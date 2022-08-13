@@ -7,6 +7,7 @@ library(parallelly)
 library(codetools)
 library(rlang)
 library(MonteCarlo)
+library(rlang)
 
 # Montecarlo function
 
@@ -16,16 +17,22 @@ parallelly::availableCores()
 cores_number <- 6
 repetitions <- 10
 
-test_func <- function(param = 0.1, n = 100){
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
   
-  data <- rnorm(n, mean = param)
-  
+  data <- rnorm(n, mean = param) + x1 + x2
   stat <- mean(data)
   stat_2 <- var(data)
+  
+  if (x2 == 5){
+    stop("error message")
+  }
+  
   return(list(stat, stat_2))
 }
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.1))
+
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1:2, x2 = 5)
 
 MCMC_func <- function(test_func, repetitions, param_list, packages,
                       cores_number, simple = FALSE){
@@ -33,6 +40,7 @@ MCMC_func <- function(test_func, repetitions, param_list, packages,
   # Order parameter names to match function order
   func_argnames <- names(as.list(args(test_func)))
   func_argnames <- func_argnames[-which(func_argnames == "")]
+  func_argnames_equal <- paste(func_argnames, " = ", sep = "") 
   param_names <- names(param_list) 
   param_list <- param_list[order(match(func_argnames, param_names))]
   param_names <- names(param_list) 
@@ -59,17 +67,55 @@ MCMC_func <- function(test_func, repetitions, param_list, packages,
   
   
   
-  # Check the number of results
-  num_res <- length(unlist(pmap(.l = aux[1,], .f = test_func)))
+  
   
   # Aux but for the number of repetitions could be improved
   aux2 <- future_map_dfr(seq_len(repetitions), function(x) aux)
   
+  # Nice names for the parameters
+  nice_names <- eval(parse(text = paste("data.frame(",
+                                        paste(rep("numeric(grid_size*repetitions)", n_param),
+                                              collapse = ","),
+                                        ")", sep = "", collapse = "")))
+  for (i in 1:n_param){
+    nice_names[, i] <- paste(colnames(aux2)[i], "=",
+                             as.character(unlist(aux2[,i], use.names = F)),
+                             sep = "")
+  }
+  nice_names <- eval(parse(text = paste("paste(",
+                                        paste("unlist(nice_names[,",
+                                              1:n_param, "]), ", sep = "",
+                                              collapse = ""),
+                                        "sep = \", \" )", sep = "")))
+  
+  # New function based on test_func that gives us the error message with the
+  # function call
+  deparsed_function <- deparse(test_func)
+  
+  test_func_2 <- eval(parse(text = paste(paste(deparsed_function[1:2], collapse = ""), "\n",
+                                         "cl <- paste(func_argnames_equal,
+      eval(parse(text  = paste(\"c(\", paste(func_argnames, sep = \"\", collapse = \", \"), \")\",
+                               sep = \"\", collapse = \"\"))),
+      sep = \"\", collapse = \", \")",
+                                         "\n",
+                                         paste("tryCatch({out <- test_func(", 
+                                               paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
+                                               ")", sep = "", collapse = ""), "}, ", "\n", "error  ={ ",
+                                         paste("function(e) stop(paste(\"\nFunction error: \", unlist(rlang::catch_cnd(test_func(", 
+                                               paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
+                                               ")))[[1]], \"\n At the parameters: \",  cl, collapse = \"\", sep = \"\"))", sep = "", collapse = ""), "});", "\n",
+                                         "return(out)}", sep = "",
+                                         collapse = "")))
+  
+  # Check the number of results and catch errors early
+  num_res <- length(unlist(future_pmap(.l = aux2[c(1,floor(nrow(aux2)*0.5), nrow(aux2)),],
+                                       .f = test_func_2,  
+                                       .options = furrr_options(seed = TRUE))[[1]]))
+  
   # Results
-  results_list <- future_pmap(.l = aux2, .f = test_func, 
+  results_list <- future_pmap(.l = aux2, .f = test_func_2, 
                               .options = furrr_options(seed = TRUE))
   
-  # Parameter names
   
   
   # Extract results
@@ -78,7 +124,7 @@ MCMC_func <- function(test_func, repetitions, param_list, packages,
     
     out <- eval(parse(text = paste("data.frame(", 
                                    paste("res_", 1:num_res, "=",
-                                         rep("numeric(grid_size)",
+                                         rep("numeric(grid_size*repetitions)",
                                              num_res),
                                          sep = "", collapse = ", "), ")", sep = "")))
     
@@ -87,10 +133,9 @@ MCMC_func <- function(test_func, repetitions, param_list, packages,
         out[i,j] <- results_list[[i]][j]
       }
     }
+    out <- cbind(param = nice_names, out)
   } else if (simple == FALSE){
-    # This still gives the parameters quite ugly, I will include proper names
-    # like "n=1, param =2"
-    out <- tibble(params =  apply(aux2, 1, function(x)paste(x, collapse = " , ", sep = "")),
+    out <- tibble(params =  nice_names,
                   results = as_tibble_col(results_list))
   }
   
@@ -101,8 +146,11 @@ MCMC_func <- function(test_func, repetitions, param_list, packages,
   return(out)
 }
 
-test <- MCMC_func(test_func = test_func, repetitions = 1000, param_list = param_list,
+test <- MCMC_func(test_func = test_func, repetitions = 10, param_list = param_list,
                   cores_number = 7, simple = FALSE)
+
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1:2, x2 = 1:6)
 
 
 
