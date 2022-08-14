@@ -1,56 +1,47 @@
 ### First functions ####
-
-library(tidyverse)
-library(purrr)
-library(furrr)
-library(parallelly)
-library(codetools)
-library(rlang)
-library(MonteCarlo)
-library(rlang)
-library(checkmate)
-library(magrittr)
-library(stringr)
-
-# Montecarlo function
-
-parallelly::availableCores()
+#
+# library(tidyverse)
+# library(parallelly)
+# library(codetools)
+# library(MonteCarlo)
 
 
-cores_number <- 4
-repetitions <- 10
+# parallelly::availableCores()
+#
+#
+# cores_number <- 4
+# repetitions <- 10
 
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-  
+
   data <- rnorm(n, mean = param) + x1 + x2
   stat <- mean(data)
   stat_2 <- var(data)
-  
+
   if (x2 == 5){
     stop("x2 can't be 5!")
   }
-  
+
   return(list(stat, stat_2))
 }
 
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
                    x1 = 1:2, x2 = 2)
 
-
-
-
-test <- future_mc(test_func = test_func, repetitions = 1000, param_list = param_list, simple = T)
+set.seed(101)
+test <- future_mc(func = test_func, repetitions = 3000, param_list = param_list, simple = TRUE)
 
 param_list <- list(n = 1000, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2, x2 = 1:4)
+                   x1 = 1:2, x2 = 1:6)
 
 
 
-#### Things to implement still 
+
+#### Things to implement still
 
 #* I need to extract the packages names from the functions we call, and then
-#* supply them to the furrr_options. The code below does that, but i need to 
+#* supply them to the furrr_options. The code below does that, but i need to
 #* change it so it's not a complete rip off.
 
 
@@ -82,11 +73,11 @@ export_functions<-new_funcs
 # -- loop through deeper functions to find functions called by functions in test_func and deeper nested functions
 
 all_funcs_found<-in_func # create array of names of all functions found so that the packages required can be found below
-while(length(new_funcs)>0){ # while loop runs as long as new functions are found in deeper layers 
+while(length(new_funcs)>0){ # while loop runs as long as new functions are found in deeper layers
   n_exp<-length(new_funcs)
   new_funcs2<-NULL
   for(i in 1:n_exp){# find functions used in every new function
-    in_inner_aux<-findGlobals(eval(parse(text=new_funcs[i])))  
+    in_inner_aux<-findGlobals(eval(parse(text=new_funcs[i])))
     in_inner<-NULL # loop to sort out primitive functions
     for(i in 1:length(in_inner_aux)){
       if(is.function(tryCatch(.Primitive(in_inner_aux[i]), error=function(e)FALSE))==FALSE){
@@ -117,7 +108,7 @@ if(is.null(all_funcs_found)==FALSE){
   all_env<-search() #list all environments
   env_names<-unlist(strsplit(all_env[grep(":", all_env)], split=":")) # keep only those environments that refer to packages
   env_names<-env_names[-which(env_names=="package")]
-  
+
   #loop through non-primitive functions used in func and check from which package they are
   for(i in 1:length(all_funcs_found)){
     if(environmentName(environment(eval(parse(text=all_funcs_found[i]))))%in%env_names){
@@ -125,7 +116,7 @@ if(is.null(all_funcs_found)==FALSE){
     }
   }
   packages<-unique(packages[packages!="base"])
-  
+
   dependencies_list<-NULL # loop through packages found and collect their dependencies in character vector
   if(length(packages)>0){
     for(i in 1:length(packages)){
@@ -141,7 +132,7 @@ if(is.null(all_funcs_found)==FALSE){
 
 
 # summary functions -> list of function for each result in list (-> single function --> used for all, default --> summary())
-# What to do with the furrr.options?
+# What to do with the furrr.options?, seed argument user-defined?
 # Nice output -> look in tidyverse package
 
 
