@@ -7,9 +7,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "konstantin.lehmann@tu-dortmund.de")
     person(given = "Stefan",
-       family = "Linnert",
+       family = "Linner",
        role = c("aut", "cre"),
-       email = "stefan.linnert@tu-dortmund.de")
+       email = "stefan.linner@tu-dortmund.de")
     person(given = "Igancio",
        family = "Moreira Lara",
        role = c("aut", "cre"),
