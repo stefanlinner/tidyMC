@@ -40,242 +40,40 @@ library(rlang)
 library(ggplot2)
 ```
 
-# a)
-
-```{r a}
-
-lprob_nbinomial <- function(data, k = 10, p){
-  
-
-  - sum(log(choose(data+k-1, data))) - length(data)*k*log(p) - sum(data)*log(1-p)
-  
-}
+# Introduction
+MSC is statistical technique to analyze statistical techniques. 
 
 
-
-set.seed(123)
-
-data.test <- rnbinom(n = 1e3, size = 10, prob = .3)
-k.test <- 10
-p.test <- 0.3
-
-bench::mark(
-  {
-    - sum(log(choose(data.test + k.test - 1, data.test)))
-  }, 
-  {
-    - length(data.test)*k.test*log(p.test)
-  }, 
-  {
-    - sum(data.test)*log(1-p.test)
-  },
-  check = FALSE)$median
+# Monte-Carlo Simulation
+Monte Carlo Simulations (henceforth MCS) allow analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known GDP helps to investigate properties of statistical techniques in two situations. For one, it allows to scrutinize the properties of asymptotically consistent estimators in smaller samples. For another, it helps to analyze properties in situations which are analytically not solvable. In this section we want to give a brief overview how and in which circumstances work, mainly following \citep{kiviet_monte_2011}. 
 
 
-```
-In the function, the most computationally expensive calculation is the first one,
-since it's composed of different functions calculated over several elements of
-data.test.
+## Pseudo Random Number Generation and the Data Generating Process
+MCS generally starts with a synthetically created i.i.d. sample. Computers are however not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
+
+Creating pseudo-random numbers from a probability distribution generally requires creating pseudo-random draws from a standard uniform distribution. Draws from a uniform distribution are created through the application of a certain algorithm, called random number generators (RNG), to a natural number, called the seed. The created values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. Combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The possibility to replicate the draws allows to exactly reproduce results that build on the pseudo-randomly generated number on different computers. 
+
+The most common algorithm, as well as R's standard algorithm, used for the generation of pseudo-random draws from a  uniform (0,1) distribution, is the Mersenne-Twister algorithm. There are however more algorithms available. In R it is also possible to specify your own algorithm to create pseudo-random numbers.  The purpose of the tidyMC-package is to additionally allow easy parallelization. With parallel computing, special attention has to be payed to create disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on R-standard L’Ecuyer-CMRG RNG streams. The algorithm creates reproducible sets of $U[0,1]$ numbers for each parallel worker, using an integer seed of length 7. Alternatively a seed of length is accepted, which corresponds to a seed of length 7. Because the algorithm creates a subset of random numbers for each workers, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. Alternatively our function allows to supply user-generated lists of random variables. 
+
+Generating pseudo-random numbers from more complex distributions uses the distribution's cumulative distribution function (CDF). It can be shown that every random variable $X$ has a CDF $F$ if $X = F^{-1}(U)$, where U is a random variable uniformly distributed on $(0,1)$. Pseudo-random draws from different probability distributions are conceptually implemented by applying the inverse of CDF to pseudo-random numbers from the uniform distribution. Using the CDF works directly for continuous random variables. If the random variable is discrete, the CDF is a discrete step function. In that case ... .Direct application of the inverse of CDF is however often computationally rather time-consuming and requires that the inverse CDF is analytically available. To account for the two shortcomings different approaches have been developed for specific distributions, that also easily extend to random vectors. While they build on the idea to use the inverse of the CDF, their concrete design is out of the scope of this paper. A general overview can be found in Simulations chapter. 
+
+Complex multivariate distribution can then be simulated as functions of standard distributions. A typical example of that is a linear conditional expectation functions, the work horse model of econometrics. In the following example.who creation of uniform numbers. 
+
+## MCS moment estimation
+MCS allows to approximate the distribution of a statistic for prespecified DGP. MCS results for a statistic hence hold generally only for the prespecified DGP. Because it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  To provide a general understanding of these two limitations, we next provide a outline of MCS Moment Estimations 
+
+### MCS set-up
+
+In MCs we generally simulate the distrbution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\theta$, some deterministic variables $D$ and some random variables $v$, s.t. $q_n = q_n(\theta,D,n)$. 
+
+Sho here pag 20. how then MC works and why consistent for functions of means
 
 
 
-# b)
-
-An ephemeral environment is an environment that is purposefully created to only last
-a limited time. In R functions usually create ephemeral execution environments, which
-are garbaged after the function has run. Function factories are special in the sense 
-that the execution environment of the function factory is the enclosing environment
-of the functions created by the function factory. Manufactured functions behave differently
-because values used to create the new functions are bound to the execution environments
-of the function factory when the function was created. Every time a function is created 
-via the function factory, a new, usually ephemeral, execution environment is created,
-but instead of vanishing becomes the enclosing environment for the functions created
+For example we might be interested in the ability of OLS to estimate the variable parameter $\beta_1$ of a simple linear regression model with deterministic regressor.
+In that case specify the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ with corresponding true population paramterers $\theta  = (\beta_0, \beta_1)$, $D = X$ a $n \times 2$ matrix of the deterministic x and the intercept $\beta_0$, and $c = \epsilon$ a $n \times 1$ of $\mathcal{N}(0, \sigma_\epsilon)$ as a normally distributed error term. Using OLS, we estimate $\hat{\beta_1}$ as the second element of $(X^TX)^{-1}X^Ty$. With OLS then $\hat{\beta}_1(\theta, D, v)$. In a MCS we would then generate r $\hat{\beta_1}$ to study how well OLS is able to capture the true $\beta_1$. 
+Show distrbution of interval 
 
 
-# c)
-
-```{r c}
-
-ll_nbinomial <- function(data, k = 10, p
-){
-  
-  x <- as.integer(data)
-  n <- length(x)
-  sum_x <- sum(data)
-  sum_l_choose <- sum(log(choose(x+k-1, x)))
-  
-  function(p){
-    - sum_l_choose - n*k*log(p) - sum_x*log(1-p)
-  }
-}
-
-set.seed(123)
-
-x1 <- rnbinom(n = 1e3, size = 10, prob = .3)
-
-test_x1 <- ll_nbinomial(data = x1)
-
-bench::mark(
-  {
-    map_dbl(
-      seq(from =0.1, to = 0.9, by = 0.1), 
-      lprob_nbinomial, 
-      data = x1, 
-      k = 10
-    )
-  }, 
-  {
-    map_dbl(
-      seq(from =0.1, to = 0.9, by = 0.1), 
-      test_x1
-    )
-  }, 
-  check = FALSE)$median
-
-
-```
-Using the local environment of the function we can store the first element of the calculation
-of the likelihood since it does not depend on pi. After that, this value is reused
-for the next calculations and the speed of the function is greatly improved.
-
-
-# d)
-
-```{r d}
-
-set.seed(123)
-
-x1 <- rnbinom(n = 1e3, size = 10, prob = .3)
-
-test_x1 <- ll_nbinomial(data = x1)
-
-tibble::tibble(p = seq(from =0.1, to = 0.9, by = 0.1)) %>%
-  mutate(log_likelihood = map_dbl(p, test_x1))
-
-```
-
-
-# e)
-
-```{r}
-
-
-nbin_mle <- function(input_fun){
-  
-  opti <- optimize(input_fun, interval= c(1e-25, 1-1e-25), tol = 1e-5)
-  
-  fun_env <- environment(input_fun)
-  
-  list(
-    data = fun_env$data,
-    n = fun_env$n,
-    distr = "negative binomial distribution",
-    par = "p",
-    ll = opti$objective, 
-    MLE = opti$minimum, 
-    fun = input_fun 
-  )
-}
-
-nbin_mle(test_x1)
-
-```
-
-# f)
-
-```{r}
-
-
-nbin_mle <- function(input_fun){
-  
-  opti <- optimize(input_fun, interval= c(1e-25, 1-1e-25), tol = 1e-5)
-  
-  fun_env <- environment(input_fun)
-  
-  res <- list(
-    data = fun_env$data,
-    n = fun_env$n,
-    distr = "negative binomial distribution",
-    par = "p", 
-    ll = opti$objective, 
-    MLE = opti$minimum, 
-    fun = input_fun
-  )
-  class(res) <-  "my_mle"
-  res
-  
-}
-
-summary.my_mle <- function(x, prob_seq){
-  if (class(x) == "my_mle") {
-    new <- list(
-      data_summary = summary(x$data),
-      prob_ll = tibble::tibble(prob = prob_seq) %>%
-        mutate(ll = map_dbl(prob, x$fun))
-    ) 
-    out <- c(x, new)
-    class(out) <- "summary.my_mle"
-    return(out)
-  } else {
-    message("Object not of class my_mle!")
-  }
-}
-
-```
-
-# g)
-```{r}
-
-plot.summary.my_mle <- function(x){
-  if (class(x) == "summary.my_mle") {
-    ggplot2::ggplot(x$prob_ll, aes(y = ll, x = prob)) +
-      geom_line() +
-      geom_point(aes(y = x$ll, x = x$MLE), col = "red") +
-      geom_segment(aes(x=x$MLE, xend=x$MLE, y=0, yend=x$ll),
-                   linetype = "dashed" ) +
-      labs(y = "log L(pi; x, k = 10)",
-           x = "pi") +
-      theme_bw() + 
-      scale_x_continuous(expand = c(0, 0), 
-                         limits = c(0, 1.05),
-                         breaks = c(0,0.25,0.5,0.75,1)) + 
-      scale_y_continuous(expand = c(0, 0), 
-                         limits = c(0, NA)) +
-      theme(panel.border = element_blank(), 
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(), 
-            axis.line = element_line(colour = "black")
-      )
-    
-  } else {
-    message("Object not of class summary.my_mle!")
-  }
-}
-
-print.summary.my_mle <- function(x){
-  if (class(x) == "summary.my_mle") {
-    cat(
-      "Summary MLE estimate for", x$distr, ":\n\n",
-      "MLE estimate for", x$par, " = ", round(x$MLE,3), "\n",
-      "with a log loss of", round(x$ll,3)
-    )
-  } else {
-    message("Object not of class summary.my_mle!")
-  }
-}
-
-```
-
-
-# h)
-
-```{r}
-
-test <- summary(nbin_mle(test_x1), seq(1e-5,1-1e-5,1e-4))
-
-plot(test)
-
-print(test)
-
-```
+\end{document}
 
