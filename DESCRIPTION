@@ -2,12 +2,21 @@ Package: tidyMC
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Konstantin",
+           family = "Lehmann",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "konstantin.lehmann@tu-dortmund.de")
+    person(given = "Stefan",
+       family = "Linnert",
+       role = c("aut", "cre"),
+       email = "stefan.linnert@tu-dortmund.de")
+    person(given = "Igancio",
+       family = "Moreira Lara",
+       role = c("aut", "cre"),
+       email = "ignacio.moreira-lara@tu-dortmund.de")
+Description: Framework to run Monte Carlo simulations over a parameter grid. 
+             Allows to parralilize the simulations. Generates plots and LaTex tables
+             summarizing the results from the simulation. 
 License: MIT + file LICENSE
 Imports:
     checkmate,
