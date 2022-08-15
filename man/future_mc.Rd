@@ -10,7 +10,8 @@ future_mc(
   param_list,
   packages = "test",
   parallelisation_plan = NULL,
-  simple = FALSE
+  parallelisation_options = NULL,
+  ...
 )
 }
 \arguments{
@@ -24,7 +25,9 @@ future_mc(
 
 \item{parallelisation_plan}{test}
 
-\item{simple}{test}
+\item{parallelisation_options}{test}
+
+\item{...}{test}
 }
 \value{
 returns simulation results
@@ -44,7 +47,7 @@ if (x2 == 5){
  stop("x2 can't be 5!")
 }
 
-return(list(stat, stat_2))
+return(list(mean = stat,sd = stat_2))
 }
 
 
@@ -54,6 +57,6 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 
-test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list, simple = TRUE)
+test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list)
 
 }
