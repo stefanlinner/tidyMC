@@ -35,33 +35,129 @@
 summary.mc <- function(object, sum_funcs = NULL, ...){
 
   checkmate::assert_class(object, "mc")
+  stat_names <- dplyr::setdiff(names(object$output), "params")
+  setup_names <- object$setups
   checkmate::assert_list(sum_funcs, null.ok = TRUE)
   if(!is.null(sum_funcs)){
-    checkmate::assert_choice(length(sum_funcs), c(1, nrow(object$sim_setups)))
+    checkmate::assert_choice(
+      length(sum_funcs), c(length(stat_names), length(setup_names))
+    )
+    purrr::walk(
+      sum_funcs,
+      function(.x){
+        checkmate::assert(
+          {checkmate::check_list(.x ,names = "named")},
+          {checkmate::check_function(.x)},
+          combine = "or"
+        )
+      }
+    )
   }
 
   if(is.null(sum_funcs)){
 
-    object$output %>%
+    sum_out <-
+      object$output %>%
       dplyr::group_by(.data$params) %>%
       dplyr::group_map(~{
-        purrr::map_dfr(.$results$value,
-                function(.x){
-
-                  purrr::walk(
-                    .x,
-                    function(func_list_outputs){
-                          checkmate::assert_scalar(func_list_outputs)
-                    }
-                  )
-
-                  .x
-                }) %>%
-          summary()
-
+        purrr::map(
+          .x,
+          function(.y){
+            summary(.y)
+          }
+        )
       }) %>%
-      purrr::set_names(object$sim_setups$setup)
+      purrr::set_names(setup_names)
+
+    return(sum_out)
 
   }
 
+
+
+  if(!is.null(sum_funcs) & length(sum_funcs) == length(stat_names) & is.function(sum_funcs[[1]])){
+
+    checkmate::assert_list(sum_funcs, names = "named")
+    checkmate::assertNames(
+      names(sum_funcs),
+      permutation.of = stat_names
+    )
+    purrr::walk(
+      sum_funcs,
+      checkmate::assert_function
+    )
+
+    sum_out <-
+      object$output %>%
+      dplyr::group_by(.data$params) %>%
+      dplyr::group_map(~{
+
+        stat_names <- names(.)
+        purrr::map(
+          stat_names,
+          function(.y){
+            sum_funcs[[.y]](.[[.y]])
+          }
+        ) %>%
+          purrr::set_names(stat_names)
+
+      }) %>%
+      purrr::set_names(setup_names)
+
+    return(sum_out)
+
+  }
+
+
+  if(!is.null(sum_funcs) & length(sum_funcs) == length(setup_names) & is.list(sum_funcs[[1]])){
+
+    checkmate::assert_list(sum_funcs, names = "named")
+    checkmate::assertNames(
+      names(sum_funcs),
+      permutation.of = setup_names
+    )
+
+    purrr::walk(
+      sum_funcs,
+      function(.x){
+        checkmate::assert_list(
+          .x,
+          names = "named",
+          len = length(stat_names)
+        )
+        checkmate::assertNames(
+          names(.x),
+          permutation.of = stat_names
+        )
+        purrr::walk(
+          .x,
+          function(.y){
+            checkmate::assert_function
+          }
+        )
+      }
+    )
+
+    sum_out <-
+      object$output %>%
+      dplyr::group_by(.data$params) %>%
+      dplyr::group_map(~{
+
+        setup <- unique(.$params)
+
+        purrr::map(
+          stat_names,
+          function(.y){
+            sum_funcs[[setup]][[.y]](.[[.y]])
+          }
+        ) %>%
+          purrr::set_names(stat_names)
+
+      }, .keep = TRUE) %>%
+      purrr::set_names(setup_names)
+
+    return(sum_out)
+
+  }
 }
+

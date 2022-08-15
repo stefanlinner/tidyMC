@@ -211,6 +211,25 @@ future_mc <-
         checkmate::assert_list,
         names = "named"
       )
+
+      scalar_results <-
+        purrr::map_lgl(
+          test_runs,
+          function(.x){
+            purrr::map_lgl(
+              .x, function(func_list_outputs){
+                checkmate::test_scalar(func_list_outputs)
+              }
+            ) %>%
+              all()
+          }
+        ) %>%
+        all()
+
+      if(!scalar_results){
+        stop("func has to return a list with named components. Each component has to be scalar.")
+      }
+
       message("Test-run successfull: No errors occurred!")
     }
 
@@ -231,14 +250,27 @@ future_mc <-
 
     future::plan("default")
 
-    res <- dplyr::tibble(
-      params =  nice_names,
-      results = tibble::as_tibble_col(results_list)
-    )
+    res <-
+      cbind(
+        params = nice_names,
+        purrr::map_dfr(
+          results_list,
+          function(.x){
+            .x
+          }
+        )
+      ) %>%
+      dplyr::as_tibble() %>%
+      dplyr::arrange(.data$params)
 
-    aux$setup <- unique(nice_names)
+    setups <- unique(nice_names)
 
-    out <- list(output = res, sim_setups = aux)
+    out <-
+      list(
+        output = res,
+        parameter = aux,
+        setups = setups
+      )
 
     class(out) <- "mc"
 

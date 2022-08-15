@@ -31,17 +31,68 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2, x3, x4){
 }
 
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
-                   x1 = 1:2, x2 = 2)
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1, x2 = 2)
+
+devtools::load_all()
 
 set.seed(101)
 test1 <- future_mc(func = test_func, repetitions = 3000, param_list = param_list, x3 = 6, x4 = 1)
 
+
+# default summary function --> summary (compatible with any data type)
 summary(test1)
 
+# user_defined summary function for different results
+summary(test1, sum_funcs = list(mean = mean, sd = sd, test = table))
+
+# user_defined summary function for different results and different setups
+sum_funcs <- list(
+  list(
+    mean = mean, sd = sd, test = table
+  ),
+  list(
+    mean = summary, sd = summary, test = table
+  ),
+  list(
+    mean = max, sd = min, test = summary
+  )
+)
+
+names(sum_funcs) <- test1$setups
+
+summary(test1, sum_funcs = sum_funcs)
 
 
 
+
+
+
+
+
+
+
+library(MonteCarlo)
+
+
+test_func<-function(n,loc,scale){
+  sample<-rnorm(n, loc, scale)
+  stat<-sqrt(n)*mean(sample)/sd(sample)
+  decision<-abs(stat)>1.96
+  return(list("decision"=decision))
+}
+
+n_grid<-c(50,100,250,500)
+loc_grid<-seq(0,1,0.2)
+scale_grid<-c(1,2)
+
+param_list=list("n"=n_grid, "loc"=loc_grid, "scale"=scale_grid)
+erg<-MonteCarlo(func=test_func, nrep=250, param_list=param_list, ncpus=1)
+
+# test <- bench::mark({MonteCarlo(func=test_func, nrep=250, param_list=param_list, ncpus=1)},
+#             {future_mc(func = test_func, repetitions = 250, param_list = param_list)}, check = FALSE)
+
+summary(erg)
 
 
 
