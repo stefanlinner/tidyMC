@@ -7,7 +7,8 @@
 #' @param param_list test
 #' @param packages test
 #' @param parallelisation_plan test
-#' @param simple test
+#' @param parallelisation_options test
+#' @param ... test
 #'
 #' @return returns simulation results
 #' @export
@@ -26,7 +27,7 @@
 #'  stop("x2 can't be 5!")
 #'}
 #'
-#'return(list(stat, stat_2))
+#'return(list(mean = stat,sd = stat_2))
 #'}
 #'
 #'
@@ -36,7 +37,7 @@
 #'
 #'
 #'
-#'test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list, simple = TRUE)
+#'test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list)
 #'
 future_mc <-
   function(
@@ -45,7 +46,9 @@ future_mc <-
     param_list,
     packages = "test",
     parallelisation_plan = NULL,
-    simple = FALSE
+    parallelisation_options = NULL,
+    ...
+    # , simple = FALSE
   ){
 
     # Asserting inputs
@@ -57,36 +60,42 @@ future_mc <-
       checkmate::assert_vector
     )
     checkmate::assert_character(packages)
-    checkmate::assert_list(parallelisation_plan, null.ok = TRUE)
-    checkmate::assert_logical(simple, len = 1)
+    checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
+    checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
+
+    # checkmate::assert_logical(simple, len = 1)
+
+    func_argnames <- methods::formalArgs(func)
+
+    add_args <- list(...)
+    checkmate::assert_list(add_args)
+    checkmate::assert_subset(names(add_args), func_argnames)
 
     if(is.null(parallelisation_plan)){
       parallelisation_plan <-
         list(
-          strategy = future::multisession,
-          substitute = TRUE,
-          .skip = FALSE,
-          .call = TRUE,
-          .cleanup = TRUE,
-          .init = TRUE
+          strategy = future::multisession
         )
+    }
+
+    if(is.null(parallelisation_options)){
+      parallelisation_options <-
+        list(
+          seed = TRUE
+        )
+    } else {
+      if(is.null(parallelisation_options$seed)) {
+        parallelisation_options$seed <- TRUE
+      }
     }
 
     do.call(future::plan, parallelisation_plan)
 
-    # Order parameter names to match function order
-    func_argnames <- methods::formalArgs(func)
-    param_names <- names(param_list)
-    param_list <- param_list[order(match(func_argnames, param_names))]
-    param_names <- names(param_list)
-
-    n_param <- length(param_list)
     aux <- dplyr::as_tibble(
       expand.grid(param_list)
     )
-    grid_size <- nrow(aux)
 
-    # Aux but for the number of repetitions could be improved / future needed?
+    # Aux but for the number of repetitions could be improved
     aux2 <-
       purrr::map_dfr(
         seq_len(repetitions),
@@ -97,24 +106,25 @@ future_mc <-
     nice_names <-
       rep(
         purrr::map_chr(
-        seq_len(nrow(aux)),
-        function(.x){
-          paste(
-            purrr::map_chr(
-              names(aux),
-              function(.z){
-                paste(
-                  .z,
-                  "=",
-                  aux2[.x, .z],
-                  sep = ""
-                )
-              }
-            ),
-            collapse = ", "
-          )
-        }),
-        repetitions)
+          seq_len(nrow(aux)),
+          function(.x){
+            paste(
+              purrr::map_chr(
+                names(aux),
+                function(.z){
+                  paste(
+                    .z,
+                    "=",
+                    aux2[.x, .z],
+                    sep = ""
+                  )
+                }
+              ),
+              collapse = ", "
+            )
+          }),
+        repetitions
+      )
 
 
     # New function based on func that gives us the error message with the
@@ -123,6 +133,7 @@ future_mc <-
     func_2 <- args(func)
     body(func_2, envir = environment()) <-
       quote({
+
         cl <-
           paste(
             purrr::map_chr(
@@ -184,21 +195,24 @@ future_mc <-
         .l = aux,
         .f = func_2,
         .progress = TRUE,
-        .options = furrr::furrr_options(seed = TRUE)
+        .options = do.call(furrr::furrr_options, parallelisation_options),
+        ...
       )
 
     test_runs_errors <- unlist(test_runs) %>%
       stringr::str_subset(pattern = "^ \n Function error")
 
+
     if(length(test_runs_errors != 0)){
       stop(test_runs_errors)
     } else {
+      purrr::walk(
+        test_runs,
+        checkmate::assert_list,
+        names = "named"
+      )
       message("Test-run successfull: No errors occurred!")
     }
-
-    # Check the number of results
-    num_res <- length(unlist(test_runs[[1]]))
-
 
     # Results
 
@@ -209,43 +223,25 @@ future_mc <-
         .l = aux2,
         .f = func_2,
         .progress = TRUE,
-        .options = furrr::furrr_options(seed = TRUE)
+        .options = do.call(furrr::furrr_options, parallelisation_options),
+        ...
       )
 
-    message("Simulation was successfull!")
-
-    # Extract results
-
-    if(simple){
-
-      res_names <-
-        purrr::map_chr(
-          seq_len(num_res),
-          function(.x){
-            paste("res_", .x, sep = "")
-          }
-        )
-
-      out <-
-        purrr::map_dfr(
-          results_list,
-          function(.x){
-            res <- .x
-            names(res) <- res_names
-            res
-          }
-        )
-
-      out <- dplyr::as_tibble(cbind(param = nice_names, out))
-
-    } else {
-      out <- dplyr::tibble(
-        params =  nice_names,
-        results = tibble::as_tibble_col(results_list)
-      )
-    }
+    message("\n Simulation was successfull!")
 
     future::plan("default")
 
+    res <- dplyr::tibble(
+      params =  nice_names,
+      results = tibble::as_tibble_col(results_list)
+    )
+
+    aux$setup <- unique(nice_names)
+
+    out <- list(output = res, sim_setups = aux)
+
+    class(out) <- "mc"
+
     out
+
   }
