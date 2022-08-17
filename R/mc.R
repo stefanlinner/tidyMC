@@ -118,6 +118,14 @@ future_mc <-
         repetitions
       )
 
+    # Packages extraction
+    pckgs <- rlang::search_envs() %>% names()
+    pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
+      sub(pattern = "package:", replacement = "")
+    pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
+    parallelisation_options <- append(parallelisation_options, list(packages = pckgs))
+
+
     if(check){
 
       fun_2 <- args(fun)
@@ -288,6 +296,8 @@ future_mc <-
       )
     )
 
+    start_time <- Sys.time()
+
     results_list <-
       furrr::future_pmap(
         .l = param_table_reps,
@@ -316,7 +326,10 @@ future_mc <-
     #     )
     #   }
 
-    message("\n Simulation was successfull!")
+    calculation_time <- Sys.time() - start_time
+    message(paste("\n Simulation was successfull!",
+                  "\n Running time: ", round(calculation_time,2), "seconds",
+                  collapse = ""))
 
     if(!check){
       scalar_results <-
