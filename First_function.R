@@ -31,22 +31,13 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 }
 
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
-                   x1 = 1, x2 = c(2,3,4))
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1, x2 = 2)
 
 devtools::load_all()
 
 set.seed(101)
-test1 <- future_mc(fun = test_func, repetitions = 20000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
-
-
-
-
-
-
-
-
-
+test1 <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
 
 
 
@@ -54,7 +45,7 @@ test1 <- future_mc(fun = test_func, repetitions = 20000, param_list = param_list
 summary(test1)
 
 # user_defined summary function for different results
-summary(test1, sum_funcs = list(mean = mean, sd = sd, test = table))
+summary(test1, sum_funs = list(mean = mean, sd = sd, test = table))
 
 # user_defined summary function for different results and different setups
 sum_funcs <- list(
@@ -71,7 +62,7 @@ sum_funcs <- list(
 
 names(sum_funcs) <- test1$setups
 
-summary(test1, sum_funcs = sum_funcs)
+summary(test1, sum_funs = sum_funcs)
 
 
 
@@ -81,10 +72,6 @@ summary(test1, sum_funcs = sum_funcs)
 # do time series of mean over repitions
 
 # ggplot2 informative legends with grid-package, gtable (?)
-
-
-# non-parallel version
-
 
 
 

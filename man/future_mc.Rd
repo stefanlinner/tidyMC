@@ -5,17 +5,19 @@
 \title{Test title}
 \usage{
 future_mc(
-  func,
+  fun,
   repetitions,
   param_list,
   packages = "test",
   parallelisation_plan = NULL,
   parallelisation_options = NULL,
+  check = TRUE,
+  parallel = TRUE,
   ...
 )
 }
 \arguments{
-\item{func}{test}
+\item{fun}{tes}
 
 \item{repetitions}{test}
 
@@ -26,6 +28,10 @@ future_mc(
 \item{parallelisation_plan}{test}
 
 \item{parallelisation_options}{test}
+
+\item{check}{tes}
+
+\item{parallel}{tes}
 
 \item{...}{test}
 }
@@ -57,6 +63,6 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 
-test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list)
+test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 
 }
