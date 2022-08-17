@@ -4,12 +4,12 @@
 \alias{summary.mc}
 \title{Result summaries of a mc object}
 \usage{
-\method{summary}{mc}(object, sum_funcs = NULL, ...)
+\method{summary}{mc}(object, sum_funs = NULL, ...)
 }
 \arguments{
 \item{object}{test}
 
-\item{sum_funcs}{test}
+\item{sum_funs}{test}
 
 \item{...}{test}
 }
@@ -40,6 +40,6 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 
-test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list)
+test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 summary(test)
 }

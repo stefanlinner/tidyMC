@@ -384,13 +384,11 @@ future_mc <-
 
     }
 
-    setups <- unique(nice_names)
 
     out <-
       list(
         output = res,
         parameter = param_table,
-        setups = setups,
         simple_output = scalar_results
       )
 

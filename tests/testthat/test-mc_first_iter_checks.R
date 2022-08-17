@@ -19,7 +19,7 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 testthat::test_that("quick checks work", {
 
   testthat::expect_error(
-    future_mc(func = test_func, repetitions = 1000, param_list = param_list),
+    future_mc(fun = test_func, repetitions = 1000, param_list = param_list),
     regexp = "Function error:"
   )
 
