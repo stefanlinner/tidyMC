@@ -2,13 +2,15 @@
 #'
 #' test description
 #'
-#' @param func test
 #' @param repetitions test
 #' @param param_list test
 #' @param packages test
 #' @param parallelisation_plan test
 #' @param parallelisation_options test
 #' @param ... test
+#' @param fun tes
+#' @param check tes
+#' @param parallel tes
 #'
 #' @return returns simulation results
 #' @export
@@ -37,39 +39,37 @@
 #'
 #'
 #'
-#'test <- future_mc(func = test_func, repetitions = 1000, param_list = param_list)
+#'test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #'
 future_mc <-
   function(
-    func,
+    fun,
     repetitions,
     param_list,
     packages = "test",
     parallelisation_plan = NULL,
     parallelisation_options = NULL,
+    check = TRUE,
+    parallel = TRUE,
+    # parallelise_over = NULL,
     ...
-    # , simple = FALSE
   ){
 
     # Asserting inputs
-    checkmate::assert_function(func, args = names(param_list))
+    checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
-    checkmate::assert_list(param_list)
-    purrr::walk(
-      seq_along(param_list),
-      checkmate::assert_vector
-    )
+    checkmate::assert_list(param_list, names = "named")
     checkmate::assert_character(packages)
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
+    checkmate::assert_logical(check, len = 1)
+    checkmate::assert_logical(parallel, len = 1)
 
-    # checkmate::assert_logical(simple, len = 1)
-
-    func_argnames <- methods::formalArgs(func)
-
+    fun_argnames <- methods::formalArgs(fun)
     add_args <- list(...)
-    checkmate::assert_list(add_args)
-    checkmate::assert_subset(names(add_args), func_argnames)
+
+    checkmate::assert_list(add_args, names = "named")
+    checkmate::assert_subset(names(add_args), fun_argnames)
 
     if(is.null(parallelisation_plan)){
       parallelisation_plan <-
@@ -89,187 +89,296 @@ future_mc <-
       }
     }
 
-    do.call(future::plan, parallelisation_plan)
+    if(parallel){
+      do.call(future::plan, parallelisation_plan)
+    }
 
-    aux <- dplyr::as_tibble(
-      expand.grid(param_list)
-    )
+    param_table <- expand.grid(param_list)
+    param_names <- names(param_table)
 
-    # Aux but for the number of repetitions could be improved
-    aux2 <-
+    param_table_reps <-
       purrr::map_dfr(
         seq_len(repetitions),
-        function(x) aux
+        function(x) param_table
       )
 
     # Nice names for the parameters
     nice_names <-
       rep(
         purrr::map_chr(
-          seq_len(nrow(aux)),
+          seq_len(nrow(param_table)),
           function(.x){
             paste(
-              purrr::map_chr(
-                names(aux),
-                function(.z){
-                  paste(
-                    .z,
-                    "=",
-                    aux2[.x, .z],
-                    sep = ""
-                  )
-                }
-              ),
+              param_names,
+              param_table[.x,],
+              sep = "=",
               collapse = ", "
             )
           }),
         repetitions
       )
 
+    if(check){
 
-    # New function based on func that gives us the error message with the
-    # function call
+      fun_2 <- args(fun)
+      body(fun_2, envir = environment()) <-
+        quote({
 
-    func_2 <- args(func)
-    body(func_2, envir = environment()) <-
-      quote({
+          cl <-
+            paste(
+              purrr::map_chr(
+                fun_argnames,
+                function(.x){
+                  paste(.x, get(.x), sep = " = ")
+                }),
+              collapse = ", "
+            )
 
-        cl <-
-          paste(
-            purrr::map_chr(
-              func_argnames,
-              function(.x){
-                paste(.x, get(.x), sep = " = ")
-              }),
-            collapse = ", "
-          )
-
-        tryCatch(
-          {
-            out <-
-              eval(
-                parse(
-                  text =
-                    paste("func(",
-                          paste(
-                            func_argnames,
-                            func_argnames,
-                            sep = "=",
-                            collapse = ", "
-                          ),
-                          ")",
-                          sep = ""
-                    )
-                )
-              )
-            return(out)
-          },
-          error  = {
-            function(e)
-              #stop( # I don't want early exit -> We prefer test-run (alternatively if test = F,
-              # then with stop!)
-              paste(
-                " \n Function error: ", eval(
+          tryCatch(
+            {
+              out <-
+                eval(
                   parse(
                     text =
-                      paste("unlist(rlang::catch_cnd(func(",
+                      paste("fun(",
                             paste(
-                              func_argnames,
-                              func_argnames,
+                              fun_argnames,
+                              fun_argnames,
                               sep = "=",
                               collapse = ", "
                             ),
-                            ")))[[1]]", sep = ""))),
-                " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
-            #)
-          }
+                            ")",
+                            sep = ""
+                      )
+                  )
+                )
+              return(out)
+            },
+            error  = {
+              function(e)
+                paste(
+                  " \n Function error: ", eval(
+                    parse(
+                      text =
+                        paste("unlist(rlang::catch_cnd(fun(",
+                              paste(
+                                fun_argnames,
+                                fun_argnames,
+                                sep = "=",
+                                collapse = ", "
+                              ),
+                              ")))[[1]]", sep = ""))),
+                  " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
+            }
+          )
+        })
+
+      # Run single test_iteration for each parameter setup
+
+      ## HUHU: Insert if condition to skip test --> Then use old simulation (fail early)
+
+      message("Running single test-iteration for each parameter combination...")
+
+      test_runs <-
+        furrr::future_pmap(
+          .l = param_table,
+          .f = fun_2,
+          .progress = TRUE,
+          .options = do.call(furrr::furrr_options, parallelisation_options),
+          ...
         )
-      })
 
-    # Run single test_iteration for each parameter setup
+      test_runs_errors <- unlist(test_runs) %>%
+        stringr::str_subset(pattern = "^ \n Function error")
 
-    message("Running single test-iteration for each parameter combination...")
 
-    test_runs <-
+      if(length(test_runs_errors) != 0){
+        stop(test_runs_errors)
+      } else {
+        purrr::walk(
+          test_runs,
+          checkmate::assert_list,
+          names = "named"
+        )
+
+        scalar_results <-
+          purrr::map_lgl(
+            test_runs,
+            function(.x){
+              purrr::map_lgl(
+                .x, function(fun_list_outputs){
+                  checkmate::test_scalar(fun_list_outputs)
+                }
+              ) %>%
+                all()
+            }
+          ) %>%
+          all()
+
+        message("Test-run successfull: No errors occurred!")
+      }
+
+    }
+
+    if(!check){
+
+      fun_2 <- args(fun)
+      body(fun_2, envir = environment()) <-
+        quote({
+          cl <-
+            paste(
+              purrr::map_chr(
+                fun_argnames,
+                function(.x){
+                  paste(.x, get(.x), sep = " = ")
+                }),
+              collapse = ", "
+            )
+
+          tryCatch(
+            {
+              out <-
+                eval(
+                  parse(
+                    text =
+                      paste("fun(",
+                            paste(
+                              fun_argnames,
+                              fun_argnames,
+                              sep = "=",
+                              collapse = ", "
+                            ),
+                            ")",
+                            sep = ""
+                      )
+                  )
+                )
+              return(out)
+            },
+            error  = {
+              function(e)
+                stop(
+                  paste(
+                    " \n Function error: ", eval(
+                      parse(
+                        text =
+                          paste("unlist(rlang::catch_cnd(fun(",
+                                paste(
+                                  fun_argnames,
+                                  fun_argnames,
+                                  sep = "=",
+                                  collapse = ", "
+                                ),
+                                ")))[[1]]", sep = ""))),
+                    " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
+                )
+            }
+          )
+        })
+    }
+
+    # Results
+
+    message(
+      paste(
+        "Running whole simulation: Overall ",
+        nrow(param_table),
+        " parameter combinations are simulated ...",
+        sep = ""
+      )
+    )
+
+    results_list <-
       furrr::future_pmap(
-        .l = aux,
-        .f = func_2,
+        .l = param_table_reps,
+        .f = fun_2,
         .progress = TRUE,
         .options = do.call(furrr::furrr_options, parallelisation_options),
         ...
       )
 
-    test_runs_errors <- unlist(test_runs) %>%
-      stringr::str_subset(pattern = "^ \n Function error")
+    # Function suggested by Martin, but is significantlly slower
 
+    # simulator_parallelise_over_reps <-
+    #   function(){
+    #     furrr::future_map(
+    #       .x = 1:repetitions,
+    #       .f = function(.x){
+    #         purrr::map_df(
+    #           1:nrow(param_table),
+    #           .f = function(.y) {
+    #             purrr::pmap_dfr(param_table[.y,], fun, ...)
+    #           }
+    #         )
+    #       },
+    #       .progress = TRUE,
+    #       .options = do.call(furrr::furrr_options, parallelisation_options)
+    #     )
+    #   }
 
-    if(length(test_runs_errors != 0)){
-      stop(test_runs_errors)
-    } else {
-      purrr::walk(
-        test_runs,
-        checkmate::assert_list,
-        names = "named"
-      )
+    message("\n Simulation was successfull!")
 
+    if(!check){
       scalar_results <-
         purrr::map_lgl(
-          test_runs,
+          results_list[1:3],
           function(.x){
             purrr::map_lgl(
-              .x, function(func_list_outputs){
-                checkmate::test_scalar(func_list_outputs)
+              .x, function(fun_list_outputs){
+                checkmate::test_scalar(fun_list_outputs)
               }
             ) %>%
               all()
           }
         ) %>%
         all()
-
-      if(!scalar_results){
-        stop("func has to return a list with named components. Each component has to be scalar.")
-      }
-
-      message("Test-run successfull: No errors occurred!")
     }
 
-    # Results
+    if(parallel){
+      future::plan("default")
+    }
 
-    message("Running whole simulation...")
+    if(scalar_results) {
 
-    results_list <-
-      furrr::future_pmap(
-        .l = aux2,
-        .f = func_2,
-        .progress = TRUE,
-        .options = do.call(furrr::furrr_options, parallelisation_options),
-        ...
+      res <-
+        cbind(
+          params = nice_names,
+          param_table_reps,
+          purrr::map_dfr(
+            results_list,
+            function(.x){
+              .x
+            }
+          )
+        ) %>%
+        dplyr::as_tibble() %>%
+        dplyr::arrange(.data$params)
+    }
+
+    if(!scalar_results){
+
+      res <- dplyr::tibble(
+        params =  nice_names,
+        param_table_reps,
+        results = tibble::as_tibble_col(results_list)
       )
 
-    message("\n Simulation was successfull!")
+      warning(
+        "You cannot use the comfort functions: plot & summary,
+        because for that fun has to return a list with named components.
+        Each component has to be scalar."
+      )
 
-    future::plan("default")
-
-    res <-
-      cbind(
-        params = nice_names,
-        purrr::map_dfr(
-          results_list,
-          function(.x){
-            .x
-          }
-        )
-      ) %>%
-      dplyr::as_tibble() %>%
-      dplyr::arrange(.data$params)
+    }
 
     setups <- unique(nice_names)
 
     out <-
       list(
         output = res,
-        parameter = aux,
-        setups = setups
+        parameter = param_table,
+        setups = setups,
+        simple_output = scalar_results
       )
 
     class(out) <- "mc"

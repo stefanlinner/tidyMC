@@ -12,7 +12,7 @@
 # cores_number <- 4
 # repetitions <- 10
 
-test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2, x3, x4){
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 
   data <- rnorm(n, mean = param) + x1 + x2
   stat <- mean(data)
@@ -31,13 +31,23 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2, x3, x4){
 }
 
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1, x2 = 2)
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
+                   x1 = 1, x2 = c(2,3,4))
 
 devtools::load_all()
 
 set.seed(101)
-test1 <- future_mc(func = test_func, repetitions = 3000, param_list = param_list, x3 = 6, x4 = 1)
+test1 <- future_mc(fun = test_func, repetitions = 20000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
+
+
+
+
+
+
+
+
+
+
 
 
 # default summary function --> summary (compatible with any data type)
@@ -66,13 +76,18 @@ summary(test1, sum_funcs = sum_funcs)
 
 
 
+# summary changes:
+# default for numeric --> mean, else keep summary
+# do time series of mean over repitions
+
+# ggplot2 informative legends with grid-package, gtable (?)
+
+
+# non-parallel version
 
 
 
 
-
-
-library(MonteCarlo)
 
 
 test_func<-function(n,loc,scale){

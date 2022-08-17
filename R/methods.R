@@ -35,6 +35,9 @@
 summary.mc <- function(object, sum_funcs = NULL, ...){
 
   checkmate::assert_class(object, "mc")
+  if(!object$simple_output){
+    stop("fun has to return a list with named components. Each component has to be scalar.")
+  }
   stat_names <- dplyr::setdiff(names(object$output), "params")
   setup_names <- object$setups
   checkmate::assert_list(sum_funcs, null.ok = TRUE)
