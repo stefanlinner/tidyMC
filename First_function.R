@@ -37,20 +37,8 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 devtools::load_all()
 
 set.seed(101)
-<<<<<<< HEAD
-test1 <- future_mc(fun = test_func, repetitions = 5000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
 
-
-
-
-
-
-
-
-
-=======
 test1 <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
->>>>>>> a9babc7ac4cee19bf244e6d4b9e54de20f9c982c
 
 
 
@@ -87,13 +75,12 @@ summary(test1, sum_funs = sum_funcs)
 # ggplot2 informative legends with grid-package, gtable (?)
 
 
-<<<<<<< HEAD
+
 # non-parallel version
 
 
 # Do the latex tables from summary output
-=======
->>>>>>> a9babc7ac4cee19bf244e6d4b9e54de20f9c982c
+
 
 
 
