@@ -16,6 +16,7 @@
 #' @export
 #'
 #' @importFrom magrittr %>%
+#' @importFrom rlang search_envs
 #'
 #' @examples
 #'
@@ -46,7 +47,7 @@ future_mc <-
     fun,
     repetitions,
     param_list,
-    packages = "test",
+    packages = NULL,
     parallelisation_plan = NULL,
     parallelisation_options = NULL,
     check = TRUE,
@@ -59,7 +60,7 @@ future_mc <-
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
-    checkmate::assert_character(packages)
+    checkmate::assert_character(packages, null.ok = TRUE)
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
     checkmate::assert_logical(check, len = 1)
@@ -117,6 +118,20 @@ future_mc <-
           }),
         repetitions
       )
+
+    # Packages extraction
+    if (is.null(packages)){
+      pckgs <- rlang::search_envs() %>% names()
+      pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
+        sub(pattern = "package:", replacement = "")
+      pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
+      parallelisation_options <- append(parallelisation_options, list(packages = pckgs))
+    } else {
+      parallelisation_options <- append(parallelisation_options, list(packages = packages))
+    }
+
+
+
 
     if(check){
 
@@ -288,6 +303,8 @@ future_mc <-
       )
     )
 
+    start_time <- Sys.time()
+
     results_list <-
       furrr::future_pmap(
         .l = param_table_reps,
@@ -316,7 +333,19 @@ future_mc <-
     #     )
     #   }
 
-    message("\n Simulation was successfull!")
+    # simulator_parallelise_over_grid <- function(fun){
+    #   furrr::future_map(.x = 1:repetitions, .f = function(.x){
+    #     purrr::pmap(.l = param_table, .f = fun)
+    #   }, .options = do.call(furrr::furrr_options,
+    #                         parallelisation_options))
+    # }
+    #
+
+
+    calculation_time <- Sys.time() - start_time
+    message(paste("\n Simulation was successfull!",
+                  "\n Running time: ", hms::as_hms(calculation_time),
+                  collapse = ""))
 
     if(!check){
       scalar_results <-
