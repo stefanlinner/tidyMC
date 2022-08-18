@@ -41,6 +41,16 @@ set.seed(101)
 test1 <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
 
 
+plot(test1)
+plot(test1, which = test1$setups[1:2])
+plot(test1, join = test1$setups)
+
+# Note: You can modify the ggplots by yourself
+
+test.plot <- plot(test1)
+
+test.plot$mean + theme_minimal()
+
 
 # default summary function --> summary (compatible with any data type)
 summary(test1)
@@ -65,15 +75,13 @@ names(sum_funcs) <- unique(test1$output$params)
 
 summary(test1, sum_funs = sum_funcs)
 
-# summary changes:
-# default for numeric --> mean, else keep summary
-# do time series of mean over repitions
+
+plot(summary(test1))
 
 # ggplot2 informative legends with grid-package, gtable (?)
 
 
 
-# non-parallel version
 
 
 # Do the latex tables from summary output

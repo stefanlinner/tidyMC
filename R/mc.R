@@ -4,7 +4,6 @@
 #'
 #' @param repetitions test
 #' @param param_list test
-#' @param packages test
 #' @param parallelisation_plan test
 #' @param parallelisation_options test
 #' @param ... test
@@ -47,7 +46,7 @@ future_mc <-
     fun,
     repetitions,
     param_list,
-    packages = NULL,
+    # packages = NULL,
     parallelisation_plan = NULL,
     parallelisation_options = NULL,
     check = TRUE,
@@ -60,7 +59,7 @@ future_mc <-
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
-    checkmate::assert_character(packages, null.ok = TRUE)
+    # checkmate::assert_character(packages, null.ok = TRUE)
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
     checkmate::assert_logical(check, len = 1)
@@ -120,16 +119,13 @@ future_mc <-
       )
 
     # Packages extraction
-    if (is.null(packages)){
+    if (is.null(parallelisation_options$packages)){
       pckgs <- rlang::search_envs() %>% names()
       pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
         sub(pattern = "package:", replacement = "")
       pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
-      parallelisation_options <- append(parallelisation_options, list(packages = pckgs))
-    } else {
-      parallelisation_options <- append(parallelisation_options, list(packages = packages))
+      parallelisation_options$packages <- pckgs
     }
-
 
 
 
@@ -230,7 +226,7 @@ future_mc <-
           ) %>%
           all()
 
-        message("Test-run successfull: No errors occurred!")
+        message("\n Test-run successfull: No errors occurred!")
       }
 
     }
@@ -400,12 +396,14 @@ future_mc <-
 
     }
 
+    setups <- unique(nice_names)
 
     out <-
       list(
         output = res,
         parameter = param_table,
-        simple_output = scalar_results
+        simple_output = scalar_results,
+        setups = setups
       )
 
     class(out) <- "mc"
