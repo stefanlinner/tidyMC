@@ -8,7 +8,6 @@ future_mc(
   fun,
   repetitions,
   param_list,
-  packages = "test",
   parallelisation_plan = NULL,
   parallelisation_options = NULL,
   check = TRUE,
@@ -22,8 +21,6 @@ future_mc(
 \item{repetitions}{test}
 
 \item{param_list}{test}
-
-\item{packages}{test}
 
 \item{parallelisation_plan}{test}
 
