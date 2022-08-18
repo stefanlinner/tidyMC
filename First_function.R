@@ -4,9 +4,10 @@
 # library(parallelly)
 # library(codetools)
 # library(MonteCarlo)
+# library(furrr)
 
 
-# parallelly::availableCores()
+parallelly::availableCores()
 #
 #
 # cores_number <- 4

@@ -16,7 +16,6 @@
 #' @export
 #'
 #' @importFrom magrittr %>%
-#' @importFrom rlang search_envs
 #'
 #' @examples
 #'
