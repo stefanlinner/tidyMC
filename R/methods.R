@@ -85,8 +85,6 @@ summary.mc <- function(object, sum_funs = NULL, ...){
       }) %>%
       purrr::set_names(setup_names)
 
-    return(sum_out)
-
   }
 
 
@@ -140,8 +138,6 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 
       }) %>%
       purrr::set_names(setup_names)
-
-    return(sum_out)
 
   }
 
@@ -216,8 +212,12 @@ summary.mc <- function(object, sum_funs = NULL, ...){
       }, .keep = TRUE) %>%
       purrr::set_names(setup_names)
 
-    return(sum_out)
 
   }
+
+  class(sum_out) <- "summary.mc"
+
+  sum_out
+
 }
 

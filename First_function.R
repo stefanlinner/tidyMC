@@ -60,12 +60,9 @@ sum_funcs <- list(
   )
 )
 
-names(sum_funcs) <- test1$setups
+names(sum_funcs) <- unique(test1$output$params)
 
 summary(test1, sum_funs = sum_funcs)
-
-
-
 
 # summary changes:
 # default for numeric --> mean, else keep summary
