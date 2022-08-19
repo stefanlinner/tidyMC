@@ -47,10 +47,17 @@ plot(test1, which = test1$setups[1:2])
 plot(test1, join = test1$setups)
 
 
-test_latex <- tidy_mc_latex(test1)
+# New feature: Now we can select the parameters we want to choose and filter for
+# the table. We need a named list with the parameters for the filter.
+
+test_latex <- tidy_mc_latex(object = test1)
 
 test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
                             sum_funs = list(mean = max, sd = min, test = table))
+
+test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
+                            sum_funs = list(mean = mean, sd = mean, test = table),
+                            parameter_comb = list(param = 0.5))
 
 
 

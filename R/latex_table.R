@@ -4,8 +4,9 @@
 #' @param sum_funs test
 #' @param repetitions_set test
 #' @param caption test
+#' @param parameter_comb test
 #'
-#' @return result latex_table
+#' @return return latex_table
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -37,12 +38,14 @@
 tidy_mc_latex <- function(object,
                           sum_funs = NULL,
                           repetitions_set = NULL,
-                          caption = "Monte Carlo simulations results"){
+                          caption = "Monte Carlo simulations results",
+                          parameter_comb = NULL){
 
   checkmate::assert_class(object, "mc")
   if(!object$simple_output){
     stop("fun has to return a list with named components. Each component has to be scalar.")
   }
+
 
   if(is.null(sum_funs)){
     sum_funs <- list(mean = mean, sd = sd, test = table)
@@ -55,7 +58,7 @@ tidy_mc_latex <- function(object,
   aux <- c()
   count <- object$n_results * num_com
   for (i in 1:num_com){
-    for (j in 1:num_col){
+    for (j in 1:num_com){
       if (length(sum_test[[i]][[j]]) != 2){
         count <- count - 1
         next
@@ -105,6 +108,36 @@ tidy_mc_latex <- function(object,
   #               c("Total parameter combinations", length(unique(object$setups)), rep("", ncol(aux2)-2+ncol(object$parameter))),
   #               c("Seed", object$seed, rep("", ncol(aux2)-2+ncol(object$parameter))))
 
+
+
+  if(!is.null(parameter_comb)){
+    filters <- stringr::str_replace_all(string = sub(
+                                        x = sub(
+                                          pattern = "list\\(",
+                                          replacement = "",
+                                          x = (deparse(parameter_comb)
+                                          )
+                                        ), replacement = "", pattern = "\\)"),
+                                        pattern = "=", replacement = "==")
+    eval(parse(
+      text = paste("aux2 <- dplyr::filter(aux2,",
+                            filters, ")",
+                            sep = "",
+                            collapse = ","
+                   )
+               )
+         )
+    num_com <- length(
+      unique(
+        apply(
+        X = aux2[,1:ncol(object$parameter)],
+        MARGIN = 1,
+        FUN = function(x)paste(x, sep = "", collapse = ",")
+        )
+      )
+    )
+  }
+
   out <- aux2 %>%
     kableExtra::kbl(format = "latex", booktabs = T,
         digits = 3,
@@ -128,3 +161,8 @@ tidy_mc_latex <- function(object,
   return(out)
 
 }
+
+
+
+# Filter the parameters from the table
+
