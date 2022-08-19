@@ -25,6 +25,7 @@ Imports:
     future,
     ggplot2,
     hms,
+    kableExtra,
     magrittr,
     methods,
     purrr,

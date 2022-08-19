@@ -49,7 +49,8 @@ plot(test1, join = test1$setups)
 
 test_latex <- tidy_mc_latex(test1)
 
-test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000))
+test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
+                            sum_funs = list(mean = max, sd = min, test = table))
 
 
 
