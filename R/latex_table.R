@@ -8,8 +8,7 @@
 #' @return result latex_table
 #' @export
 #'
-#' @import knitr
-#' @import kableExtra
+#' @importFrom magrittr %>%
 #'
 #' @examples
 #' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
@@ -110,7 +109,7 @@ tidy_mc_latex <- function(object,
     kableExtra::kbl(format = "latex", booktabs = T,
         digits = 3,
         align = "c", caption = caption) %>%
-    footnote(general = paste("Total repetitions = ", object$n_results,
+    kableExtra::footnote(general = paste("Total repetitions = ", object$n_results,
                                            ", total parameter combinations = ", length(unique(object$setups)),
                                            ", seed:", object$seed, ".",
                              collapse = ",", sep = ""))
