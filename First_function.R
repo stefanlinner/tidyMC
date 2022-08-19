@@ -46,6 +46,13 @@ plot(test1)
 plot(test1, which = test1$setups[1:2])
 plot(test1, join = test1$setups)
 
+
+test_latex <- tidy_mc_latex(test1)
+
+test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000))
+
+
+
 # Note: You can modify the ggplots by yourself
 
 test.plot <- plot(test1)

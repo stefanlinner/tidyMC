@@ -117,14 +117,14 @@ future_mc <-
         repetitions
       )
 
-    # Packages extraction
-    if (is.null(parallelisation_options$packages)){
-      pckgs <- rlang::search_envs() %>% names()
-      pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
-        sub(pattern = "package:", replacement = "")
-      pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
-      parallelisation_options$packages <- pckgs
-    }
+    # # Packages extraction
+    # if (is.null(parallelisation_options$packages)){
+    #   pckgs <- rlang::search_envs() %>% names()
+    #   pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
+    #     sub(pattern = "package:", replacement = "")
+    #   pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
+    #   parallelisation_options$packages <- pckgs
+    # }
 
 
 
@@ -402,7 +402,11 @@ future_mc <-
         output = res,
         parameter = param_table,
         simple_output = scalar_results,
-        setups = setups
+        setups = setups,
+        calculation_time = calculation_time,
+        n_results = ncol(res) - ncol(param_table) - 1,
+        seed = parallelisation_options$seed
+
       )
 
     class(out) <- "mc"
