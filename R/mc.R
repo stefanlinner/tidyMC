@@ -405,8 +405,9 @@ future_mc <-
         setups = setups,
         calculation_time = calculation_time,
         n_results = ncol(res) - ncol(param_table) - 1,
-        seed = parallelisation_options$seed
-
+        seed = parallelisation_options$seed,
+        test_function = fun,
+        repetitions = repetitions
       )
 
     class(out) <- "mc"

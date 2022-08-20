@@ -39,7 +39,10 @@ devtools::load_all()
 
 set.seed(101)
 
-test1 <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list, x3 = 6, x4 = 1, check = TRUE)
+test1 <- future_mc(fun = test_func,
+                   repetitions = 1000,
+                   param_list = param_list,
+                   x3 = 6, x4 = 1, check = TRUE)
 
 
 plot(test1)
@@ -121,6 +124,8 @@ erg<-MonteCarlo(func=test_func, nrep=250, param_list=param_list, ncpus=1)
 
 # test <- bench::mark({MonteCarlo(func=test_func, nrep=250, param_list=param_list, ncpus=1)},
 #             {future_mc(func = test_func, repetitions = 250, param_list = param_list)}, check = FALSE)
+
+print(erg)
 
 summary(erg)
 
