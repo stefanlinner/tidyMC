@@ -2,8 +2,9 @@
 
 S3method(plot,mc)
 S3method(plot,summary.mc)
+S3method(print,mc)
 S3method(summary,mc)
 export(future_mc)
+export(tidy_mc_latex)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)
-importFrom(rlang,search_envs)

@@ -230,7 +230,7 @@ future_mc <-
 
     }
 
-    if(!check){
+    # if(!check){
 
       fun_2 <- args(fun)
       body(fun_2, envir = environment()) <-
@@ -285,7 +285,7 @@ future_mc <-
             }
           )
         })
-    }
+    # }
 
     # Results
 
@@ -407,7 +407,8 @@ future_mc <-
         n_results = ncol(res) - ncol(param_table) - 1,
         seed = parallelisation_options$seed,
         test_function = fun,
-        repetitions = repetitions
+        repetitions = repetitions,
+        parallel = parallel
       )
 
     class(out) <- "mc"

@@ -442,7 +442,8 @@ plot.summary.mc <- function(x, ...) {
 
 #' Print method for mc object
 #'
-#' @param object test
+#' @param x test
+#' @param ... test
 #'
 #' @return print output
 #' @export
@@ -471,12 +472,12 @@ plot.summary.mc <- function(x, ...) {
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' print(test)
 
-print.mc <- function(object){
+print.mc <- function(x, ...){
   cat("Monte Carlo simulation results.",
-      "\n", "Using:", length(object$setups), "parameter combinations,",
-      "\n", object$repetitions, "repetitions and",
-      "\n", "Seed:", object$seed,
-      "\n", "Specified function:", "\n", paste(deparse(object$test_function),
+      "\n", "Using:", length(x$setups), "parameter combinations,",
+      "\n", x$repetitions, "repetitions and",
+      "\n", "Seed:", x$seed,
+      "\n", "Specified function:", "\n", paste(deparse(x$test_function),
                                                collapse = "\n"))
 
 }

@@ -33,7 +33,6 @@
 #'
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-#' tidy_mc_latex(test)
 
 tidy_mc_latex <- function(object,
                           sum_funs = NULL,
@@ -48,7 +47,7 @@ tidy_mc_latex <- function(object,
 
 
   if(is.null(sum_funs)){
-    sum_funs <- list(mean = mean, sd = sd, test = table)
+    sum_funs <- list(mean = mean, sd = sd)
   }
   sum_test <- summary(object, sum_funs = sum_funs)
 
