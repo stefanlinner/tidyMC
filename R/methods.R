@@ -532,19 +532,83 @@ plot.summary.mc <- function(x, join = NULL, which = NULL, ...) {
 #' print(test)
 
 print.mc <- function(x, ...){
-  cat("Monte Carlo simulation results.",
-      "\n", "Using:", length(x$setups), "parameter combinations,",
-      "\n", x$repetitions, "repetitions and",
-      "\n", "Seed:", x$seed,
-      "\n", "Specified function:", "\n", paste(deparse(x$test_function),
-                                               collapse = "\n"))
+
+  checkmate::assert_class(x, "mc")
+
+  cat("Monte Carlo simulation results for the specified function: \n \n",
+      paste(deparse(x$test_function), collapse = "\n"),
+      "\n \n", "The following", length(x$setups), "parameter combinations: \n")
+  print(x$parameter)
+  cat("are each simulated", x$repetitions, "times.",
+      "\n \n The Running time was:", paste(hms::as_hms(x$calculation_time)),
+      "\n \n Parallel:", x$parallel,
+      "\n \n The following parallelisation plan was used: \n")
+  print(x$plan)
+  cat("\n", "Seed:", x$seed)
 
 }
 
 
 
 
+#' test
+#'
+#' @param x test
+#' @param ... test
+#'
+#' @return test
+#' @export
+#'
+#' @examples
+#'
+#' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
+#'
+#' data <- rnorm(n, mean = param) + x1 + x2
+#' stat <- mean(data)
+#' stat_2 <- var(data)
+#'
+#' if (x2 == 5){
+#'   stop("x2 can't be 5!")
+#' }
+#'
+#' return(list(mean = stat, sd = stat_2))
+#' }
+#'
+#'
+#' param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
+#'                    x1 = 1:2, x2 = 2)
+#'
+#'
+#'
+#'
+#' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
+#' print(summary(test))
+print.summary.mc <- function(x, ...){
 
+  checkmate::assert_class(x, "summary.mc")
+  setup_names <- names(x)
+  stat_names <- names(x[[1]])
+
+  purrr::walk(
+    stat_names,
+    function(stat){
+      cat("Results for the statistic ", stat, ": \n ", sep = "")
+      purrr::walk(
+        setup_names,
+        function(setup){
+          if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+            cat("  ", setup, ": ", x[[setup]][[stat]][[1]], " \n ", sep = "")
+          } else {
+            cat("  ", setup, ": \n", sep = "")
+            print(x[[setup]][[stat]])
+            cat("\n")
+          }
+        }
+      )
+      cat("\n \n")
+    }
+  )
+}
 
 
 

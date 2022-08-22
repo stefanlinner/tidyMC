@@ -44,7 +44,7 @@ test1 <- future_mc(fun = test_func,
                    param_list = param_list,
                    x3 = 6, x4 = 1, check = TRUE)
 
-
+test1
 plot(test1)
 plot(test1, which = test1$setups[1:2])
 plot(test1, join = test1$setups)

@@ -408,7 +408,8 @@ future_mc <-
         seed = parallelisation_options$seed,
         test_function = fun,
         repetitions = repetitions,
-        parallel = parallel
+        parallel = parallel,
+        plan = parallelisation_plan
       )
 
     class(out) <- "mc"
