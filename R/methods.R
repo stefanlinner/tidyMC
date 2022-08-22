@@ -268,6 +268,11 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
   checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
   checkmate::assert_subset(which, setup_names, empty.ok = TRUE)
 
+
+  if(!is.null(which) & !is.null(join)) {
+    stop("Arguments which and join cannot be specified at the same time!")
+  }
+
   data_plot <-
     x$output
 
@@ -355,6 +360,8 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
 #'
 #' @param x test
 #' @param ... tse
+#' @param join test
+#' @param which test
 #'
 #' @return tet
 #' @export
@@ -382,20 +389,35 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' plot(summary(test))
-plot.summary.mc <- function(x, ...) {
+plot.summary.mc <- function(x, join = NULL, which = NULL, ...) {
 
   checkmate::assert_class(x, "summary.mc")
   setup_names <- names(x)
   stat_names <- names(x[[1]])
+  checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
+  checkmate::assert_subset(which, setup_names, empty.ok = TRUE)
+
+  if(!is.null(which) & !is.null(join)) {
+    stop("Arguments which and join cannot be specified at the same time!")
+  }
+
+  if(is.null(which)){
+    which <- setup_names
+  }
+
+  if(!is.null(join)){
+    which <- join
+  }
+
 
   data_plot <-
     purrr::map(
       stat_names,
       function(stat){
         purrr::map_dfc(
-          setup_names,
+          which,
           function(setup){
-            if(checkmate::test_number(x[[setup]][[stat]][[1]])){
+            if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
               stat_dat <- list(x[[setup]][[stat]][[2]])
               names(stat_dat) <- setup
               return(stat_dat)
@@ -407,7 +429,8 @@ plot.summary.mc <- function(x, ...) {
           }
         ) %>%
           tibble::rowid_to_column(var = "Replications") %>%
-          tidyr::pivot_longer(cols = setup_names, names_to = "setup", values_to = stat)
+          tidyr::pivot_longer(cols = which, names_to = "setup", values_to = stat) %>%
+          dplyr::filter(!is.na(get(stat)))
       }
     ) %>%
     purrr::set_names(stat_names)
@@ -419,24 +442,60 @@ plot.summary.mc <- function(x, ...) {
     }
   )]
 
-  plots_over_reps <-
-    purrr::map(
-      stat_names,
-      function(stat){
-        if(!is.null(data_plot[[stat]])){
-          plot_stat <-
-            data_plot[[stat]] %>%
-            ggplot2::ggplot(ggplot2::aes_string(x = "Replications", y = stat)) +
-            ggplot2::geom_line() +
-            ggplot2::facet_grid(~.data$setup) +
-            ggplot2::theme_bw()
-          print(plot_stat)
-          plot_stat
-        }
-      }
-    )
+  if(is.null(join)){
 
-  return(invisible(plots_over_reps))
+    plots_over_reps_which <-
+      purrr::map(
+        stat_names,
+        function(stat){
+          if(!is.null(data_plot[[stat]])){
+            plot_stat <-
+              data_plot[[stat]] %>%
+              ggplot2::ggplot(ggplot2::aes_string(x = "Replications", y = stat)) +
+              ggplot2::geom_line() +
+              ggplot2::facet_grid(~.data$setup) +
+              ggplot2::theme_bw()
+            print(plot_stat)
+            plot_stat
+          }
+        }
+      ) %>%
+      purrr::set_names(stat_names)
+
+    plots_over_reps_which <-
+      plots_over_reps_which[!purrr::map_lgl(plots_over_reps_which, is.null)]
+
+    return(invisible(plots_over_reps_which))
+
+  }
+
+  if(!is.null(join)){
+    plots_over_reps_joint <-
+      purrr::map(
+        stat_names,
+        function(stat){
+          if(!is.null(data_plot[[stat]])){
+            plot_stat <-
+              data_plot[[stat]] %>%
+              ggplot2::ggplot(ggplot2::aes_string(x = "Replications", y = stat, col = "setup")) +
+              ggplot2::geom_line() +
+              ggplot2::theme_bw() +
+              ggplot2::labs(title = paste(
+                "Joint time series of", length(join), "setups for the statistic", stat,sep = " "
+              ), color = "Setups") +
+              ggplot2::theme(legend.position = "bottom")
+            print(plot_stat)
+            plot_stat
+          }
+        }
+      ) %>%
+      purrr::set_names(stat_names)
+
+    plots_over_reps_joint <-
+      plots_over_reps_joint[!purrr::map_lgl(plots_over_reps_joint, is.null)]
+
+    return(invisible(plots_over_reps_joint))
+  }
 
 }
 

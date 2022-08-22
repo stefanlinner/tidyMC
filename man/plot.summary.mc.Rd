@@ -4,10 +4,14 @@
 \alias{plot.summary.mc}
 \title{Plot of summary of mc object}
 \usage{
-\method{plot}{summary.mc}(x, ...)
+\method{plot}{summary.mc}(x, join = NULL, which = NULL, ...)
 }
 \arguments{
 \item{x}{test}
+
+\item{join}{test}
+
+\item{which}{test}
 
 \item{...}{tse}
 }
