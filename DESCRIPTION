@@ -10,7 +10,7 @@ Authors@R:
        family = "Linner",
        role = c("aut", "cre"),
        email = "stefan.linner@tu-dortmund.de")
-    person(given = "Igancio",
+    person(given = "Ignacio",
        family = "Moreira Lara",
        role = c("aut", "cre"),
        email = "ignacio.moreira-lara@tu-dortmund.de")
@@ -39,4 +39,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1

@@ -58,6 +58,12 @@ future_mc <-
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
+
+    # Check that all the elements in the param_list are unique
+    for (i in 1:length(param_list)){
+      checkmate::assert_vector(param_list[[i]], unique = TRUE)
+    }
+
     # checkmate::assert_character(packages, null.ok = TRUE)
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
@@ -189,18 +195,17 @@ future_mc <-
 
       message("Running single test-iteration for each parameter combination...")
 
-      test_runs <-
+      tryCatch({test_runs <-
         furrr::future_pmap(
           .l = param_table,
           .f = fun_2,
           .progress = TRUE,
           .options = do.call(furrr::furrr_options, parallelisation_options),
           ...
-        )
+        )}, error = stop("Output list needs to be named"))
 
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
-
 
       if(length(test_runs_errors) != 0){
         stop(test_runs_errors)
