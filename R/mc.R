@@ -5,7 +5,8 @@
 #'
 #' @param fun The function to be evaluated. See details.
 #' @param repetitions An integer that specifies the number of Monte Carlo iterations
-#' @param param_list A list whose components are named after the parameters of `fun`.
+#' @param param_list A list whose components are named after the parameters of `fun` and each
+#' component is a vector containing the desired grid values for that parameter.
 #' The Monte Carlo Simulation is run for all possible combinations of that parameter list.
 #' @param parallelisation_plan A list whose components are named after possible parameters
 #' of [future::plan()] specifying the parallelisation plan which should be used in the
@@ -97,7 +98,7 @@ future_mc <-
     # Check that all the elements in the param_list are unique
     purrr::walk(
       param_list,
-      checkmate::assert_vector,
+      checkmate::assert_atomic_vector,
       unique = TRUE,
       .var.name = "Element of param_list"
     )

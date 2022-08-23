@@ -174,8 +174,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
         purrr::walk(
           .x,
           function(.y){
-            checkmate::assert_function,
-            .var.name = "sum_funs"
+            checkmate::assert_function(.y, .var.name = "sum_funs")
           }
         )
       }
@@ -242,9 +241,10 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #' @param join A character vector containing the "nice names" for the different
 #' parameter combinations (returned by [future_mc()]), which should be plotted together.
 #' Default: Each parameter combination is plotted distinct.
-#' @param which A character vector containing the "nice names" for the different parameter
+#' @param which_setup A character vector containing the "nice names" for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinaitons are plotted.
+#' @param parameter_comb test
 #' @param ... additional arguments passed to callies.
 #'
 #' @return returns a plot
@@ -274,7 +274,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' plot(test)
-plot.mc <- function(x, join = NULL, which = NULL, ...){
+plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,...){
 
   checkmate::assert_class(x, "mc")
   if(!x$simple_output){
@@ -284,20 +284,50 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
   stat_names <- dplyr::setdiff(names(x$output), c("params", param_names))
   setup_names <- unique(x$output$params)
   checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
-  checkmate::assert_subset(which, setup_names, empty.ok = TRUE)
+  checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
+  checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+  checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
+  purrr::walk(
+    parameter_comb,
+    checkmate::assert_atomic_vector,
+    unique = TRUE,
+    .var.name = "Element of parameter_comb"
+  )
 
+  if(!is.null(which_setup) & !is.null(parameter_comb)){
+    stop("Please subset the setups either with which_setup or parameter_comb, not with both!")
+  }
 
-  if(!is.null(which) & !is.null(join)) {
-    stop("Arguments which and join cannot be specified at the same time!")
+  if(!is.null(which_setup) & !is.null(join)) {
+    stop("Arguments which_setup and join cannot be specified at the same time!")
+  }
+
+  if(!is.null(parameter_comb) & !is.null(join)) {
+    stop("Arguments parameter_comb and join cannot be specified at the same time!")
   }
 
   data_plot <-
     x$output
 
-  if(!is.null(which)) {
+  if(!is.null(which_setup)) {
     data_plot <-
       data_plot %>%
-      dplyr::filter(.data$params %in% which)
+      dplyr::filter(.data$params %in% which_setup)
+  }
+
+  if(!is.null(parameter_comb)){
+    count <- 0
+    data_plot <-
+      data_plot %>%
+      dplyr::filter(
+        dplyr::across(
+          names(parameter_comb),
+          ~{
+            count <<- count + 1
+            .x %in% parameter_comb[[count]]
+          }
+        )
+      )
   }
 
   if(!is.null(join)){
@@ -373,16 +403,16 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
 }
 
 
-
 #' Plot the summarized results of a Monte Carlo Simulation
 #'
 #' @param x An object of class `summary.mc`.
 #' @param join A character vector containing the "nice names" for the different
 #' parameter combinations (returned by [future_mc()]), which should plotted together.
 #' Default: Each parameter combination is plotted distinct.
-#' @param which A character vector containing the "nice names" for the different parameter
+#' @param which_setup A character vector containing the "nice names" for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
+#' @param parameter_comb test
 #' @param ... additional arguments passed to callies.
 #'
 #' @return tet
@@ -411,48 +441,111 @@ plot.mc <- function(x, join = NULL, which = NULL, ...){
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' plot(summary(test))
-plot.summary.mc <- function(x, join = NULL, which = NULL, ...) {
+plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...) {
 
   checkmate::assert_class(x, "summary.mc")
   setup_names <- names(x)
   stat_names <- names(x[[1]])
   checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
-  checkmate::assert_subset(which, setup_names, empty.ok = TRUE)
+  checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
+  checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+  purrr::walk(
+    parameter_comb,
+    checkmate::assert_atomic_vector,
+    unique = TRUE,
+    .var.name = "Element of parameter_comb"
+  )
+  param_names <-
+    names(x)[1] %>%
+    stringr::str_replace_all(
+      pattern = " ",
+      replacement = ""
+    ) %>%
+    stringr::str_split(
+      pattern = ","
+    ) %>%
+    unlist() %>%
+    stringr::str_extract(
+      pattern = "[^=]+"
+    )
+  checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
 
-  if(!is.null(which) & !is.null(join)) {
-    stop("Arguments which and join cannot be specified at the same time!")
+  if(!is.null(which_setup) & !is.null(parameter_comb)){
+    stop("Please subset the setups either with which_setup or parameter_comb, not with both!")
   }
 
-  if(is.null(which)){
-    which <- setup_names
+  if(!is.null(parameter_comb) & !is.null(join)) {
+    stop("Arguments parameter_comb and join cannot be specified at the same time!")
+  }
+
+  if(!is.null(which_setup) & !is.null(join)) {
+    stop("Arguments which_setup and join cannot be specified at the same time!")
+  }
+
+  if(is.null(which_setup)){
+    which_setup <- setup_names
   }
 
   if(!is.null(join)){
-    which <- join
+    which_setup <- join
   }
-
 
   data_plot <-
     purrr::map(
       stat_names,
       function(stat){
-        purrr::map_dfc(
-          which,
-          function(setup){
-            if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
-              stat_dat <- list(x[[setup]][[stat]][[2]])
-              names(stat_dat) <- setup
-              return(stat_dat)
-            } else {
-              stat_dat <- list(NA)
-              names(stat_dat) <- setup
-              return(stat_dat)
+        stat_table <-
+          purrr::map_dfc(
+            which_setup,
+            function(setup){
+              if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+                stat_dat <- list(x[[setup]][[stat]][[2]])
+                names(stat_dat) <- setup
+                return(stat_dat)
+              } else {
+                stat_dat <- list(NA)
+                names(stat_dat) <- setup
+                return(stat_dat)
+              }
             }
-          }
-        ) %>%
+          ) %>%
           tibble::rowid_to_column(var = "Replications") %>%
-          tidyr::pivot_longer(cols = which, names_to = "setup", values_to = stat) %>%
+          tidyr::pivot_longer(cols = which_setup, names_to = "setup", values_to = stat) %>%
           dplyr::filter(!is.na(get(stat)))
+
+        if(!is.null(parameter_comb) & nrow(stat_table) != 0){
+          count <- 0
+          stat_table <-
+            stat_table %>%
+            cbind(
+              ., #.
+              purrr::map_dfr(
+                .$setup,
+                function(params){
+                  eval(
+                    parse(
+                      text = paste(
+                        "list(", params, ")",
+                        sep = ""
+                      )
+                    )
+                  )
+                }
+              )
+            ) %>%
+            dplyr::filter(
+              dplyr::across(
+                names(parameter_comb),
+                ~{
+                  count <<- count + 1
+                  .x %in% parameter_comb[[count]]
+                }
+              )
+            ) %>%
+            dplyr::select(-param_names)
+        }
+
+        stat_table
       }
     ) %>%
     purrr::set_names(stat_names)

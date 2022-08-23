@@ -1,15 +1,15 @@
 #' Latex table output for summary.mc object
 #'
-#' @param object test
-#' @param sum_funs test
 #' @param repetitions_set test
 #' @param caption test
 #' @param parameter_comb test
+#' @param x test
+#' @param which_setup test
+#' @param which_stat test
 #'
 #' @return return latex_table
 #' @export
 #'
-#' @importFrom magrittr %>%
 #'
 #' @examples
 #' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
@@ -37,130 +37,149 @@
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #'
-#' tidy_mc_latex(test, sum_funs = c("mean", "sd", "summary"))
+#' tidy_mc_latex(summary(test))
 
-tidy_mc_latex <- function(object,
-                          sum_funs = NULL,
+tidy_mc_latex <- function(x,
                           repetitions_set = NULL,
-                          caption = "Monte Carlo simulations results",
-                          parameter_comb = NULL){
+                          which_setup = NULL,
+                          which_stat = NULL,
+                          parameter_comb = NULL,
+                          caption = "Monte Carlo simulations results"
+){
 
-  checkmate::assert_class(object, "mc")
-  if(!object$simple_output){
-    stop("fun has to return a list with named components. Each component has to be scalar.")
+  checkmate::assert_class(x, "summary.mc")
+  setup_names <- names(x)
+  stat_names <- names(x[[1]])
+  checkmate::assert_integerish(repetitions_set, lower = 1, null.ok = TRUE)
+  checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
+  checkmate::assert_subset(which_stat, stat_names, empty.ok = TRUE)
+  checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+  purrr::walk(
+    parameter_comb,
+    checkmate::assert_atomic_vector,
+    unique = TRUE,
+    .var.name = "Element of parameter_comb"
+  )
+  param_names <-
+    names(x)[1] %>%
+    stringr::str_replace_all(
+      pattern = " ",
+      replacement = ""
+    ) %>%
+    stringr::str_split(
+      pattern = ","
+    ) %>%
+    unlist() %>%
+    stringr::str_extract(
+      pattern = "[^=]+"
+    )
+  checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
+
+  if(!is.null(which_setup) & !is.null(parameter_comb)){
+    stop("Please subset the setups either with which_setup or parameter_comb, not with both!")
   }
-  checkmate::assert_list(sum_funs, names = "named")
 
-  sum_test <- summary(object, sum_funs = sum_funs)
-  num_res <- object$n_results
-  num_com <- length(sum_test)
+  if(is.null(which_setup)){
+    which_setup <- setup_names
+  }
 
-  aux <- c()
-  count <- object$n_results * num_com
-  for (i in 1:num_com){
-    for (j in 1:num_res){
-      if (length(sum_test[[i]][[j]]) != 2){
-        count <- count - 1
-        next
-      } else {
+  if(is.null(which_stat)){
+    which_stat <- stat_names
+  }
 
-        if (is.null(repetitions_set)) {
-          repetitions_set <- length(sum_test[[i]][[j]][[2]])
-        }
-        aux <- rbind(aux, sum_test[[i]][[j]][[2]][repetitions_set])
+  n_reps <- NULL
+  n_setups <- length(setup_names)
+
+  data_table <-
+    purrr::map_dfr(
+      which_setup,
+      function(setup){
+        stat_dat_setup <-
+          purrr::map_dfc(
+            which_stat,
+            function(stat){
+              if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+                if(is.null(n_reps)){
+                  n_reps <<- length(x[[setup]][[stat]][[2]])
+                }
+                if(is.null(repetitions_set)){
+                  repetitions_set <<- length(x[[setup]][[stat]][[2]])
+                }
+                stat_dat <- list(x[[setup]][[stat]][[2]])
+                names(stat_dat) <- stat
+                return(stat_dat)
+              } else {
+                stat_dat <- list(NA)
+                names(stat_dat) <- stat
+                return(stat_dat)
+              }
+            }
+          ) %>%
+          tibble::rowid_to_column(var = "Replications")
+        stat_dat_setup$setup <- setup
+        stat_dat_setup
       }
-    }
-  }
-
-  reps <- length(repetitions_set)
-  aux2 <- data.frame()
-  count <- count/num_com
-  in_1 <- seq(from = 1, to = nrow(aux), by = count)
-  in_2 <- seq(from = count, to = nrow(aux), by = count)
-  for (i in 1:reps){
-    for (j in 1:num_com){
-      aux2 <- rbind(aux2, t(aux[c(in_1[j], in_2[j]), i]))
-    }
-  }
-  in_3 <- seq(from = 1, to = nrow(aux2), by = reps)
-  iden <- unlist(lapply(X =  sum_test[[1]], FUN = function(x) (length(x)==2)))
-
-  aux2 <- round(aux2, 3)
-  # nice_names <- paste(rep(names(sum_test), reps))
-  #
-  # aux2 <- cbind(nice_names, aux2)
-
-  # colnames(aux2) <- c("Parameters",
-  #                     names(unlist(lapply(
-  #                       X =  sum_test[[1]],
-  #                       FUN = function(x) (length(x)==2))))[iden])
-
-  aux2 <- cbind(purrr::map_dfr(
-    seq_len(reps),
-    function(x) object$parameter
-  ), aux2)
-
-  colnames(aux2) <- c(colnames(object$parameter),
-                      names(unlist(lapply(X = sum_test[[1]], FUN = function(x) (length(x)==2))))[iden])
-
-  # aux2 <- rbind(aux2,
-  #               c("Total repetitions", object$n_results, rep("", ncol(aux2)-2+ncol(object$parameter))),
-  #               c("Total parameter combinations", length(unique(object$setups)), rep("", ncol(aux2)-2+ncol(object$parameter))),
-  #               c("Seed", object$seed, rep("", ncol(aux2)-2+ncol(object$parameter))))
-
-
+    ) %>%
+    dplyr::select(which(colMeans(is.na(.)) != 1)) %>%
+    dplyr::filter(.data$Replications %in% repetitions_set) %>%
+    cbind(
+      ., #.
+      purrr::map_dfr(
+        .$setup,
+        function(params){
+          eval(
+            parse(
+              text = paste(
+                "list(", params, ")",
+                sep = ""
+              )
+            )
+          )
+        }
+      )
+    ) %>%
+    dplyr::relocate(
+      names(.data) %>% #.
+        intersect(which_stat),
+      .after = dplyr::last_col()
+    )
 
   if(!is.null(parameter_comb)){
-    filters <- stringr::str_replace_all(string = sub(
-                                        x = sub(
-                                          pattern = "list\\(",
-                                          replacement = "",
-                                          x = (deparse(parameter_comb)
-                                          )
-                                        ), replacement = "", pattern = "\\)"),
-                                        pattern = "=", replacement = "==")
-    eval(parse(
-      text = paste("aux2 <- dplyr::filter(aux2,",
-                            filters, ")",
-                            sep = "",
-                            collapse = ","
-                   )
-               )
-         )
-    num_com <- length(
-      unique(
-        apply(
-        X = aux2[,1:ncol(object$parameter)],
-        MARGIN = 1,
-        FUN = function(x)paste(x, sep = "", collapse = ",")
+    count <- 0
+    data_table <-
+      data_table %>%
+      dplyr::filter(
+        dplyr::across(
+          names(parameter_comb),
+          ~{
+            count <<- count + 1
+            .x %in% parameter_comb[[count]]
+          }
         )
       )
-    )
   }
 
-  out <- aux2 %>%
-    kableExtra::kbl(format = "latex", booktabs = T,
-        digits = 3,
-        align = "c", caption = caption) %>%
-    kableExtra::footnote(general = paste("Total repetitions = ", object$n_results,
-                                           ", total parameter combinations = ", length(unique(object$setups)),
-                                           ", seed:", object$seed, ".",
-                             collapse = ",", sep = ""))
 
-  if (reps > 1){
+  out <- data_table %>%
+    dplyr::arrange(.data$Replications) %>%
+    dplyr::select(-.data$setup, -.data$Replications) %>%
+    kableExtra::kbl(format = "latex", booktabs = T,
+                    digits = 3,
+                    align = "c", caption = caption) %>%
+    kableExtra::footnote(general = paste("Total repetitions = ",n_reps,
+                                         ", total parameter combinations = ", n_setups,
+                                         collapse = ",", sep = ""))
+
+  if(!is.null(repetitions_set)){
     out <- eval(parse(text =
                         paste("kableExtra::pack_rows(kable_input = out, index = c(",
                               paste( "\"N = ", repetitions_set,
-                                     "\" = ", rep(num_com, reps), collapse = ",", sep = ""),
+                                     "\" = ", rep(n_setups, length(repetitions_set)), collapse = ",", sep = ""),
                               "))", collapse = "\n")
     )
     )
   }
 
-  print(out)
+  print(out) # Needed?
   return(out)
-
 }
-
-# Filter the parameters from the table
-

@@ -33,7 +33,7 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 
 
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2, x2 = 2:4)
+                   x1 = 1, x2 = list(2,3))
 
 devtools::load_all()
 
@@ -46,21 +46,44 @@ test1 <- future_mc(fun = test_func,
 
 test1
 plot(test1)
-plot(test1, which = test1$setups[1:2])
-plot(test1, join = test1$setups)
+plot(test1, which_setup = test1$nice_names[1:2])
+plot(test1, join = test1$nice_names)
+plot(test1, parameter_comb = list(param = c(0, 0.5)))
 
 
 # To do the table we need to give the sum_funs object and provide a function for
 # each result. Functions that don't give the nice output of just one scalar and
 # the time series are ignored from the table.
 
-test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
-                            sum_funs = list(mean = max, sd = min, test = table))
 
-test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
-                            sum_funs = list(mean = mean, sd = mean, test = table),
-                            parameter_comb = list(param = 0.5))
+test_latex <- tidy_mc_latex(x = summary(test1), repetitions_set = c(10, 500, 1000))
+test_latex <- tidy_mc_latex(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)))
 
+sum_funcs <- list(
+  list(
+    mean = mean, sd = sd, test = table
+  ),
+  list(
+    mean = mean, sd = summary, test = table
+  ),
+  list(
+    mean = max, sd = min, test = summary
+  )
+)
+
+names(sum_funcs) <- unique(test1$output$params)
+
+summary(test1, sum_funs = sum_funcs)
+
+test_latex <- tidy_mc_latex(summary(test1, sum_funs = sum_funcs))
+
+test_latex <- tidy_mc_latex(x = summary(test1),
+                            repetitions_set = c(10, 500, 1000),
+                            parameter_comb = list(param = c(0,0.5)), which_stat = "mean")
+
+test_latex <- tidy_mc_latex(x = summary(test1),
+                            repetitions_set = c(10, 500, 1000),
+                            which_setup = unique(test1$output$params)[1:2], which_stat = "mean")
 
 
 # Note: You can modify the ggplots by yourself
@@ -97,9 +120,11 @@ summary(test1, sum_funs = sum_funcs)
 
 
 plot(summary(test1))
-plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), which = test1$setups[1:2])
-plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), join = test1$setups)
+plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), which_setup = test1$nice_names[1:2])
+plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), join = test1$nice_names)
 plot(summary(test1, sum_funs = sum_funcs))
+plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), parameter_comb = list(param = c(0,0.5)))
+
 
 # ggplot2 informative legends with grid-package, gtable (?)
 
