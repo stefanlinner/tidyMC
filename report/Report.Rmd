@@ -74,6 +74,23 @@ For example we might be interested in the ability of OLS to estimate the variabl
 In that case specify the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ with corresponding true population paramterers $\theta  = (\beta_0, \beta_1)$, $D = X$ a $n \times 2$ matrix of the deterministic x and the intercept $\beta_0$, and $c = \epsilon$ a $n \times 1$ of $\mathcal{N}(0, \sigma_\epsilon)$ as a normally distributed error term. Using OLS, we estimate $\hat{\beta_1}$ as the second element of $(X^TX)^{-1}X^Ty$. With OLS then $\hat{\beta}_1(\theta, D, v)$. In a MCS we would then generate r $\hat{\beta_1}$ to study how well OLS is able to capture the true $\beta_1$. 
 Show distribution of interval 
 
+# Strucutre
+-Introduction to MCS (5)
+- How it works in our package (10)
+  - parallelisation plan
+  - function
+  - return objects
+    - objects
+    - summary
+    - plots
+    - tables 
+  - exampl of outputs
+  - extension: bootstrap
+- Comparison to Monte Carlos package (3)
+  - objects
+  - speed
+    -bench::mark
+- Vignette
 
 \end{document}
 

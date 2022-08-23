@@ -44,7 +44,7 @@ test1 <- future_mc(fun = test_func,
                    param_list = param_list,
                    x3 = 6, x4 = 1, check = TRUE)
 
-
+test1
 plot(test1)
 plot(test1, which = test1$setups[1:2])
 plot(test1, join = test1$setups)
@@ -68,7 +68,7 @@ test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
 
 test.plot <- plot(test1)
 
-test.plot$mean + theme_minimal()
+test.plot$mean + ggplot2::theme_minimal()
 
 
 # default summary function --> summary (compatible with any data type)
@@ -96,6 +96,9 @@ summary(test1, sum_funs = sum_funcs)
 
 
 plot(summary(test1))
+plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), which = test1$setups[1:2])
+plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), join = test1$setups)
+plot(summary(test1, sum_funs = sum_funcs))
 
 # ggplot2 informative legends with grid-package, gtable (?)
 
