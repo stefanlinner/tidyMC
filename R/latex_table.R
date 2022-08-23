@@ -61,6 +61,15 @@ tidy_mc_latex <- function(
     unique = TRUE,
     .var.name = "Element of parameter_comb"
   )
+
+  # Check that the provided repetitions set is not bigger than the actual
+  # repetitions
+  if (!is.null(repetitions_set)){
+    if (max(repetitions_set) >length(x[[1]][[1]][[2]])) {
+    stop("Upper bound of calculated repetitions surpassed")
+    }
+  }
+
   param_names <-
     names(x)[1] %>%
     stringr::str_replace_all(

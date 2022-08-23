@@ -7,7 +7,7 @@
 # library(furrr)
 
 
-parallelly::availableCores()
+# parallelly::availableCores()
 #
 #
 # cores_number <- 4
@@ -49,7 +49,10 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 #
 #   return(list(mean = stat))
 # }
-
+# test1 <- future_mc(fun = test_func_1out,
+#                    repetitions = 1000,
+#                    param_list = param_list,
+#                    x3 = 6, x4 = 1, check = TRUE)
 
 
 
@@ -70,14 +73,6 @@ plot(test1)
 plot(test1, which_setup = test1$nice_names[1:2])
 plot(test1, join = test1$nice_names)
 plot(test1, parameter_comb = list(param = c(0, 0.5)))
-
-
-test_1out <- future_mc(fun = test_func_1out,
-                   repetitions = 1000,
-                   param_list = param_list,
-                   x3 = 6, x4 = 1, check = TRUE)
-
-
 
 
 
