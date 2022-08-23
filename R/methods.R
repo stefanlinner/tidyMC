@@ -174,7 +174,8 @@ summary.mc <- function(object, sum_funs = NULL, ...){
         purrr::walk(
           .x,
           function(.y){
-            checkmate::assert_function(.y, .var.name = "sum_funs")
+            checkmate::assert_function(.y,
+            .var.name = "sum_funs")
           }
         )
       }

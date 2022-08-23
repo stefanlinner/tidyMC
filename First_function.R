@@ -32,6 +32,27 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 }
 
 
+test_func_1out <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
+
+  data <- rnorm(n, mean = param) + x1 + x2
+  stat <- mean(data)
+  stat_2 <- var(data)
+  test <- LETTERS[sample(1:26, 1)]
+
+  if(x3 == 0 & x4 == 0){
+    next
+  }
+
+  if (x2 == 5){
+    stop("x2 can't be 5!")
+  }
+
+  return(list(mean = stat))
+}
+
+
+
+
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1, x2 = 2)
 
@@ -49,6 +70,15 @@ plot(test1)
 plot(test1, which_setup = test1$nice_names[1:2])
 plot(test1, join = test1$nice_names)
 plot(test1, parameter_comb = list(param = c(0, 0.5)))
+
+
+test_1out <- future_mc(fun = test_func_1out,
+                   repetitions = 1000,
+                   param_list = param_list,
+                   x3 = 6, x4 = 1, check = TRUE)
+
+
+
 
 
 # To do the table we need to give the sum_funs object and provide a function for
@@ -89,6 +119,7 @@ test_latex <- tidy_mc_latex(x = summary(test1),
 # Note: You can modify the ggplots by yourself
 
 test.plot <- plot(test1)
+
 
 test.plot$mean +
   ggplot2::theme_minimal() +
