@@ -4,7 +4,7 @@
 \alias{plot.mc}
 \title{Plot the results of a Monte Carlo Simulation}
 \usage{
-\method{plot}{mc}(x, join = NULL, which = NULL, ...)
+\method{plot}{mc}(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
@@ -14,9 +14,11 @@ See value of \code{\link[=future_mc]{future_mc()}}.}
 parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
 Default: Each parameter combination is plotted distinct.}
 
-\item{which}{A character vector containing the "nice names" for the different parameter
+\item{which_setup}{A character vector containing the "nice names" for the different parameter
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
 Default: All parameter combinaitons are plotted.}
+
+\item{parameter_comb}{test}
 
 \item{...}{additional arguments passed to callies.}
 }

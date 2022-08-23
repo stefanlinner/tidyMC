@@ -7,7 +7,6 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
   if (x2 == 5){
     stop("x2 can't be 5!")
   }
-
   return(list(mean = stat))
 }
 
@@ -16,14 +15,12 @@ param_list <- list(param = seq(from = 0, to = 1, by = 0.5), n = 100,
                    x1 = 1:2, x2 = 1)
 
 
-testthat::test_that("quick checks work", {
 
+testthat::test_that("quick checks work", {
   testthat::expect_error(
     future_mc(fun = test_func, repetitions = 1000, param_list = param_list),
     regexp = "Function error:"
   )
-
-
 })
 
 out <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
@@ -32,7 +29,6 @@ invisible({
   out.summary <- summary(out)
   out.latex <- tidy_mc_latex(out, sum_funs = list(mean = mean))
 })
-
 
 testthat::test_that("Class of the outputs",{
 
@@ -65,8 +61,5 @@ testthat::test_that("Number of combinations for summary functions", {
                                                                  test = table))))
 
 })
-
-
-
 
 

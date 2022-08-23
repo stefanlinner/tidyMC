@@ -5,23 +5,26 @@
 \title{Latex table output for summary.mc object}
 \usage{
 tidy_mc_latex(
-  object,
-  sum_funs = NULL,
+  x,
   repetitions_set = NULL,
-  caption = "Monte Carlo simulations results",
-  parameter_comb = NULL
+  which_setup = NULL,
+  which_stat = NULL,
+  parameter_comb = NULL,
+  caption = "Monte Carlo simulations results"
 )
 }
 \arguments{
-\item{object}{test}
-
-\item{sum_funs}{test}
+\item{x}{test}
 
 \item{repetitions_set}{test}
 
-\item{caption}{test}
+\item{which_setup}{test}
+
+\item{which_stat}{test}
 
 \item{parameter_comb}{test}
+
+\item{caption}{test}
 }
 \value{
 return latex_table
@@ -53,7 +56,7 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1:2, x2 = 2)
 
 
-
-
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
+
+tidy_mc_latex(summary(test))
 }
