@@ -33,7 +33,7 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 
 
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1, x2 = list(2,3))
+                   x1 = 1, x2 = 2)
 
 devtools::load_all()
 
