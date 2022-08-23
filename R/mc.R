@@ -1,24 +1,63 @@
-#' Test title
+#' Run a Parallelized Monte Carlo Simulation
 #'
-#' test description
+#' `future_mc` runs a Monte Carlo simulation study for a user-specified function and the
+#' desired parameter grids.
 #'
-#' @param repetitions test
-#' @param param_list test
-#' @param parallelisation_plan test
-#' @param parallelisation_options test
-#' @param ... test
-#' @param fun tes
-#' @param check tes
-#' @param parallel tes
+#' @param fun The function to be evaluated. See details.
+#' @param repetitions An integer that specifies the number of Monte Carlo iterations
+#' @param param_list A list whose components are named after the parameters of `fun`.
+#' The Monte Carlo Simulation is run for all possible combinations of that parameter list.
+#' @param parallelisation_plan A list whose components are named after possible parameters
+#' of [future::plan()] specifying the parallelisation plan which should be used in the
+#' Monte Carlo Simulation. Default is `strategy = multisession`.
+#' @param parallelisation_options A list whose components are named after possible parameters
+#' of [furrr::furrr_options()] for fine tuning functions, such as [furrr::future_map()]. Default is
+#' `seed = TRUE` as long as not specified differently in order to assure reproducibility.
+#' @param check Boolean that specifies whether a single test-iteration should be run for each parameter
+#' combination in order to check for possible occuring errors in `fun`. Default is `TRUE`.
+#' @param parallel Boolean that specifies whether the Monte Carlo simulation should be run in parallel.
+#' Default is `TRUE`.
+#' @param ... Additional parameters that are passed on to `fun` and which are not part of the parameter
+#' grid.
 #'
-#' @return returns simulation results
+#' @details The user defined function func handles the generation of data, the
+#' application of the method of interest and the evaluation of the result for a
+#' single repetition and parameter combination. MonteCarlo handles the generation
+#' of loops over the desired parameter grids and the repetition of the Monte Carlo
+#' experiment for each of the parameter constellations.
+#'
+#' There are two formal requirements that `fun` has to fulfill:
+#'
+#' * The arguments of `fun` have to be scalar
+#' * The value returned by `fun` has to be a named list
+#'
+#' In order to use the comfort functions [plot.mc()], [summary.mc()], and [plot.summary.mc()] the
+#' value returned by `fun` has to be a named list of scalars.
+#'
+#'
+#' @return A list of type `mc` containing the following objects:
+#'
+#' * output: A tibble containing the return value of `fun` for each iteration and
+#' parameter combination
+#' * parameter: A data.frame which shows the different parameter combinations
+#' * simple_output: A boolean indicating whether the return value of `fun` is a named list of
+#' scalars or not
+#' * nice_names: A character vector containing "nice names" for the different parameter setups
+#' * calculation_time: The calculation time needed to run the whole Monte Carlo Simulation
+#' * n_results: A numeric value indicating the number of results
+#' * seed: The value which is used for the parameter `seed` in [furrr::furrr_options()]
+#' * fun: The user-defined function `fun`
+#' * repetitions: The number of repetitions run for each parameter setup
+#' * parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
+#' * plan: A list which was used to specify the parallelisation plan via [future::plan()]
+#'
 #' @export
 #'
 #' @importFrom magrittr %>%
 #'
 #' @examples
 #'
-#' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
+#'test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 #'
 #'data <- rnorm(n, mean = param) + x1 + x2
 #'stat <- mean(data)
@@ -39,18 +78,15 @@
 #'
 #'
 #'test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-#'
 future_mc <-
   function(
     fun,
     repetitions,
     param_list,
-    # packages = NULL,
     parallelisation_plan = NULL,
     parallelisation_options = NULL,
     check = TRUE,
     parallel = TRUE,
-    # parallelise_over = NULL,
     ...
   ){
 
@@ -58,7 +94,6 @@ future_mc <-
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
-    # checkmate::assert_character(packages, null.ok = TRUE)
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
     checkmate::assert_logical(check, len = 1)
@@ -184,9 +219,6 @@ future_mc <-
         })
 
       # Run single test_iteration for each parameter setup
-
-      ## HUHU: Insert if condition to skip test --> Then use old simulation (fail early)
-
       message("Running single test-iteration for each parameter combination...")
 
       test_runs <-
@@ -208,7 +240,8 @@ future_mc <-
         purrr::walk(
           test_runs,
           checkmate::assert_list,
-          names = "named"
+          names = "named",
+          .var.name = "Return value of fun"
         )
 
         scalar_results <-
@@ -230,62 +263,59 @@ future_mc <-
 
     }
 
-    # if(!check){
-
-      fun_2 <- args(fun)
-      body(fun_2, envir = environment()) <-
-        quote({
-          cl <-
-            paste(
-              purrr::map_chr(
-                fun_argnames,
-                function(.x){
-                  paste(.x, get(.x), sep = " = ")
-                }),
-              collapse = ", "
-            )
-
-          tryCatch(
-            {
-              out <-
-                eval(
-                  parse(
-                    text =
-                      paste("fun(",
-                            paste(
-                              fun_argnames,
-                              fun_argnames,
-                              sep = "=",
-                              collapse = ", "
-                            ),
-                            ")",
-                            sep = ""
-                      )
-                  )
-                )
-              return(out)
-            },
-            error  = {
-              function(e)
-                stop(
-                  paste(
-                    " \n Function error: ", eval(
-                      parse(
-                        text =
-                          paste("unlist(rlang::catch_cnd(fun(",
-                                paste(
-                                  fun_argnames,
-                                  fun_argnames,
-                                  sep = "=",
-                                  collapse = ", "
-                                ),
-                                ")))[[1]]", sep = ""))),
-                    " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
-                )
-            }
+    fun_2 <- args(fun)
+    body(fun_2, envir = environment()) <-
+      quote({
+        cl <-
+          paste(
+            purrr::map_chr(
+              fun_argnames,
+              function(.x){
+                paste(.x, get(.x), sep = " = ")
+              }),
+            collapse = ", "
           )
-        })
-    # }
+
+        tryCatch(
+          {
+            out <-
+              eval(
+                parse(
+                  text =
+                    paste("fun(",
+                          paste(
+                            fun_argnames,
+                            fun_argnames,
+                            sep = "=",
+                            collapse = ", "
+                          ),
+                          ")",
+                          sep = ""
+                    )
+                )
+              )
+            return(out)
+          },
+          error  = {
+            function(e)
+              stop(
+                paste(
+                  " \n Function error: ", eval(
+                    parse(
+                      text =
+                        paste("unlist(rlang::catch_cnd(fun(",
+                              paste(
+                                fun_argnames,
+                                fun_argnames,
+                                sep = "=",
+                                collapse = ", "
+                              ),
+                              ")))[[1]]", sep = ""))),
+                  " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
+              )
+          }
+        )
+      })
 
     # Results
 
@@ -402,11 +432,11 @@ future_mc <-
         output = res,
         parameter = param_table,
         simple_output = scalar_results,
-        setups = setups,
+        nice_names = setups,
         calculation_time = calculation_time,
         n_results = ncol(res) - ncol(param_table) - 1,
         seed = parallelisation_options$seed,
-        test_function = fun,
+        fun = fun,
         repetitions = repetitions,
         parallel = parallel,
         plan = parallelisation_plan

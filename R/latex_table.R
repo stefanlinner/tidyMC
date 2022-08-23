@@ -35,8 +35,6 @@
 #'                    x1 = 1:2, x2 = 2)
 #'
 #'
-#'
-#'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 
 tidy_mc_latex <- function(object,

@@ -2,22 +2,24 @@
 % Please edit documentation in R/methods.R
 \name{summary.mc}
 \alias{summary.mc}
-\title{Result summaries of a mc object}
+\title{Summarize the Results of a Monte Carlo Simulation}
 \usage{
 \method{summary}{mc}(object, sum_funs = NULL, ...)
 }
 \arguments{
-\item{object}{test}
+\item{object}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
+See value of \code{\link[=future_mc]{future_mc()}}.}
 
-\item{sum_funs}{test}
+\item{sum_funs}{A named list containing summary functions. See details.}
 
-\item{...}{test}
+\item{...}{additional arguments passed to callies}
 }
 \value{
 result summaries
 }
 \description{
-Result summaries of a mc object
+Summarize the results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}} with
+(optionally) user-defined summary functions.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
@@ -41,5 +43,7 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-summary(test)
+
+summary(test, sum_funs = list(mean = mean, sd = sd))
+
 }

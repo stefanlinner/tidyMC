@@ -7,9 +7,9 @@
 \method{print}{summary.mc}(x, ...)
 }
 \arguments{
-\item{x}{test}
+\item{x}{object of class mc}
 
-\item{...}{test}
+\item{...}{additional arguments passed to callies}
 }
 \value{
 test

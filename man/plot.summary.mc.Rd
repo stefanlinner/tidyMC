@@ -2,24 +2,28 @@
 % Please edit documentation in R/methods.R
 \name{plot.summary.mc}
 \alias{plot.summary.mc}
-\title{Plot of summary of mc object}
+\title{Plot the summarized results of a Monte Carlo Simulation}
 \usage{
 \method{plot}{summary.mc}(x, join = NULL, which = NULL, ...)
 }
 \arguments{
-\item{x}{test}
+\item{x}{An object of class \code{summary.mc}.}
 
-\item{join}{test}
+\item{join}{A character vector containing the "nice names" for the different
+parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should plotted together.
+Default: Each parameter combination is plotted distinct.}
 
-\item{which}{test}
+\item{which}{A character vector containing the "nice names" for the different parameter
+combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
+Default: All parameter combinations are plotted.}
 
-\item{...}{tse}
+\item{...}{additional arguments passed to callies.}
 }
 \value{
 tet
 }
 \description{
-Plot of summary of mc object
+Plot the summarized results of a Monte Carlo Simulation
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){

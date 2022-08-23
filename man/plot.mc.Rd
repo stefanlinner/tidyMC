@@ -2,24 +2,30 @@
 % Please edit documentation in R/methods.R
 \name{plot.mc}
 \alias{plot.mc}
-\title{Plotting mc object}
+\title{Plot the results of a Monte Carlo Simulation}
 \usage{
 \method{plot}{mc}(x, join = NULL, which = NULL, ...)
 }
 \arguments{
-\item{x}{test}
+\item{x}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
+See value of \code{\link[=future_mc]{future_mc()}}.}
 
-\item{join}{testt}
+\item{join}{A character vector containing the "nice names" for the different
+parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
+Default: Each parameter combination is plotted distinct.}
 
-\item{which}{test}
+\item{which}{A character vector containing the "nice names" for the different parameter
+combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
+Default: All parameter combinaitons are plotted.}
 
-\item{...}{test}
+\item{...}{additional arguments passed to callies.}
 }
 \value{
 returns a plot
 }
 \description{
-Plotting mc object
+Plot density plots for numeric results and bar plots for non-numeric results
+of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}
 }
 \examples{
 

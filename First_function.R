@@ -68,7 +68,9 @@ test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
 
 test.plot <- plot(test1)
 
-test.plot$mean + ggplot2::theme_minimal()
+test.plot$mean +
+  ggplot2::theme_minimal() +
+  ggplot2::geom_vline(xintercept = 3)
 
 
 # default summary function --> summary (compatible with any data type)

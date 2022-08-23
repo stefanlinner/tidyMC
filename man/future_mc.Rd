@@ -2,7 +2,7 @@
 % Please edit documentation in R/mc.R
 \name{future_mc}
 \alias{future_mc}
-\title{Test title}
+\title{Run a Parallelized Monte Carlo Simulation}
 \usage{
 future_mc(
   fun,
@@ -16,27 +16,67 @@ future_mc(
 )
 }
 \arguments{
-\item{fun}{tes}
+\item{fun}{The function to be evaluated. See details.}
 
-\item{repetitions}{test}
+\item{repetitions}{An integer that specifies the number of Monte Carlo iterations}
 
-\item{param_list}{test}
+\item{param_list}{A list whose components are named after the parameters of \code{fun}.
+The Monte Carlo Simulation is run for all possible combinations of that parameter list.}
 
-\item{parallelisation_plan}{test}
+\item{parallelisation_plan}{A list whose components are named after possible parameters
+of \code{\link[future:plan]{future::plan()}} specifying the parallelisation plan which should be used in the
+Monte Carlo Simulation. Default is \code{strategy = multisession}.}
 
-\item{parallelisation_options}{test}
+\item{parallelisation_options}{A list whose components are named after possible parameters
+of \code{\link[furrr:furrr_options]{furrr::furrr_options()}} for fine tuning functions, such as \code{\link[furrr:future_map]{furrr::future_map()}}. Default is
+\code{seed = TRUE} as long as not specified differently in order to assure reproducibility.}
 
-\item{check}{tes}
+\item{check}{Boolean that specifies whether a single test-iteration should be run for each parameter
+combination in order to check for possible occuring errors in \code{fun}. Default is \code{TRUE}.}
 
-\item{parallel}{tes}
+\item{parallel}{Boolean that specifies whether the Monte Carlo simulation should be run in parallel.
+Default is \code{TRUE}.}
 
-\item{...}{test}
+\item{...}{Additional parameters that are passed on to \code{fun} and which are not part of the parameter
+grid.}
 }
 \value{
-returns simulation results
+A list of type \code{mc} containing the following objects:
+\itemize{
+\item output: A tibble containing the return value of \code{fun} for each iteration and
+parameter combination
+\item parameter: A data.frame which shows the different parameter combinations
+\item simple_output: A boolean indicating whether the return value of \code{fun} is a named list of
+scalars or not
+\item nice_names: A character vector containing "nice names" for the different parameter setups
+\item calculation_time: The calculation time needed to run the whole Monte Carlo Simulation
+\item n_results: A numeric value indicating the number of results
+\item seed: The value which is used for the parameter \code{seed} in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}
+\item fun: The user-defined function \code{fun}
+\item repetitions: The number of repetitions run for each parameter setup
+\item parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
+\item plan: A list which was used to specify the parallelisation plan via \code{\link[future:plan]{future::plan()}}
+}
 }
 \description{
-test description
+\code{future_mc} runs a Monte Carlo simulation study for a user-specified function and the
+desired parameter grids.
+}
+\details{
+The user defined function func handles the generation of data, the
+application of the method of interest and the evaluation of the result for a
+single repetition and parameter combination. MonteCarlo handles the generation
+of loops over the desired parameter grids and the repetition of the Monte Carlo
+experiment for each of the parameter constellations.
+
+There are two formal requirements that \code{fun} has to fulfill:
+\itemize{
+\item The arguments of \code{fun} have to be scalar
+\item The value returned by \code{fun} has to be a named list
+}
+
+In order to use the comfort functions \code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, and \code{\link[=plot.summary.mc]{plot.summary.mc()}} the
+value returned by \code{fun} has to be a named list of scalars.
 }
 \examples{
 
@@ -61,5 +101,4 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-
 }
