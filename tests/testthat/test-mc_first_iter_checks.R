@@ -14,21 +14,24 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 param_list <- list(param = seq(from = 0, to = 1, by = 0.5), n = 100,
                    x1 = 1:2, x2 = 1)
 
-
-
-testthat::test_that("quick checks work", {
-  testthat::expect_error(
-    future_mc(fun = test_func, repetitions = 1000, param_list = param_list),
-    regexp = "Function error:"
-  )
-})
-
 out <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 invisible({
   out.plot <- plot(out)
   out.summary <- summary(out)
-  out.latex <- tidy_mc_latex(out, sum_funs = list(mean = mean))
+  out.latex <- tidy_mc_latex(x = summary(out), which_stat = "mean")
 })
+
+
+
+testthat::test_that("Errors check work", {
+  testthat::expect_error(
+    future_mc(fun = test_func, repetitions = 1000, param_list = param_list),
+    regexp = "Function error:"
+  )
+  testthat::expect_error()
+
+})
+
 
 testthat::test_that("Class of the outputs",{
 
@@ -41,24 +44,21 @@ testthat::test_that("Class of the outputs",{
 
 
 testthat::test_that("Functions print",{
-
-  testthat::expect_output({
-    out <- future_mc(
-      fun = test_func, repetitions = 1000, param_list = param_list)
-  })
+  testthat::expect_message({out <- future_mc(
+    fun = test_func, repetitions = 1000, param_list = param_list)})
   testthat::expect_output({print(out)})
   testthat::expect_output(print(out.summary))
   testthat::expect_output(print(out.latex))
 })
 
 
-testthat::test_that("Number of combinations for summary functions", {
-  res <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-
-  testthat::expect_identical(nrow(res$parameter),
-                             length(summary(res, sum_funs = list(mean = mean,
+testthat::test_that("Number of results coincide", {
+  testthat::expect_identical(nrow(out$parameter),
+                             length(summary(out, sum_funs = list(mean = mean,
                                                                  sd = sd,
                                                                  test = table))))
+  testthat::expect_identical()
+
 
 })
 

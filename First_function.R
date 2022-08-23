@@ -32,23 +32,23 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 }
 
 
-test_func_1out <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
-
-  data <- rnorm(n, mean = param) + x1 + x2
-  stat <- mean(data)
-  stat_2 <- var(data)
-  test <- LETTERS[sample(1:26, 1)]
-
-  if(x3 == 0 & x4 == 0){
-    next
-  }
-
-  if (x2 == 5){
-    stop("x2 can't be 5!")
-  }
-
-  return(list(mean = stat))
-}
+# test_func_1out <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
+#
+#   data <- rnorm(n, mean = param) + x1 + x2
+#   stat <- mean(data)
+#   stat_2 <- var(data)
+#   test <- LETTERS[sample(1:26, 1)]
+#
+#   if(x3 == 0 & x4 == 0){
+#     next
+#   }
+#
+#   if (x2 == 5){
+#     stop("x2 can't be 5!")
+#   }
+#
+#   return(list(mean = stat))
+# }
 
 
 
@@ -65,7 +65,7 @@ test1 <- future_mc(fun = test_func,
                    param_list = param_list,
                    x3 = 6, x4 = 1, check = TRUE)
 
-test1
+
 plot(test1)
 plot(test1, which_setup = test1$nice_names[1:2])
 plot(test1, join = test1$nice_names)
@@ -107,7 +107,7 @@ summary(test1, sum_funs = sum_funcs)
 
 test_latex <- tidy_mc_latex(summary(test1, sum_funs = sum_funcs))
 
-test_latex <- tidy_mc_latex(x = summary(test1),
+test_latex <- tidy_mc_latex(x = summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)),
                             repetitions_set = c(10, 500, 1000),
                             parameter_comb = list(param = c(0,0.5)), which_stat = "mean")
 
@@ -115,6 +115,9 @@ test_latex <- tidy_mc_latex(x = summary(test1),
                             repetitions_set = c(10, 500, 1000),
                             which_setup = unique(test1$output$params)[1:2], which_stat = "mean")
 
+
+
+tidy_mc_latex(x = summary(test1), repetitions_set = c(10,500, 1000))
 
 # Note: You can modify the ggplots by yourself
 
