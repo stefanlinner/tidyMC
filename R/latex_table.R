@@ -39,12 +39,13 @@
 #'
 #' tidy_mc_latex(summary(test))
 
-tidy_mc_latex <- function(x,
-                          repetitions_set = NULL,
-                          which_setup = NULL,
-                          which_stat = NULL,
-                          parameter_comb = NULL,
-                          caption = "Monte Carlo simulations results"
+tidy_mc_latex <- function(
+    x,
+    repetitions_set = NULL,
+    which_setup = NULL,
+    which_stat = NULL,
+    parameter_comb = NULL,
+    caption = "Monte Carlo simulations results"
 ){
 
   checkmate::assert_class(x, "summary.mc")
@@ -123,7 +124,7 @@ tidy_mc_latex <- function(x,
     dplyr::select(which(colMeans(is.na(.)) != 1)) %>%
     dplyr::filter(.data$Replications %in% repetitions_set) %>%
     cbind(
-      ., #.
+      .,
       purrr::map_dfr(
         .$setup,
         function(params){
@@ -139,7 +140,7 @@ tidy_mc_latex <- function(x,
       )
     ) %>%
     dplyr::relocate(
-      names(.data) %>% #.
+      names(.) %>%
         intersect(which_stat),
       .after = dplyr::last_col()
     )
@@ -158,7 +159,6 @@ tidy_mc_latex <- function(x,
         )
       )
   }
-
 
   out <- data_table %>%
     dplyr::arrange(.data$Replications) %>%
@@ -180,6 +180,5 @@ tidy_mc_latex <- function(x,
     )
   }
 
-  print(out) # Needed?
   return(out)
 }
