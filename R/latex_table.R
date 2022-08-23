@@ -36,6 +36,8 @@
 #'
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
+#'
+#' tidy_mc_latex(test, sum_funs = c("mean", "sd", "summary"))
 
 tidy_mc_latex <- function(object,
                           sum_funs = NULL,
@@ -47,20 +49,16 @@ tidy_mc_latex <- function(object,
   if(!object$simple_output){
     stop("fun has to return a list with named components. Each component has to be scalar.")
   }
+  checkmate::assert_list(sum_funs, names = "named")
 
-
-  if(is.null(sum_funs)){
-    sum_funs <- list(mean = mean, sd = sd, test = table)
-  }
   sum_test <- summary(object, sum_funs = sum_funs)
-
   num_res <- object$n_results
   num_com <- length(sum_test)
 
   aux <- c()
   count <- object$n_results * num_com
   for (i in 1:num_com){
-    for (j in 1:num_com){
+    for (j in 1:num_res){
       if (length(sum_test[[i]][[j]]) != 2){
         count <- count - 1
         next
@@ -163,8 +161,6 @@ tidy_mc_latex <- function(object,
   return(out)
 
 }
-
-
 
 # Filter the parameters from the table
 

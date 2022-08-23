@@ -94,6 +94,13 @@ future_mc <-
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
+    # Check that all the elements in the param_list are unique
+    purrr::walk(
+      param_list,
+      checkmate::assert_vector,
+      unique = TRUE,
+      .var.name = "Element of param_list"
+    )
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
     checkmate::assert_logical(check, len = 1)
@@ -151,17 +158,6 @@ future_mc <-
           }),
         repetitions
       )
-
-    # # Packages extraction
-    # if (is.null(parallelisation_options$packages)){
-    #   pckgs <- rlang::search_envs() %>% names()
-    #   pckgs <- pckgs[stringr::str_detect(pckgs, pattern = "package:")] %>%
-    #     sub(pattern = "package:", replacement = "")
-    #   pckgs <- pckgs[!(pckgs %in% c("base", "methods", "datasets"))]
-    #   parallelisation_options$packages <- pckgs
-    # }
-
-
 
     if(check){
 
@@ -232,7 +228,6 @@ future_mc <-
 
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
-
 
       if(length(test_runs_errors) != 0){
         stop(test_runs_errors)

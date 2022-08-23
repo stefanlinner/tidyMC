@@ -33,7 +33,7 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 
 
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1, x2 = 2)
+                   x1 = 1:2, x2 = 2:4)
 
 devtools::load_all()
 
@@ -50,10 +50,9 @@ plot(test1, which = test1$setups[1:2])
 plot(test1, join = test1$setups)
 
 
-# New feature: Now we can select the parameters we want to choose and filter for
-# the table. We need a named list with the parameters for the filter.
-
-test_latex <- tidy_mc_latex(object = test1)
+# To do the table we need to give the sum_funs object and provide a function for
+# each result. Functions that don't give the nice output of just one scalar and
+# the time series are ignored from the table.
 
 test_latex <- tidy_mc_latex(object = test1, repetitions_set = c(10, 500, 1000),
                             sum_funs = list(mean = max, sd = min, test = table))
