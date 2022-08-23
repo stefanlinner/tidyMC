@@ -195,14 +195,14 @@ future_mc <-
 
       message("Running single test-iteration for each parameter combination...")
 
-      tryCatch({test_runs <-
+      test_runs <-
         furrr::future_pmap(
           .l = param_table,
           .f = fun_2,
           .progress = TRUE,
           .options = do.call(furrr::furrr_options, parallelisation_options),
           ...
-        )}, error = stop("Output list needs to be named"))
+        )
 
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
