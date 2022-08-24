@@ -56,15 +56,15 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
 
 
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1, x2 = 2)
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
+                   x1 = 1, x2 = c(2,3,4))
 
 devtools::load_all()
 
 set.seed(101)
 
 test1 <- future_mc(fun = test_func,
-                   repetitions = 1000,
+                   repetitions = 5000,
                    param_list = param_list,
                    x3 = 6, x4 = 1, check = TRUE)
 
@@ -194,3 +194,182 @@ summary(erg)
 # Nice output -> look in tidyverse package
 
 
+
+# Performance
+
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
+
+  data <- rnorm(n, mean = param) + x1 + x2
+  stat <- mean(data)
+  stat_2 <- var(data)
+  test <- LETTERS[sample(1:26, 1)]
+
+  if(x3 == 0 & x4 == 0){
+    next
+  }
+
+  if (x2 == 5){
+    stop("x2 can't be 5!")
+  }
+
+  return(list(mean = stat, sd = stat_2, test = test))
+}
+
+param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.2),
+                   x1 = 1, x2 = c(2,3,4))
+
+param_table <- expand.grid(param_list)
+n_params <- nrow(param_table)
+
+
+repetitions <- 50000
+parallelisation_options <- list(seed = TRUE)
+
+
+library(furrr)
+library(MonteCarlo)
+library(bench)
+devtools::load_all()
+
+# Comparison of non-parallel version MonteCarlo vs. future_mc
+speed_result1 <- bench::mark({
+  results <- MonteCarlo(func=test_func, nrep=repetitions, param_list=param_list)
+},
+{
+  param_table_reps <-
+    purrr::map_dfr(
+      seq_len(repetitions),
+      function(x) param_table
+    )
+  results_list <-
+    furrr::future_pmap(
+      .l = param_table_reps,
+      .f = test_func,
+      .options = do.call(furrr::furrr_options, parallelisation_options),
+      .progress = TRUE
+    )
+}, check = FALSE)
+speed_result1$median
+
+
+speed_result2 <- bench::mark({
+  results <- MonteCarlo(
+    func=test_func,
+    nrep=repetitions,
+    param_list=param_list
+  )
+},
+{
+  results <- future_mc(
+    test_func,
+    repetitions = repetitions,
+    param_list = param_list,
+    check = FALSE,
+    parallel = FALSE,
+    parallelisation_options = list(seed = TRUE)
+  )
+}, check = FALSE)
+speed_result2$median
+
+
+# Parallel comparison of MonteCarlo and future_mc
+
+cores <- parallelly::availableCores()
+
+plan(multisession, workers = cores)
+
+speed_results3 <- bench::mark({
+  results <- MonteCarlo(func=test_func, nrep=repetitions, param_list=param_list, ncpus = cores) # Why is it slower??
+},
+{
+  param_table_reps <-
+    purrr::map_dfr(
+      seq_len(repetitions),
+      function(x) param_table
+    )
+  results_list <-
+    furrr::future_pmap(
+      .l = param_table_reps,
+      .f = test_func,
+      .options = do.call(furrr::furrr_options, parallelisation_options),
+      .progress = TRUE
+    )
+}, check = FALSE)
+speed_results3$median
+
+speed_results4 <- bench::mark({
+  results <-
+    MonteCarlo(
+      func=test_func,
+      nrep=repetitions,
+      param_list=param_list,
+      ncpus = cores # Why is it slower??
+    )
+},
+{
+  results <- future_mc(
+    test_func,
+    repetitions = repetitions,
+    param_list = param_list,
+    check = FALSE,
+    parallel = TRUE,
+    parallelisation_options = list(seed = TRUE),
+    parallelisation_plan = list(strategy = multisession, workers = cores)
+  )
+}, check = FALSE)
+speed_results4$median
+
+
+# Comparison of different parallelizations
+
+plan(multisession)
+
+speed_results5 <- bench::mark({
+  # parallelise over parameters
+  results_list <-
+    furrr::future_map(
+      .x = 1:n_params,
+      .f = function(.x){
+        purrr::map_df(
+          1:repetitions,
+          .f = function(.y) {
+            purrr::pmap_dfr(param_table[.x,], test_func)
+          }
+        )
+      },
+      .progress = TRUE,
+      .options = do.call(furrr::furrr_options, parallelisation_options)
+    )
+},
+{
+  # Parallel over reps
+  results_list <-
+    furrr::future_map(
+      .x = 1:repetitions,
+      .f = function(.x){
+        purrr::map_df(
+          1:nrow(param_table),
+          .f = function(.y) {
+            purrr::pmap_dfr(param_table[.y,], test_func)
+          }
+        )
+      },
+      .progress = TRUE,
+      .options = do.call(furrr::furrr_options, parallelisation_options)
+    )
+},
+{
+  # Parallel over both
+  param_table_reps <-
+    purrr::map_dfr(
+      seq_len(repetitions),
+      function(x) param_table
+    )
+  results_list <-
+    furrr::future_pmap(
+      .l = param_table_reps,
+      .f = test_func,
+      .options = do.call(furrr::furrr_options, parallelisation_options),
+      .progress = TRUE
+    )
+}, check = FALSE)

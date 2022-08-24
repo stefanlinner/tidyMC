@@ -263,59 +263,61 @@ future_mc <-
 
     }
 
-    fun_2 <- args(fun)
-    body(fun_2, envir = environment()) <-
-      quote({
-        cl <-
-          paste(
-            purrr::map_chr(
-              fun_argnames,
-              function(.x){
-                paste(.x, get(.x), sep = " = ")
-              }),
-            collapse = ", "
-          )
+    # Don't use fun_2 but use fun --> Speed up! --> If you want nice error messages use check = TRUE
 
-        tryCatch(
-          {
-            out <-
-              eval(
-                parse(
-                  text =
-                    paste("fun(",
-                          paste(
-                            fun_argnames,
-                            fun_argnames,
-                            sep = "=",
-                            collapse = ", "
-                          ),
-                          ")",
-                          sep = ""
-                    )
-                )
-              )
-            return(out)
-          },
-          error  = {
-            function(e)
-              stop(
-                paste(
-                  " \n Function error: ", eval(
-                    parse(
-                      text =
-                        paste("unlist(rlang::catch_cnd(fun(",
-                              paste(
-                                fun_argnames,
-                                fun_argnames,
-                                sep = "=",
-                                collapse = ", "
-                              ),
-                              ")))[[1]]", sep = ""))),
-                  " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
-              )
-          }
-        )
-      })
+    # fun_2 <- args(fun)
+    # body(fun_2, envir = environment()) <-
+    #   quote({
+    #     cl <-
+    #       paste(
+    #         purrr::map_chr(
+    #           fun_argnames,
+    #           function(.x){
+    #             paste(.x, get(.x), sep = " = ")
+    #           }),
+    #         collapse = ", "
+    #       )
+    #
+    #     tryCatch(
+    #       {
+    #         out <-
+    #           eval(
+    #             parse(
+    #               text =
+    #                 paste("fun(",
+    #                       paste(
+    #                         fun_argnames,
+    #                         fun_argnames,
+    #                         sep = "=",
+    #                         collapse = ", "
+    #                       ),
+    #                       ")",
+    #                       sep = ""
+    #                 )
+    #             )
+    #           )
+    #         return(out)
+    #       },
+    #       error  = {
+    #         function(e)
+    #           stop(
+    #             paste(
+    #               " \n Function error: ", eval(
+    #                 parse(
+    #                   text =
+    #                     paste("unlist(rlang::catch_cnd(fun(",
+    #                           paste(
+    #                             fun_argnames,
+    #                             fun_argnames,
+    #                             sep = "=",
+    #                             collapse = ", "
+    #                           ),
+    #                           ")))[[1]]", sep = ""))),
+    #               " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
+    #           )
+    #       }
+    #     )
+    #   })
 
     # Results
 
@@ -333,14 +335,14 @@ future_mc <-
     results_list <-
       furrr::future_pmap(
         .l = param_table_reps,
-        .f = fun_2,
+        .f = fun,
         .progress = TRUE,
         .options = do.call(furrr::furrr_options, parallelisation_options),
         ...
       )
 
-    # Function suggested by Martin, but is significantlly slower
-
+    # # Function suggested by Martin, but is significantlly slower
+    #
     # simulator_parallelise_over_reps <-
     #   function(){
     #     furrr::future_map(
@@ -358,16 +360,26 @@ future_mc <-
     #     )
     #   }
 
-    # simulator_parallelise_over_grid <- function(fun){
-    #   furrr::future_map(.x = 1:repetitions, .f = function(.x){
-    #     purrr::pmap(.l = param_table, .f = fun)
-    #   }, .options = do.call(furrr::furrr_options,
-    #                         parallelisation_options))
+    # simulator_parallelise_over_params <-
+    # function(){
+    #   furrr::future_map(
+    #     .x = 1:n_params,
+    #     .f = function(.x){
+    #       purrr::map_df(
+    #         1:repetitions,
+    #         .f = function(.y) {
+    #           purrr::pmap_dfr(param_table[.x,], fun)
+    #         }
+    #       )
+    #     },
+    #     .progress = TRUE,
+    #     .options = do.call(furrr::furrr_options, parallelisation_options)
+    #   )
     # }
-    #
 
 
     calculation_time <- Sys.time() - start_time
+
     message(paste("\n Simulation was successfull!",
                   "\n Running time: ", hms::as_hms(calculation_time),
                   collapse = ""))
@@ -375,7 +387,7 @@ future_mc <-
     if(!check){
       scalar_results <-
         purrr::map_lgl(
-          results_list[1:3],
+          results_list[1:3], # HUHU: Nicht 1:3
           function(.x){
             purrr::map_lgl(
               .x, function(fun_list_outputs){
