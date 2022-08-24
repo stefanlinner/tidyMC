@@ -27,10 +27,12 @@
 #' of loops over the desired parameter grids and the repetition of the Monte Carlo
 #' experiment for each of the parameter constellations.
 #'
-#' There are two formal requirements that `fun` has to fulfill:
+#' There are three formal requirements that `fun` has to fulfill:
 #'
 #' * The arguments of `fun` have to be scalar
 #' * The value returned by `fun` has to be a named list
+#' * The names of the values returned by `fun` must be different from the names of the arguments
+#'
 #'
 #' In order to use the comfort functions [plot.mc()], [summary.mc()], and [plot.summary.mc()] the
 #' value returned by `fun` has to be a named list of scalars.
