@@ -27,7 +27,7 @@
 #' the functions provided for each output return only one numeric value the results are twofold:
 #' first, a single scalar result of over the whole output vector (with length `repetitions`).
 #' Second, a "path" with length `repetitions` of the step wise calculation of the function's result
-#' accros the output vector.
+#' across the output vector.
 #'
 #' If the user wants to summarize the simulation results of a respective output in the same way
 #' for each parameter combination, a list whose components are named after the

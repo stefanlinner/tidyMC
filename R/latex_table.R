@@ -32,8 +32,8 @@
 #' is discarded as well. In summary, all outputs must be summarized with functions
 #' which return just one numeric value.
 #'
-#' @return An object of class `knitr_kable`, which prints the resulting table
-#' in LaTeX code style.
+#' @return An object of class `knitr_kable` which can be modified by the functions
+#' in the `kableExtra` package is returned and printed in the console. @seealso `kableExtra`
 #' @export
 #'
 #' @examples
