@@ -2,20 +2,21 @@
 % Please edit documentation in R/methods.R
 \name{print.summary.mc}
 \alias{print.summary.mc}
-\title{test}
+\title{Print the summarized results of a Monte Carlo Simulation}
 \usage{
 \method{print}{summary.mc}(x, ...)
 }
 \arguments{
-\item{x}{object of class mc}
+\item{x}{An object of class \code{summary.mc}}
 
 \item{...}{additional arguments passed to callies}
 }
 \value{
-test
+print shows a nice representation of the summarized results of a Monte Carlo Simulation
 }
 \description{
-test
+Print the summarized results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}
+and summarized by \code{\link[=summary.mc]{summary.mc()}}
 }
 \examples{
 

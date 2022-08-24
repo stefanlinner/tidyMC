@@ -10,16 +10,54 @@
 \item{object}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
-\item{sum_funs}{A named list containing summary functions. See details.}
+\item{sum_funs}{A named (nested) list containing summary functions. See details.}
 
 \item{...}{additional arguments passed to callies}
 }
 \value{
-result summaries
+A list of type \code{summary.mc} containing the result of the summary functions of the simulation
+results of a respective statistic and parameter combination.
+
+If the provided summary functions return a single numeric value, also the path of the summarized statistic
+over all simulation repetitions is returned.
 }
 \description{
 Summarize the results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}} with
 (optionally) user-defined summary functions.
+}
+\details{
+In order to use \code{summary}, the output of \code{\link[=future_mc]{future_mc()}} has to be simple,
+which is the case if return value of \code{fun} is a named list of scalars. If the
+returned value of \code{fun} is a named list of more complex data structures, \code{summary}
+can not be used.
+
+With \code{sum_funs} the user can define (different) functions which summarize
+the simulation results for each statistic (return value of \code{fun} in \code{\link[=future_mc]{future_mc()}})
+and each parameter combination. Thus, the functions inside \code{sum_funs} only take one
+argument, which is the result vector (with length \code{repetitions}) of one statistic
+of one specific parameter combination.
+
+The default summary functions are \code{\link[base:mean]{base::mean()}} for numeric statistics and
+\code{\link[base:summary]{base::summary()}} for statistics with non-numeric data types.
+
+The user can define summary functions by supplying a named (nested) list to \code{sum_funs}.
+
+If you want to summarize the simulation results of a respective statistic in the same way
+for each parameter combination you have supply a list whose components are named after the
+statistics (the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}) and each component is
+a function which only takes the vector of results of one statistic as input.
+
+If you want to summarize the simulation results of a respective statistic differently for
+different parameter combination you have to supply a nested list. The components of the outter list
+are named after the \code{nice_names} of the parameter combinations (see value of \code{\link[=future_mc]{future_mc()}}) and
+each component is another list (inner list). The components of the inner list are then defined the
+same way as above (components named after the statistics and each component is a function).
+
+The provided summary functions are not restricted regarding the complexity of their return value.
+However, the path of the summarized statistic over all simulation repetitions is only returned if the
+provided summary functions return a single numeric value. Thus, \code{\link[=plot.summary.mc]{plot.summary.mc()}} will only plot the
+path of the summarized statistic over the simulation repetitions if the summary function returns a
+single numeric value.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
@@ -37,13 +75,30 @@ return(list(mean = stat, sd = stat_2))
 
 
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2, x2 = 2)
+                   x1 = 1, x2 = 2)
 
 
 
 
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 
+summary(test)
 summary(test, sum_funs = list(mean = mean, sd = sd))
+
+sum_funcs <- list(
+list(
+  mean = mean, sd = sd
+),
+list(
+  mean = mean, sd = summary
+),
+list(
+  mean = max, sd = min
+)
+)
+
+names(sum_funcs) <- test$nice_names
+
+summary(test, sum_funs = sum_funcs)
 
 }

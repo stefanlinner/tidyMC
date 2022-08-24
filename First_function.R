@@ -152,7 +152,7 @@ plot(summary(test1))
 plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), which_setup = test1$nice_names[1:2])
 plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), join = test1$nice_names)
 plot(summary(test1, sum_funs = sum_funcs))
-plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), parameter_comb = list(param = c(0,0.5)))
+test_summary_plot <- plot(summary(test1, sum_funs = list(mean = mean, sd = sd, test = table)), parameter_comb = list(param = c(0,0.5)))
 
 
 # ggplot2 informative legends with grid-package, gtable (?)

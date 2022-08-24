@@ -2,35 +2,58 @@
 % Please edit documentation in R/latex_table.R
 \name{tidy_mc_latex}
 \alias{tidy_mc_latex}
-\title{Latex table output for summary.mc object}
+\title{Create a LaTeX table with the summarized results of a Monte Carlo Simulation}
 \usage{
 tidy_mc_latex(
   x,
   repetitions_set = NULL,
   which_setup = NULL,
-  which_stat = NULL,
   parameter_comb = NULL,
+  which_stat = NULL,
   caption = "Monte Carlo simulations results"
 )
 }
 \arguments{
-\item{x}{test}
+\item{x}{An object of class \code{summary.mc}. For restrictions see details.}
 
-\item{repetitions_set}{test}
+\item{repetitions_set}{A vector of integers specifying at which repetitions the summarized
+results should be displayed in the table.
+Default: The argument \code{repetitions} in \code{\link[=future_mc]{future_mc()}} which means that the summarized results after
+the last repetition are displayed in the table.}
 
-\item{which_setup}{test}
+\item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
+combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
+Default: All parameter combinations are plotted.}
 
-\item{which_stat}{test}
+\item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
+the values for the parameters to filter by.
+Default: All parameter combinations are plotted.}
 
-\item{parameter_comb}{test}
+\item{which_stat}{A character vector containing the names of (some of) the statistics
+(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), which should be displayed in the table.
+Default: All statistics are displayed.}
 
-\item{caption}{test}
+\item{caption}{A string specifying the caption of the latex table.}
 }
 \value{
-return latex_table
+A character vector of the LaTeX source code.
 }
 \description{
-Latex table output for summary.mc object
+Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
+by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}
+}
+\details{
+Only one of the arguments \code{which_setup} and \code{paramter_comb} can be specified
+at one time.
+
+Only (statistic - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
+a function is provided in \code{sum_funs} which returns a single numeric value appear as
+non-\code{NA} value in the latex table. If a specific statistic is summarized with functions
+which do not return a single numeric value over all parameter combinations, then this statistic
+is discarded from the table. Similarly, if for a specific parameter combination all statistics are
+summarized with functions which do not return a single numeric value, the this parameter combination
+is discarded from the table.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
@@ -59,4 +82,5 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 
 tidy_mc_latex(summary(test))
+
 }

@@ -5,10 +5,49 @@
 #'
 #' @param object An object of class `mc`, for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
-#' @param sum_funs A named list containing summary functions. See details.
+#' @param sum_funs A named (nested) list containing summary functions. See details.
 #' @param ... additional arguments passed to callies
 #'
-#' @return result summaries
+#' @details In order to use `summary`, the output of [future_mc()] has to be simple,
+#' which is the case if return value of `fun` is a named list of scalars. If the
+#' returned value of `fun` is a named list of more complex data structures, `summary`
+#' can not be used.
+#'
+#' With `sum_funs` the user can define (different) functions which summarize
+#' the simulation results for each statistic (return value of `fun` in [future_mc()])
+#' and each parameter combination. Thus, the functions inside `sum_funs` only take one
+#' argument, which is the result vector (with length `repetitions`) of one statistic
+#' of one specific parameter combination.
+#'
+#' The default summary functions are [base::mean()] for numeric statistics and
+#' [base::summary()] for statistics with non-numeric data types.
+#'
+#' The user can define summary functions by supplying a named (nested) list to `sum_funs`.
+#'
+#' If you want to summarize the simulation results of a respective statistic in the same way
+#' for each parameter combination you have supply a list whose components are named after the
+#' statistics (the names of the returned list of `fun` in [future_mc()]) and each component is
+#' a function which only takes the vector of results of one statistic as input.
+#'
+#' If you want to summarize the simulation results of a respective statistic differently for
+#' different parameter combination you have to supply a nested list. The components of the outter list
+#' are named after the `nice_names` of the parameter combinations (see value of [future_mc()]) and
+#' each component is another list (inner list). The components of the inner list are then defined the
+#' same way as above (components named after the statistics and each component is a function).
+#'
+#' The provided summary functions are not restricted regarding the complexity of their return value.
+#' However, the path of the summarized statistic over all simulation repetitions is only returned if the
+#' provided summary functions return a single numeric value. Thus, [plot.summary.mc()] will only plot the
+#' path of the summarized statistic over the simulation repetitions if the summary function returns a
+#' single numeric value.
+#'
+#'
+#' @return A list of type `summary.mc` containing the result of the summary functions of the simulation
+#' results of a respective statistic and parameter combination.
+#'
+#' If the provided summary functions return a single numeric value, also the path of the summarized statistic
+#' over all simulation repetitions is returned.
+#'
 #' @export
 #'
 #' @importFrom rlang .data
@@ -29,14 +68,31 @@
 #'
 #'
 #' param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-#'                    x1 = 1:2, x2 = 2)
+#'                    x1 = 1, x2 = 2)
 #'
 #'
 #'
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #'
+#' summary(test)
 #' summary(test, sum_funs = list(mean = mean, sd = sd))
+#'
+#' sum_funcs <- list(
+#' list(
+#'   mean = mean, sd = sd
+#' ),
+#' list(
+#'   mean = mean, sd = summary
+#' ),
+#' list(
+#'   mean = max, sd = min
+#' )
+#' )
+#'
+#' names(sum_funcs) <- test$nice_names
+#'
+#' summary(test, sum_funs = sum_funcs)
 #'
 summary.mc <- function(object, sum_funs = NULL, ...){
 
@@ -235,20 +291,29 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #' Plot the results of a Monte Carlo Simulation
 #'
 #' Plot density plots for numeric results and bar plots for non-numeric results
-#' of a Monte Carlo Simulation run by [future_mc()]
+#' of a Monte Carlo Simulation run by [future_mc()].
 #'
 #' @param x An object of class `mc`, for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
-#' @param join A character vector containing the "nice names" for the different
+#' @param join A character vector containing the `nice_names` for the different
 #' parameter combinations (returned by [future_mc()]), which should be plotted together.
 #' Default: Each parameter combination is plotted distinct.
-#' @param which_setup A character vector containing the "nice names" for the different parameter
+#' @param which_setup A character vector containing the `nice_names` for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
-#' Default: All parameter combinaitons are plotted.
-#' @param parameter_comb test
+#' Default: All parameter combinations are plotted.
+#' @param parameter_comb Alternative to which_setup. A named list whose components are named after
+#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
+#' the values for the parameters to filter by.
+#' Default: All parameter combinations are plotted.
 #' @param ... additional arguments passed to callies.
 #'
-#' @return returns a plot
+#'
+#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb` can be specified
+#' at one time.
+#'
+#' @return A list whose components are named after the statistics and each component
+#' contains a `ggplot2` plot.
+#'
 #' @export
 #'
 #' @examples
@@ -274,7 +339,14 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #'
 #'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-#' plot(test)
+#' returned_plot <- plot(test)
+#'
+#' returned_plot$mean +
+#'  ggplot2::theme_minimal() +
+#'  ggplot2::geom_vline(xintercept = 3)
+#'
+#'
+#'
 plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,...){
 
   checkmate::assert_class(x, "mc")
@@ -406,17 +478,31 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
 
 #' Plot the summarized results of a Monte Carlo Simulation
 #'
-#' @param x An object of class `summary.mc`.
-#' @param join A character vector containing the "nice names" for the different
-#' parameter combinations (returned by [future_mc()]), which should plotted together.
+#' Plot line plots of the path of the summarized statistic over all simulation repetitions
+#' of a Monte Carlo simulation run by [future_mc()] and summarized by [summary.mc()]
+#'
+#' @param x An object of class `summary.mc`. For restrictions see details.
+#' @param join A character vector containing the `nice_names` for the different
+#' parameter combinations (returned by [future_mc()]), which should be plotted together.
 #' Default: Each parameter combination is plotted distinct.
-#' @param which_setup A character vector containing the "nice names" for the different parameter
+#' @param which_setup A character vector containing the `nice_names` for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
-#' @param parameter_comb test
+#' @param parameter_comb Alternative to which_setup. A named list whose components are named after
+#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
+#' the values for the parameters to filter by.
+#' Default: All parameter combinations are plotted.
 #' @param ... additional arguments passed to callies.
 #'
-#' @return tet
+#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb` can be specified
+#' at one time.
+#'
+#' A plot is only created for (statistic - parameter combination)-pairs for which in [summary.mc()]
+#' a function is provided in `sum_funs` which returns a single numeric value.
+#'
+#' @return A list whose components are named after the statistics and each component
+#' contains a `ggplot2` plot.
+#'
 #' @export
 #'
 #' @examples
@@ -433,15 +519,12 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
 #' return(list(mean = stat, sd = stat_2))
 #' }
 #'
-#'
 #' param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2, x2 = 2)
 #'
-#'
-#'
-#'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' plot(summary(test))
+#'
 plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...) {
 
   checkmate::assert_class(x, "summary.mc")
@@ -510,7 +593,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
               }
             }
           ) %>%
-          tibble::rowid_to_column(var = "Replications") %>%
+          tibble::rowid_to_column(var = "repetitions") %>%
           tidyr::pivot_longer(cols = which_setup, names_to = "setup", values_to = stat) %>%
           dplyr::filter(!is.na(get(stat)))
 
@@ -519,7 +602,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           stat_table <-
             stat_table %>%
             cbind(
-              ., #.
+              .,
               purrr::map_dfr(
                 .$setup,
                 function(params){
@@ -567,7 +650,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "Replications", y = stat)) +
+              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions", y = stat)) +
               ggplot2::geom_line() +
               ggplot2::facet_grid(~.data$setup) +
               ggplot2::theme_bw()
@@ -593,7 +676,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "Replications", y = stat, col = "setup")) +
+              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions", y = stat, col = "setup")) +
               ggplot2::geom_line() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = paste(
@@ -615,14 +698,14 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
 
 }
 
-#' Print an mc object
+#' Print the results of a Monte Carlo Simulation
 #'
-#' Print function for an `mc` object generated by [future_mc()].
+#' Print the results of a Monte Carlo Simulation run by [future_mc()]
 #'
-#' @param x object of class mc
+#' @param x An object of class `mc`
 #' @param ... additional arguments passed to callies
 #'
-#' @return print shows a dense representation of the Monte Carlo Simulation.
+#' @return print shows a dense representation of the run Monte Carlo Simulation
 #' @export
 #'
 #' @examples
@@ -643,11 +726,8 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
 #' param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2, x2 = 2)
 #'
-#'
-#'
-#'
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-#' print(test)
+#' test
 
 print.mc <- function(x, ...){
 
@@ -669,12 +749,15 @@ print.mc <- function(x, ...){
 
 
 
-#' test
+#' Print the summarized results of a Monte Carlo Simulation
 #'
-#' @param x object of class mc
+#' Print the summarized results of a Monte Carlo Simulation run by [future_mc()]
+#' and summarized by [summary.mc()]
+#'
+#' @param x An object of class `summary.mc`
 #' @param ... additional arguments passed to callies
 #'
-#' @return test
+#' @return print shows a nice representation of the summarized results of a Monte Carlo Simulation
 #' @export
 #'
 #' @examples
