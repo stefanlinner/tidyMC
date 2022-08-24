@@ -10,24 +10,32 @@
 \item{x}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
-\item{join}{A character vector containing the "nice names" for the different
+\item{join}{A character vector containing the \code{nice_names} for the different
 parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
 Default: Each parameter combination is plotted distinct.}
 
-\item{which_setup}{A character vector containing the "nice names" for the different parameter
+\item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
-Default: All parameter combinaitons are plotted.}
+Default: All parameter combinations are plotted.}
 
-\item{parameter_comb}{test}
+\item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
+the values for the parameters to filter by.
+Default: All parameter combinations are plotted.}
 
 \item{...}{additional arguments passed to callies.}
 }
 \value{
-returns a plot
+A list whose components are named after the statistics and each component
+contains a \code{ggplot2} plot.
 }
 \description{
 Plot density plots for numeric results and bar plots for non-numeric results
-of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}
+of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}.
+}
+\details{
+Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb} can be specified
+at one time.
 }
 \examples{
 
@@ -52,5 +60,12 @@ param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 
 
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-plot(test)
+returned_plot <- plot(test)
+
+returned_plot$mean +
+ ggplot2::theme_minimal() +
+ ggplot2::geom_vline(xintercept = 3)
+
+
+
 }

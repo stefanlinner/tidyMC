@@ -28,8 +28,8 @@ testthat::test_that("The output of latex table is printed", {
 
 
 
-  testthat::expect_output({res <- tidy_mc_latex(x = summary(res), repetitions_set = c(10, 500, 1000),
-                                                caption = "Nice table")})
+  # testthat::expect_output({res <- tidy_mc_latex(x = summary(res), repetitions_set = c(10, 500, 1000),
+  #                                               caption = "Nice table")})
 
 })
 

@@ -70,10 +70,14 @@ single repetition and parameter combination. MonteCarlo handles the generation
 of loops over the desired parameter grids and the repetition of the Monte Carlo
 experiment for each of the parameter constellations.
 
-There are two formal requirements that \code{fun} has to fulfill:
+There are four formal requirements that \code{fun} has to fulfill:
 \itemize{
 \item The arguments of \code{fun} have to be scalar
 \item The value returned by \code{fun} has to be a named list
+\item The names of the returned values have to be different to the names of the arguments of \code{fun}.
+Moreover, they can also not be \code{params}, \code{repetitions} or \code{setup}
+\item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument.
+In particular, \code{fun} cannot use variables which are only defined in the global environment.
 }
 
 In order to use the comfort functions \code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, and \code{\link[=plot.summary.mc]{plot.summary.mc()}} the

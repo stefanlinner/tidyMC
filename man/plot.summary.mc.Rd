@@ -7,25 +7,37 @@
 \method{plot}{summary.mc}(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...)
 }
 \arguments{
-\item{x}{An object of class \code{summary.mc}.}
+\item{x}{An object of class \code{summary.mc}. For restrictions see details.}
 
-\item{join}{A character vector containing the "nice names" for the different
-parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should plotted together.
+\item{join}{A character vector containing the \code{nice_names} for the different
+parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
 Default: Each parameter combination is plotted distinct.}
 
-\item{which_setup}{A character vector containing the "nice names" for the different parameter
+\item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
 Default: All parameter combinations are plotted.}
 
-\item{parameter_comb}{test}
+\item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
+the values for the parameters to filter by.
+Default: All parameter combinations are plotted.}
 
 \item{...}{additional arguments passed to callies.}
 }
 \value{
-tet
+A list whose components are named after the statistics and each component
+contains a \code{ggplot2} plot.
 }
 \description{
-Plot the summarized results of a Monte Carlo Simulation
+Plot line plots of the path of the summarized statistic over all simulation repetitions
+of a Monte Carlo simulation run by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}
+}
+\details{
+Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb} can be specified
+at one time.
+
+A plot is only created for (statistic - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
+a function is provided in \code{sum_funs} which returns a single numeric value.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
@@ -41,13 +53,10 @@ if (x2 == 5){
 return(list(mean = stat, sd = stat_2))
 }
 
-
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1:2, x2 = 2)
 
-
-
-
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 plot(summary(test))
+
 }

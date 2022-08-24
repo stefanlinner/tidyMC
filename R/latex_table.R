@@ -1,15 +1,38 @@
-#' Latex table output for summary.mc object
+#' Create a LaTeX table with the summarized results of a Monte Carlo Simulation
 #'
-#' @param repetitions_set test
-#' @param caption test
-#' @param parameter_comb test
-#' @param x test
-#' @param which_setup test
-#' @param which_stat test
+#' Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
+#' by [future_mc()] and summarized by [summary.mc()]
 #'
-#' @return return latex_table
+#' @param x An object of class `summary.mc`. For restrictions see details.
+#' @param repetitions_set A vector of integers specifying at which repetitions the summarized
+#' results should be displayed in the table.
+#' Default: The argument `repetitions` in [future_mc()] which means that the summarized results after
+#' the last repetition are displayed in the table.
+#' @param which_setup A character vector containing the `nice_names` for the different parameter
+#' combinations (returned by [future_mc()]), which should be plotted.
+#' Default: All parameter combinations are plotted.
+#' @param parameter_comb Alternative to which_setup. A named list whose components are named after
+#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
+#' the values for the parameters to filter by.
+#' Default: All parameter combinations are plotted.
+#' @param which_stat A character vector containing the names of (some of) the statistics
+#' (the names of the returned list of `fun` in [future_mc()]), which should be displayed in the table.
+#' Default: All statistics are displayed.
+#' @param caption A string specifying the caption of the latex table.
+#'
+#' @details Only one of the arguments `which_setup` and `paramter_comb` can be specified
+#' at one time.
+#'
+#' Only (statistic - parameter combination)-pairs for which in [summary.mc()]
+#' a function is provided in `sum_funs` which returns a single numeric value appear as
+#' non-`NA` value in the latex table. If a specific statistic is summarized with functions
+#' which do not return a single numeric value over all parameter combinations, then this statistic
+#' is discarded from the table. Similarly, if for a specific parameter combination all statistics are
+#' summarized with functions which do not return a single numeric value, the this parameter combination
+#' is discarded from the table.
+#'
+#' @return A character vector of the LaTeX source code.
 #' @export
-#'
 #'
 #' @examples
 #' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
@@ -38,14 +61,15 @@
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #'
 #' tidy_mc_latex(summary(test))
+#'
 
 tidy_mc_latex <- function(
     x,
     repetitions_set = NULL,
     which_setup = NULL,
-    which_stat = NULL,
     parameter_comb = NULL,
-    caption = "Monte Carlo simulations results"
+    which_stat = NULL,
+    caption = "Monte Carlo simulations results" # HUHU: Allow for more options which are passed to kable?
 ){
 
   checkmate::assert_class(x, "summary.mc")
@@ -61,14 +85,6 @@ tidy_mc_latex <- function(
     unique = TRUE,
     .var.name = "Element of parameter_comb"
   )
-
-  # Check that the provided repetitions set is not bigger than the actual
-  # repetitions
-  if (!is.null(repetitions_set)){
-    if (max(repetitions_set) >length(x[[1]][[1]][[2]])) {
-    stop("Upper bound of calculated repetitions surpassed")
-    }
-  }
 
   param_names <-
     names(x)[1] %>%
@@ -111,6 +127,7 @@ tidy_mc_latex <- function(
               if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
                 if(is.null(n_reps)){
                   n_reps <<- length(x[[setup]][[stat]][[2]])
+                  checkmate::assert_integerish(repetitions_set, lower = 1, upper = n_reps, null.ok = TRUE)
                 }
                 if(is.null(repetitions_set)){
                   repetitions_set <<- length(x[[setup]][[stat]][[2]])
@@ -125,13 +142,13 @@ tidy_mc_latex <- function(
               }
             }
           ) %>%
-          tibble::rowid_to_column(var = "Replications")
+          tibble::rowid_to_column(var = "repetitions")
         stat_dat_setup$setup <- setup
         stat_dat_setup
       }
     ) %>%
     dplyr::select(which(colMeans(is.na(.)) != 1)) %>%
-    dplyr::filter(.data$Replications %in% repetitions_set) %>%
+    dplyr::filter(.data$repetitions %in% repetitions_set) %>%
     cbind(
       .,
       purrr::map_dfr(
@@ -170,8 +187,8 @@ tidy_mc_latex <- function(
   }
 
   out <- data_table %>%
-    dplyr::arrange(.data$Replications) %>%
-    dplyr::select(-.data$setup, -.data$Replications) %>%
+    dplyr::arrange(.data$repetitions) %>%
+    dplyr::select(-.data$setup, -.data$repetitions) %>%
     kableExtra::kbl(format = "latex", booktabs = T,
                     digits = 3,
                     align = "c", caption = caption) %>%
