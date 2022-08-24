@@ -373,3 +373,5 @@ speed_results5 <- bench::mark({
       .progress = TRUE
     )
 }, check = FALSE)
+speed_results5$median
+

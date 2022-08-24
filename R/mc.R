@@ -114,6 +114,7 @@ future_mc <-
     fun_argnames <- methods::formalArgs(fun)
     add_args <- list(...)
 
+    checkmate::assert_subset(names(param_list), choices = fun_argnames)
     checkmate::assert_list(add_args, names = "named")
     checkmate::assert_subset(names(add_args), fun_argnames)
 
@@ -173,7 +174,7 @@ future_mc <-
           cl <-
             paste(
               purrr::map_chr(
-                fun_argnames,
+                param_names,
                 function(.x){
                   paste(.x, get(.x), sep = " = ")
                 }),
@@ -222,6 +223,7 @@ future_mc <-
       # Run single test_iteration for each parameter setup
       message("Running single test-iteration for each parameter combination...")
 
+
       test_runs <-
         furrr::future_pmap(
           .l = param_table,
@@ -230,6 +232,8 @@ future_mc <-
           .options = do.call(furrr::furrr_options, parallelisation_options),
           ...
         )
+
+
 
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
