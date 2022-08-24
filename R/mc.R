@@ -1,5 +1,6 @@
 #' Run a Parallelized Monte Carlo Simulation
 #'
+#' @description
 #' `future_mc` runs a Monte Carlo simulation study for a user-specified function and the
 #' desired parameter grids.
 #'
@@ -21,19 +22,20 @@
 #' @param ... Additional parameters that are passed on to `fun` and which are not part of the parameter
 #' grid.
 #'
-#' @details The user defined function func handles the generation of data, the
+#' @details The user defined function `fun` handles (if specified) the generation of data, the
 #' application of the method of interest and the evaluation of the result for a
-#' single repetition and parameter combination. MonteCarlo handles the generation
+#' single repetition and parameter combination. `future_mc` handles the generation
 #' of loops over the desired parameter grids and the repetition of the Monte Carlo
 #' experiment for each of the parameter constellations.
 #'
 #' There are four formal requirements that `fun` has to fulfill:
 #'
-#' * The arguments of `fun` have to be scalar
+#' * The arguments of `fun` which are present in `param_list` need to be scalar values.
 #' * The value returned by `fun` has to be a named list
-#' * The names of the returned values have to be different to the names of the arguments of `fun`.
-#' Moreover, they can also not be `params`, `repetitions` or `setup`
-#' * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument.
+#' * The names of the returned values and those of the arguments of `fun` need to
+#'   be different. Moreover, they cannot be `params`, `repetitions` or `setup`
+#' * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument
+#' trough the `...` argument.
 #' In particular, `fun` cannot use variables which are only defined in the global environment.
 #'
 #' In order to use the comfort functions [plot.mc()], [summary.mc()], and [plot.summary.mc()] the
@@ -45,7 +47,7 @@
 #' * output: A tibble containing the return value of `fun` for each iteration and
 #' parameter combination
 #' * parameter: A data.frame which shows the different parameter combinations
-#' * simple_output: A boolean indicating whether the return value of `fun` is a named list of
+#' * simple_output: A boolean value indicating whether the return value of `fun` is a named list of
 #' scalars or not
 #' * nice_names: A character vector containing "nice names" for the different parameter setups
 #' * calculation_time: The calculation time needed to run the whole Monte Carlo Simulation

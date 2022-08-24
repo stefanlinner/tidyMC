@@ -69,7 +69,7 @@ test1 <- future_mc(fun = test_func,
                    x3 = 6, x4 = 1, check = TRUE)
 
 
-plot(test1)
+test1.plot <- plot(test1)
 plot(test1, which_setup = test1$nice_names[1:2])
 plot(test1, join = test1$nice_names)
 plot(test1, parameter_comb = list(param = c(0, 0.5)))

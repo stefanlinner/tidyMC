@@ -82,21 +82,21 @@ tidy_mc_latex(summary(test1), repetitions_set = c(1000, 2500, 5000))
 b0 <- 2
 b1 <- 1
 N <- 10000
+n <- 1000
 sigma2 <- 3
 x1 <- rnorm(N, mean = 3, 2)
 e <- rnorm(N, sd = sqrt(sigma2))
 y <- b0 + x1*b1 + e
-pop_data <- data.frame(inter = rep(1, N),
+pop_data.test <- data.frame(inter = rep(1, N),
                       X1 = x1,
                       Y = y,
                       eps = e)
 
-
-test_boot <- function(n_boot, n){
+test_boot <- function(n, pop_data){
   id <- sample(x = 1:10000, size = n, replace = FALSE)
   sam_data <- pop_data[id,]
   boot_data <- sam_data[sample(x = 1:nrow(sam_data),
-                               size = n_boot, replace = TRUE), -c(1, 4)]
+                               size = n, replace = TRUE), -c(1, 4)]
 
   estim <- lm(Y ~ X1, data = boot_data)
 
@@ -106,10 +106,17 @@ test_boot <- function(n_boot, n){
 
 }
 
+test_boot(50, pop_data = pop_data.test)
 
-param_list_boot <- list(n_boot = 1000, n = 1000)
 
-MC_boot <- future_mc(fun = test_boot, repetitions = 500, param_list = param_list_boot)
+param_list_boot <- list(n = 1000)
+
+MC_boot <- future_mc(fun = test_boot, repetitions = 500, param_list = param_list_boot,
+                     parallelisation_plan = NULL,
+                     parallelisation_options = NULL,
+                     check = TRUE,
+                     parallel = TRUE,
+                     pop_data = pop_data.test)
 
 # We can't include variables that are defined outside the function
 
