@@ -92,6 +92,7 @@ pop_data.test <- data.frame(inter = rep(1, N),
                       Y = y,
                       eps = e)
 
+
 test_boot <- function(n, pop_data){
   id <- sample(x = 1:10000, size = n, replace = FALSE)
   sam_data <- pop_data[id,]
@@ -108,7 +109,6 @@ test_boot <- function(n, pop_data){
 
 test_boot(50, pop_data = pop_data.test)
 
-
 param_list_boot <- list(n = 1000)
 
 MC_boot <- future_mc(fun = test_boot, repetitions = 500, param_list = param_list_boot,
@@ -117,6 +117,7 @@ MC_boot <- future_mc(fun = test_boot, repetitions = 500, param_list = param_list
                      check = TRUE,
                      parallel = TRUE,
                      pop_data = pop_data.test)
+
 
 # We can't include variables that are defined outside the function
 
