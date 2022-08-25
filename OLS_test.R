@@ -6,24 +6,34 @@ devtools::load_all()
 
 
 ols_test <- function(b0, b1, b2, n,
-                     sigma2){
+                     sigma2, param_x1 = c(0,5),
+                     param_x2 = c(0,6),
+                     inc_x2 = 0){
   # Gen x independently
-  x1 <- rnorm(n = n, mean = 1, sd = 5)
-  x2 <- rnorm(n = n,  mean = 2, sd = 1)
+  x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
+  x2 <- rnorm(n = n,  mean = param_x2[1], sd = param_x2[2])
   # Generate error term
   e <- rnorm(n, sd = sqrt(sigma2))
 
   # Gen y dependently
   y <- b0 + b1*x1 + b2*x2 + e
 
-
-  # Estimate OLS on the sample
-estim <- lm(y ~ x1 + x2)
-
-  return(list(B0 = estim$coefficients[1],
-              B1 = estim$coefficients[2],
-              B2 = estim$coefficients[3],
-              s2 = var(estim$residuals)))
+  if (inc_x2 == 0){
+    x2 <- x2 * inc
+    # Estimate OLS on the sample without x2
+    estim <- lm(y ~ x1 + x2)
+    out <- list(B0 = estim$coefficients[1],
+                B1 = estim$coefficients[2],
+                s2 = var(estim$residuals))
+  } else {
+    # Estimate OLS on the sample with x2
+    estim <- lm(y ~ x1 + x2)
+    out <- list(B0 = estim$coefficients[1],
+                B1 = estim$coefficients[2],
+                B2 = estim$coefficients[3],
+                s2 = var(estim$residuals))
+  }
+  return(out)
 }
 
 
