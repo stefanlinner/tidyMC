@@ -1,0 +1,183 @@
+---
+title: "Monte Carlo Simulations made easy and tidy with tidyMC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Monte Carlo Simulations made easy and tidy with tidyMC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# When to use tidyMC?
+
+summarize typical tasks of MCs and how tidyMC helps to solve those: see [dpylr package ](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
+
+
+# Package overview
+
+The `tidyMC` package aims to cover the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following steps:
+
+* Running a Monte Carlo Simulation for a user defined function and given parameters using `future_mc()`
+* Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
+* Creating plots of the Monte Carlo Simulation and its results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
+* Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+
+In the following subsections we will show you how you can implement those steps using the `tidyMC` package.
+
+
+## Installing tidyMC
+
+Until now, the `tidyMC` package is not on CRAN, thus you need to download the development version from [GitHub](https://github.com/stefanlinner/tidyMC) as follows:
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("stefanlinner/tidyMC")
+```
+
+Afterwards you can load the package:
+
+```{r}
+library(tidyMC)
+```
+
+
+### Run your first Monte Carlo Simulation with `future_mc()`
+
+`future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of the `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Thus, the second argument is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` should be a list whose components are named after the parameters of `fun` and each component is a vector containing the desired grid values for the parameter. `future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations.
+
+Given this general introduction, there are four formal requirements that `fun` has to fulfill:
+
+* The arguments of `fun` which are present in `param_list` have to be scalar values.
+* The names of the returned values and those of the arguments of `fun` need to be different. Moreover, 
+they cannot be `params`, `repetitions` or `setup` as these names are already occupied.
+* Every variable used inside `fun` has either to be defined inside `fun` or given as an argument trough the `...` argument.
+* The value returned by `fun` has to be a named list.
+
+We recommend to even further restrict the return value of `fun` to be a named list of scalars. This allows you to use all comfort functions of the `tidyMC` package.
+
+A suitable example for `fun` and `param_list` is:
+
+```{r}
+# fun
+ols_test <- 
+  function(b0, b1, b2, n, sigma2){
+    
+    # generation of data
+    x1 <- rnorm(n = n, mean = 1, sd = 5)
+    x2 <- rnorm(n = n,  mean = 2, sd = 1)
+    e <- rnorm(n, sd = sqrt(sigma2))
+    y <- b0 + b1*x1 + b2*x2 + e
+    
+    # application of method
+    estim <- lm(y ~ x1 + x2)
+    estim.summary <- summary(estim)
+    
+    # evaluation of the result for a single repetition and parameter combination
+    estim.summary$coefficients[,4]
+    
+    return(
+      list(B0 = estim$coefficients[1],
+           B1 = estim$coefficients[2],
+           B2 = estim$coefficients[3],
+           s2 = var(estim$residuals))
+    )
+  }
+
+# param_list
+param_list <- 
+  list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000), sigma2 = -2)
+```
+
+The argument `parallelisation_plan` allows the user to set a parallelisation plan by specifying the arguments of `future::plan()`. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()`, by specifying the arguments of `furrr::furrr_options()`. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. As default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
+
+```{r, error=TRUE}
+set.seed(101)
+first_mcs <- future_mc(
+  fun = ols_test, 
+  repetitions = 10000, 
+  param_list = param_list, 
+  check = TRUE 
+)
+
+# correctly specify param_list 
+param_list <- 
+  list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000), sigma2 = 2)
+
+set.seed(101)
+first_mcs <- future_mc(
+  fun = ols_test, 
+  repetitions = 10000, 
+  param_list = param_list, 
+  check = TRUE 
+)
+```
+
+`future_mc` returns a list of type `mc` and length `r length(first_mcs)` consisting of a tibble (`first_mcs$output`) containing the return value of `fun` for each iteration and parameter combination as well as much other information about the Monte Carlo Simulation that can be printed in a dense representation:
+
+```{r}
+first_mcs
+```
+
+
+### Summarize your results with `summary.mc()`
+
+If `fun` was further restricted to return a named list of scalars the function `summary.mc()` can be used to summarize the Monte Carlo results of an object of class `mc` that is returned by `future_mc()`. Using the argument `sum_funs` the user can define (different) functions which summarize the simulation results for each output (return values of `fun`) and each parameter combination. Thus, the functions inside `sum_funs` only take one argument, which is the output vector (with length `repetitions`) of one output of one specific parameter combination.
+
+The default summary functions are `mean()` for numeric outputs and `summary()` for outputs with non-numeric data types.
+
+The user can define summary functions by supplying a named (nested) list to `sum_funs`. When the functions provided for each output return only one numeric value (like `mean()` but unlike `summary()`) the results are twofold: first, a single scalar result of the function evaluating the whole output vector. Second, a "path" with length `repetitions` of the step wise calculation of the function's result across the output vector.
+
+If the user wants to summarize the simulation results of a respective output in the same way for each parameter combination, a list whose components are named after the outputs (names of the returned list of `fun`) is supplied and each component is a function which only takes the vector of results of one output as the main argument.
+
+If the user wants to summarize the simulation results of a respective output differently for different parameter combinations, a nested list has to be supplied. The components of the outter list must be equal in length and naming to the `nice_names` (see `first_mcs$nice_names`) and each component is another list (inner list). The components of the inner list are then defined the same way as above (components named after the outputs and each component is a function).
+
+Here an example for the different specifications of `sum_funs`:
+
+```{r}
+# Default
+summary_default <- summary(first_mcs)
+
+# summarizing output the same way for each parameter combination with own functions
+## summary functions only have one argument
+quantile_sum <- function(x) quantile(x, probs = 0.75)
+sum_funs1 <- list(B0 = mean, B1 = sd, B2 = quantile_sum, s2 = median)
+
+summary_output_spec <- summary(first_mcs, sum_funs = sum_funs1)
+
+# summarizing output differently for different parameter combinations
+sum_funs2 <- 
+  list(
+    list(B0 = min, B1 = min, B2 = min, s2 = mean), 
+    list(B0 = mean, B1 = mean, B2 = mean, s2 = mean),
+    list(B0 = median, B1 = median, B2 = median, s2 = mean),
+    list(B0 = max, B1 = max, B2 = max, s2 = mean)
+  )
+names(sum_funs2) <- first_mcs$nice_names
+summary_out_param_spec <- summary(first_mcs, sum_funs = sum_funs2)
+
+summary_default
+```
+
+The provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
+
+
+### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
+
+
+
+
+
+
+
+### Create a LaTeX table of your results with `tidy_mc_latex()`
+
+
+
+
+

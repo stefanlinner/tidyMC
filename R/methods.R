@@ -20,12 +20,12 @@
 #' argument, which is the output vector (with length `repetitions`) of one output
 #' of one specific parameter combination.
 #'
-#' The default summary functions are [base::mean()] for numeric statistics and
-#' [base::summary()] for statistics with non-numeric data types.
+#' The default summary functions are [base::mean()] for numeric outputs and
+#' [base::summary()] for outputs with non-numeric data types.
 #'
 #' The user can define summary functions by supplying a named (nested) list to `sum_funs`. When
 #' the functions provided for each output return only one numeric value the results are twofold:
-#' first, a single scalar result of over the whole output vector (with length `repetitions`).
+#' ffirst, a single scalar result of the function evaluating the whole output vector.
 #' Second, a "path" with length `repetitions` of the step wise calculation of the function's result
 #' across the output vector.
 #'
@@ -34,12 +34,12 @@
 #' outputs (the names of the returned list of `fun` in [future_mc()]) is supplied and each component is
 #' a function which only takes the vector of results of one output as the main argument.
 #'
-#' If the user wants to summarize the simulation results of a respective statistic differently for
-#' different parameter combination, a nested list has to be supplied. The components of the outer list
+#' If the user wants to summarize the simulation results of a respective output differently for
+#' different parameter combinations, a nested list has to be supplied. The components of the outer list
 #' must be equal in length and naming to the `nice_names` of the parameter
 #' combinations (see value of [future_mc()]) and each component is another
 #' list (inner list). The components of the inner list are then defined the
-#' same way as above (components named after the statistics and each component is a function).
+#' same way as above (components named after the outputs and each component is a function).
 #'
 #' The provided summary functions are not restricted regarding the complexity of their return value.
 #' However, the path of the summarized output over all simulation repetitions is only returned if the
@@ -48,7 +48,7 @@
 #'
 #'
 #' @return A list of type `summary.mc` containing the result of the summary functions of the simulation
-#' results of a respective statistic and parameter combination.
+#' results of a respective output and parameter combination.
 #'
 #' If the provided summary functions return a single numeric value, also the path of the summarized output
 #' over all simulation repetitions is returned.
@@ -462,7 +462,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
               ggplot2::geom_density() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = paste(
-                "Joint density plot of", length(join), "setups for the statistic", stat,sep = " "
+                "Joint density plot of", length(join), "setups for the output", stat,sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
 
@@ -688,7 +688,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
               ggplot2::geom_line() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = paste(
-                "Joint time series of", length(join), "setups for the statistic", stat,sep = " "
+                "Joint time series of", length(join), "setups for the output", stat,sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
             print(plot_stat)
@@ -802,7 +802,7 @@ print.summary.mc <- function(x, ...){
   purrr::walk(
     stat_names,
     function(stat){
-      cat("Results for the statistic ", stat, ": \n ", sep = "")
+      cat("Results for the output ", stat, ": \n ", sep = "")
       purrr::walk(
         setup_names,
         function(setup){
