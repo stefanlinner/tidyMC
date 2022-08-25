@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{An object of class \code{summary.mc}}
 
-\item{...}{additional arguments passed to callies}
+\item{...}{ignored}
 }
 \value{
 print shows a nice representation of the summarized results of a Monte Carlo Simulation

@@ -12,22 +12,23 @@ See value of \code{\link[=future_mc]{future_mc()}}.}
 
 \item{join}{A character vector containing the \code{nice_names} for the different
 parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
-Default: Each parameter combination is plotted distinct.}
+Default: Each parameter combination is plotted distinctly.}
 
 \item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
 Default: All parameter combinations are plotted.}
 
-\item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
+\item{parameter_comb}{Alternative to \code{which_setup}. A named list whose components are named after
 (some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
 the values for the parameters to filter by.
 Default: All parameter combinations are plotted.}
 
-\item{...}{additional arguments passed to callies.}
+\item{...}{ignored}
 }
 \value{
-A list whose components are named after the statistics and each component
-contains a \code{ggplot2} plot.
+A list whose components are named after the outputs of \code{fun} and each component
+contains an object of class \code{ggplot} and \code{gg} which can be plotted and modified with the
+ggplot2 functions. See \code{ggplot2}.
 }
 \description{
 Plot density plots for numeric results and bar plots for non-numeric results

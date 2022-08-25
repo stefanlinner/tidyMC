@@ -9,7 +9,7 @@ tidy_mc_latex(
   repetitions_set = NULL,
   which_setup = NULL,
   parameter_comb = NULL,
-  which_stat = NULL,
+  which_out = NULL,
   caption = "Monte Carlo simulations results"
 )
 }
@@ -18,42 +18,44 @@ tidy_mc_latex(
 
 \item{repetitions_set}{A vector of integers specifying at which repetitions the summarized
 results should be displayed in the table.
-Default: The argument \code{repetitions} in \code{\link[=future_mc]{future_mc()}} which means that the summarized results after
+Default: The argument \code{repetitions} in \code{\link[=future_mc]{future_mc()}}, which means that the summarized results after
 the last repetition are displayed in the table.}
 
 \item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
-combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
-Default: All parameter combinations are plotted.}
+combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be presented in the table.
+Default: All parameter combinations are presented.}
 
 \item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
-(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
-the values for the parameters to filter by.
-Default: All parameter combinations are plotted.}
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}}. Each component is a vector containing
+the values for the parameters to be filtered by.
+Default: All parameter combinations are presented.}
 
-\item{which_stat}{A character vector containing the names of (some of) the statistics
+\item{which_out}{A character vector containing the names of (some of) the named outputs
 (the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), which should be displayed in the table.
-Default: All statistics are displayed.}
+Default: All outputs are displayed.}
 
 \item{caption}{A string specifying the caption of the latex table.}
 }
 \value{
-A character vector of the LaTeX source code.
+An object of class \code{knitr_kable} which can be modified by the functions
+in the \code{kableExtra} package is returned and printed in the console. See\code{kableExtra}
 }
 \description{
 Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
-by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}
+by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}.
 }
 \details{
-Only one of the arguments \code{which_setup} and \code{paramter_comb} can be specified
+Only one of the arguments \code{which_setup} and \code{parameter_comb} can be specified
 at one time.
 
-Only (statistic - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
-a function is provided in \code{sum_funs} which returns a single numeric value appear as
-non-\code{NA} value in the latex table. If a specific statistic is summarized with functions
-which do not return a single numeric value over all parameter combinations, then this statistic
-is discarded from the table. Similarly, if for a specific parameter combination all statistics are
-summarized with functions which do not return a single numeric value, the this parameter combination
-is discarded from the table.
+Only (output - parameter combination)-pairs for which the summary function specified
+in the \code{sum_funs} argument of \code{\link[=summary.mc]{summary.mc()}} returns a single scalar value appear as
+non-\code{NA} values in the latex table. If a specific output is summarized with functions
+which do not return a single numeric value over all parameter combinations, then this output
+is discarded from the table. Similarly, if for a specific parameter combination all \code{fun} outputs are
+summarized with functions which do not return a single numeric value, then this parameter combination
+is discarded as well. In summary, all outputs must be summarized with functions
+which return just one numeric value.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){

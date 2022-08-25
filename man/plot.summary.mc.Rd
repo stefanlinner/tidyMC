@@ -25,18 +25,18 @@ Default: All parameter combinations are plotted.}
 \item{...}{additional arguments passed to callies.}
 }
 \value{
-A list whose components are named after the statistics and each component
+A list whose components are named after the outputs and each component
 contains a \code{ggplot2} plot.
 }
 \description{
-Plot line plots of the path of the summarized statistic over all simulation repetitions
+Plot line plots of the path of the summarized output over all simulation repetitions
 of a Monte Carlo simulation run by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}
 }
 \details{
 Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb} can be specified
-at one time.
+at a time.
 
-A plot is only created for (statistic - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
+A plot is only created for (output - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
 a function is provided in \code{sum_funs} which returns a single numeric value.
 }
 \examples{

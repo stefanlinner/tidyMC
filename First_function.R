@@ -322,7 +322,7 @@ speed_results4$median
 
 # Comparison of different parallelizations
 
-plan(multisession)
+plan(multisession(workers = 8))
 
 speed_results5 <- bench::mark({
   # parallelise over parameters

@@ -319,7 +319,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #'
 #' @return A list whose components are named after the outputs of `fun` and each component
 #' contains an object of class `ggplot` and `gg` which can be plotted and modified with the
-#' ggplot2 functions. See @seealso `ggplot2`.
+#' ggplot2 functions. See `ggplot2`.
 #'
 #' @export
 #'

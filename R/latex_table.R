@@ -33,7 +33,7 @@
 #' which return just one numeric value.
 #'
 #' @return An object of class `knitr_kable` which can be modified by the functions
-#' in the `kableExtra` package is returned and printed in the console. @seealso `kableExtra`
+#' in the `kableExtra` package is returned and printed in the console. See`kableExtra`
 #' @export
 #'
 #' @examples
