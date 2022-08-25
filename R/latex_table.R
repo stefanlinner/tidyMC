@@ -1,37 +1,39 @@
 #' Create a LaTeX table with the summarized results of a Monte Carlo Simulation
 #'
 #' Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
-#' by [future_mc()] and summarized by [summary.mc()]
+#' by [future_mc()] and summarized by [summary.mc()].
 #'
 #' @param x An object of class `summary.mc`. For restrictions see details.
 #' @param repetitions_set A vector of integers specifying at which repetitions the summarized
 #' results should be displayed in the table.
-#' Default: The argument `repetitions` in [future_mc()] which means that the summarized results after
+#' Default: The argument `repetitions` in [future_mc()], which means that the summarized results after
 #' the last repetition are displayed in the table.
 #' @param which_setup A character vector containing the `nice_names` for the different parameter
-#' combinations (returned by [future_mc()]), which should be plotted.
-#' Default: All parameter combinations are plotted.
+#' combinations (returned by [future_mc()]), which should be presented in the table.
+#' Default: All parameter combinations are presented.
 #' @param parameter_comb Alternative to which_setup. A named list whose components are named after
-#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
-#' the values for the parameters to filter by.
-#' Default: All parameter combinations are plotted.
-#' @param which_stat A character vector containing the names of (some of) the statistics
+#' (some of) the parameters in `param_list` in [future_mc()]. Each component is a vector containing
+#' the values for the parameters to be filtered by.
+#' Default: All parameter combinations are presented.
+#' @param which_out A character vector containing the names of (some of) the named outputs
 #' (the names of the returned list of `fun` in [future_mc()]), which should be displayed in the table.
-#' Default: All statistics are displayed.
+#' Default: All outputs are displayed.
 #' @param caption A string specifying the caption of the latex table.
 #'
-#' @details Only one of the arguments `which_setup` and `paramter_comb` can be specified
+#' @details Only one of the arguments `which_setup` and `parameter_comb` can be specified
 #' at one time.
 #'
-#' Only (statistic - parameter combination)-pairs for which in [summary.mc()]
-#' a function is provided in `sum_funs` which returns a single numeric value appear as
-#' non-`NA` value in the latex table. If a specific statistic is summarized with functions
-#' which do not return a single numeric value over all parameter combinations, then this statistic
-#' is discarded from the table. Similarly, if for a specific parameter combination all statistics are
-#' summarized with functions which do not return a single numeric value, the this parameter combination
-#' is discarded from the table.
+#' Only (output - parameter combination)-pairs for which the summary function specified
+#' in the `sum_funs` argument of [summary.mc()] returns a single scalar value appear as
+#' non-`NA` values in the latex table. If a specific output is summarized with functions
+#' which do not return a single numeric value over all parameter combinations, then this output
+#' is discarded from the table. Similarly, if for a specific parameter combination all `fun` outputs are
+#' summarized with functions which do not return a single numeric value, then this parameter combination
+#' is discarded as well. In summary, all outputs must be summarized with functions
+#' which return just one numeric value.
 #'
-#' @return A character vector of the LaTeX source code.
+#' @return An object of class `knitr_kable` which can be modified by the functions
+#' in the `kableExtra` package is returned and printed in the console. See`kableExtra`
 #' @export
 #'
 #' @examples
@@ -68,7 +70,7 @@ tidy_mc_latex <- function(
     repetitions_set = NULL,
     which_setup = NULL,
     parameter_comb = NULL,
-    which_stat = NULL,
+    which_out = NULL,
     caption = "Monte Carlo simulations results" # HUHU: Allow for more options which are passed to kable?
 ){
 
@@ -77,7 +79,7 @@ tidy_mc_latex <- function(
   stat_names <- names(x[[1]])
   checkmate::assert_integerish(repetitions_set, lower = 1, null.ok = TRUE)
   checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
-  checkmate::assert_subset(which_stat, stat_names, empty.ok = TRUE)
+  checkmate::assert_subset(which_out, stat_names, empty.ok = TRUE)
   checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
   purrr::walk(
     parameter_comb,
@@ -109,8 +111,8 @@ tidy_mc_latex <- function(
     which_setup <- setup_names
   }
 
-  if(is.null(which_stat)){
-    which_stat <- stat_names
+  if(is.null(which_out)){
+    which_out <- stat_names
   }
 
   n_reps <- NULL
@@ -122,7 +124,7 @@ tidy_mc_latex <- function(
       function(setup){
         stat_dat_setup <-
           purrr::map_dfc(
-            which_stat,
+            which_out,
             function(stat){
               if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
                 if(is.null(n_reps)){
@@ -167,7 +169,7 @@ tidy_mc_latex <- function(
     ) %>%
     dplyr::relocate(
       names(.) %>%
-        intersect(which_stat),
+        intersect(which_out),
       .after = dplyr::last_col()
     )
 

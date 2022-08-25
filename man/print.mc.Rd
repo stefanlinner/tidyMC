@@ -7,12 +7,12 @@
 \method{print}{mc}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{mc}}
+\item{x}{An object of class \code{mc}.}
 
-\item{...}{additional arguments passed to callies}
+\item{...}{ignored}
 }
 \value{
-print shows a dense representation of the run Monte Carlo Simulation
+print shows a complete representation of the run Monte Carlo Simulation
 }
 \description{
 Print the results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}

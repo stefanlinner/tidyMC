@@ -47,7 +47,7 @@ A list of type \code{mc} containing the following objects:
 \item output: A tibble containing the return value of \code{fun} for each iteration and
 parameter combination
 \item parameter: A data.frame which shows the different parameter combinations
-\item simple_output: A boolean indicating whether the return value of \code{fun} is a named list of
+\item simple_output: A boolean value indicating whether the return value of \code{fun} is a named list of
 scalars or not
 \item nice_names: A character vector containing "nice names" for the different parameter setups
 \item calculation_time: The calculation time needed to run the whole Monte Carlo Simulation
@@ -64,19 +64,20 @@ scalars or not
 desired parameter grids.
 }
 \details{
-The user defined function func handles the generation of data, the
+The user defined function \code{fun} handles (if specified) the generation of data, the
 application of the method of interest and the evaluation of the result for a
-single repetition and parameter combination. MonteCarlo handles the generation
+single repetition and parameter combination. \code{future_mc} handles the generation
 of loops over the desired parameter grids and the repetition of the Monte Carlo
 experiment for each of the parameter constellations.
 
 There are four formal requirements that \code{fun} has to fulfill:
 \itemize{
-\item The arguments of \code{fun} have to be scalar
+\item The arguments of \code{fun} which are present in \code{param_list} need to be scalar values.
 \item The value returned by \code{fun} has to be a named list
-\item The names of the returned values have to be different to the names of the arguments of \code{fun}.
-Moreover, they can also not be \code{params}, \code{repetitions} or \code{setup}
-\item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument.
+\item The names of the returned values and those of the arguments of \code{fun} need to
+be different. Moreover, they cannot be \code{params}, \code{repetitions} or \code{setup}
+\item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument
+trough the \code{...} argument.
 In particular, \code{fun} cannot use variables which are only defined in the global environment.
 }
 
