@@ -223,7 +223,6 @@ future_mc <-
       # Run single test_iteration for each parameter setup
       message("Running single test-iteration for each parameter combination...")
 
-
       test_runs <-
         furrr::future_pmap(
           .l = param_table,
@@ -232,8 +231,6 @@ future_mc <-
           .options = do.call(furrr::furrr_options, parallelisation_options),
           ...
         )
-
-
 
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
@@ -267,64 +264,7 @@ future_mc <-
 
     }
 
-    # Don't use fun_2 but use fun --> Speed up! --> If you want nice error messages use check = TRUE
-
-    # fun_2 <- args(fun)
-    # body(fun_2, envir = environment()) <-
-    #   quote({
-    #     cl <-
-    #       paste(
-    #         purrr::map_chr(
-    #           fun_argnames,
-    #           function(.x){
-    #             paste(.x, get(.x), sep = " = ")
-    #           }),
-    #         collapse = ", "
-    #       )
-    #
-    #     tryCatch(
-    #       {
-    #         out <-
-    #           eval(
-    #             parse(
-    #               text =
-    #                 paste("fun(",
-    #                       paste(
-    #                         fun_argnames,
-    #                         fun_argnames,
-    #                         sep = "=",
-    #                         collapse = ", "
-    #                       ),
-    #                       ")",
-    #                       sep = ""
-    #                 )
-    #             )
-    #           )
-    #         return(out)
-    #       },
-    #       error  = {
-    #         function(e)
-    #           stop(
-    #             paste(
-    #               " \n Function error: ", eval(
-    #                 parse(
-    #                   text =
-    #                     paste("unlist(rlang::catch_cnd(fun(",
-    #                           paste(
-    #                             fun_argnames,
-    #                             fun_argnames,
-    #                             sep = "=",
-    #                             collapse = ", "
-    #                           ),
-    #                           ")))[[1]]", sep = ""))),
-    #               " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
-    #           )
-    #       }
-    #     )
-    #   })
-
     # Results
-
     message(
       paste(
         "Running whole simulation: Overall ",
@@ -345,43 +285,6 @@ future_mc <-
         ...
       )
 
-    # # Function suggested by Martin, but is significantlly slower
-    #
-    # simulator_parallelise_over_reps <-
-    #   function(){
-    #     furrr::future_map(
-    #       .x = 1:repetitions,
-    #       .f = function(.x){
-    #         purrr::map_df(
-    #           1:nrow(param_table),
-    #           .f = function(.y) {
-    #             purrr::pmap_dfr(param_table[.y,], fun, ...)
-    #           }
-    #         )
-    #       },
-    #       .progress = TRUE,
-    #       .options = do.call(furrr::furrr_options, parallelisation_options)
-    #     )
-    #   }
-
-    # simulator_parallelise_over_params <-
-    # function(){
-    #   furrr::future_map(
-    #     .x = 1:n_params,
-    #     .f = function(.x){
-    #       purrr::map_df(
-    #         1:repetitions,
-    #         .f = function(.y) {
-    #           purrr::pmap_dfr(param_table[.x,], fun)
-    #         }
-    #       )
-    #     },
-    #     .progress = TRUE,
-    #     .options = do.call(furrr::furrr_options, parallelisation_options)
-    #   )
-    # }
-
-
     calculation_time <- Sys.time() - start_time
 
     message(paste("\n Simulation was successfull!",
@@ -391,7 +294,7 @@ future_mc <-
     if(!check){
       scalar_results <-
         purrr::map_lgl(
-          results_list[1:3], # HUHU: Nicht 1:3
+          results_list[1:nrow(param_table)],
           function(.x){
             purrr::map_lgl(
               .x, function(fun_list_outputs){
