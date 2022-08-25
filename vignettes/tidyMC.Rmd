@@ -1,0 +1,106 @@
+---
+title: "Monte Carlo Simulations made easy and tidy with tidyMC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Monte Carlo Simulations made easy and tidy with tidyMC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# When to use tidyMC?
+
+summarize typical tasks of MCs and how tidyMC helps to solve those: see [dpylr package ](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
+
+# First steps with tidyMC
+
+Add a few sentences summarizing what's to come
+
+## Installing tidyMC
+
+Until now, the `tidyMC` package is not on CRAN, thus you need to download the development version from [GitHub](https://github.com/stefanlinner/tidyMC) as follows:
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("stefanlinner/tidyMC")
+```
+
+Afterwards you can load the package:
+
+```{r}
+library(tidyMC)
+```
+
+
+## Package overview
+
+The `tidyMC` package aims to cover the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following steps:
+
+* Running a Monte Carlo Simulation for a user defined function and given parameters using `future_mc()`
+* Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
+* Creating plots of the Monte Carlo Simulation and its results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
+* Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+
+In the following subsections we will show you how you can implement those steps using the `tidyMC` package.
+
+
+### Run your first Monte Carlo Simulation with `future_mc()`
+
+`future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of the `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Thus, the second argument is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` should be a list whose components are named after the parameters of `fun` and each component is a vector containing the desired grid values for the parameter. `future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations.
+
+Given this general introduction, there are four formal requirements that `fun` has to fulfill:
+
+* The arguments of `fun` which are present in `param_list` have to be scalar values.
+* The names of the returned values and those of the arguments of `fun` need to be different. Moreover, 
+they cannot be `params`, `repetitions` or `setup` as these names are already occupied.
+* Every variable used inside `fun` has either to be defined inside `fun` or given as an argument trough the `...` argument.
+* The value returned by `fun` has to be a named list.
+
+We recommend to even further restrict the return value of `fun` to be a named list of scalars. This allows you to use all comfort functions of the `tidyMC` package.
+
+A suitable example for `fun` and `param_list` is:
+
+```{r}
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+### Summarize your results with `summary.mc()`
+
+
+
+
+
+
+
+
+### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
+
+
+
+
+
+
+
+### Create a LaTeX table of your results with `tidy_mc_latex()`
+
+
+
+
+

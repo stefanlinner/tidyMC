@@ -18,7 +18,7 @@ out <- future_mc(fun = test_func, repetitions = 10, param_list = param_list)
 invisible({
   out.plot <- plot(out)
   out.summary <- summary(out)
-  out.latex <- tidy_mc_latex(x = summary(out), which_stat = "mean")
+  out.latex <- tidy_mc_latex(x = summary(out), which_out = "mean")
 })
 
 
@@ -52,7 +52,7 @@ testthat::test_that("Errors check work", {
   })
 
   testthat::expect_error(tidy_mc_latex(summary(out), repetitions_set = c(10, 20000),
-                                       which_stat = "mean"))
+                                       which_out = "mean"))
   testthat::expect_error({ # A variable from the global environment cannot be called
     rand_var <- rnorm(1)
     test_func2 <- function(param = 0.1, n = 100, x1 = 1, x2 = 1){
@@ -68,8 +68,6 @@ testthat::test_that("Errors check work", {
     }
     future_mc(fun = test_func2, repetitions = 10, param_list = param_list)
   })
-
-
 
 })
 
