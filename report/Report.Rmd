@@ -49,7 +49,7 @@ Monte Carlo Simulations (henceforth MCS) allow analyzing the properties of class
 
 
 ## Pseudo Random Number Generation and the Data Generating Process
-MCS generally starts with a synthetically created i.i.d. sample. Computers are however not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
+MCS generally starts with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
 
 Creating pseudo-random numbers from a probability distribution generally requires creating pseudo-random draws from a standard uniform distribution. Draws from a uniform distribution are created through the application of a certain algorithm, called random number generators (RNG), to a natural number, called the seed. The created values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. Combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The possibility to replicate the draws allows to exactly reproduce results that build on the pseudo-randomly generated number on different computers. 
 
@@ -64,7 +64,7 @@ MCS allows to approximate the distribution of a statistic for prespecified DGP. 
 
 ### MCS set-up
 
-In MCs we generally simulate the distrbution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\theta$, some deterministic variables $D$ and some random variables $v$, s.t. $q_n = q_n(\theta,D,n)$. 
+In MCs we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\theta$, some deterministic variables $D$ and some random variables $v$, s.t. $q_n = q_n(\theta,D,n)$. 
 
 Sho here pag 20. how then MC works and why consistent for functions of means
 

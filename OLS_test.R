@@ -2,10 +2,8 @@
 
 # Yt = B0 + B1*x1 + B2*x2 + e
 
-b0 <- 2
-b1 <- 1
-b2 <- 3
-n <- 100
+devtools::load_all()
+
 
 ols_test <- function(b0, b1, b2, n,
                      sigma2){
@@ -31,22 +29,30 @@ ols_test <- function(b0, b1, b2, n,
   return(list(B0 = estim$coefficients[1],
               B1 = estim$coefficients[2],
               B2 = estim$coefficients[3],
-              sig2 = var(estim$residuals)))
+              s2 = var(estim$residuals)))
 }
 
 
-param_list <- list(b0 = 0:1, b1 = 1, b2 = 3, n = c(10, 100, 1000, 10000),
-                   sigma2 = 1)
+param_list <- list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000),
+                   sigma2 = 2)
 
-test1 <- future_mc(fun = ols_test, repetitions = 5000, param_list = param_list)
+test1 <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list)
+
+ols.latex <- tidy_mc_latex(summary(test1), repetitions_set = c(10, 10000))
 
 
-summary(test1)
+ols.plot_n10_b1 <- plot(x = test1, parameter_comb = list(n = 10))$B1
 
-plot(test1)
+ols.plot_n10_b1 +
+  ggplot2::theme_minimal() +
+  # ggplot2::ggtitle("Beta 1 results for 10 MC repetitions") +
+  ggplot2::labs(title = "Beta 1 results for 10 MC repetitions")
 
-tidy_mc_latex(summary(test1), repetitions_set = c(1000, 2500, 5000))
 
+ols.plot_n10_s2 <- plot(x = test1, which_setup = test1$nice_names[c(1,4)])$s2
+
+
+ols.plot_n10k <- plot(x = test1, which_setup = test1$nice_names[c(1,4)])[[2]]
 
 
 # Bootstrap function is not what is inteded but lets do it
