@@ -253,7 +253,7 @@ future_mc <-
             function(.x){
               purrr::map_lgl(
                 .x, function(fun_list_outputs){
-                  checkmate::test_scalar(fun_list_outputs)
+                  checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
                 }
               ) %>%
                 all()
@@ -300,7 +300,7 @@ future_mc <-
           function(.x){
             purrr::map_lgl(
               .x, function(fun_list_outputs){
-                checkmate::test_scalar(fun_list_outputs)
+                checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
               }
             ) %>%
               all()
