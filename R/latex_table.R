@@ -19,6 +19,8 @@
 #' (the names of the returned list of `fun` in [future_mc()]), which should be displayed in the table.
 #' Default: All outputs are displayed.
 #' @param caption A string specifying the caption of the latex table.
+#' @param column_names Column names for the resulting table. They can be written
+#' in standard LaTeX manner.
 #'
 #' @details Only one of the arguments `which_setup` and `parameter_comb` can be specified
 #' at one time.
@@ -71,7 +73,8 @@ tidy_mc_latex <- function(
     which_setup = NULL,
     parameter_comb = NULL,
     which_out = NULL,
-    caption = "Monte Carlo simulations results" # HUHU: Allow for more options which are passed to kable?
+    caption = "Monte Carlo simulations results",
+    column_names = NULL# HUHU: Allow for more options which are passed to kable?
 ){
 
   checkmate::assert_class(x, "summary.mc")
@@ -81,6 +84,7 @@ tidy_mc_latex <- function(
   checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
   checkmate::assert_subset(which_out, stat_names, empty.ok = TRUE)
   checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+  checkmate::assert_character(column_names, null.ok = T)
   purrr::walk(
     parameter_comb,
     checkmate::assert_atomic_vector,
@@ -187,13 +191,19 @@ tidy_mc_latex <- function(
         )
       )
   }
-
+  if(!is.null(column_names)){
+    if (length(column_names)!=length(stat_names)){
+      stop("Length of column names differ from the number of columns in the table")
+    } else {
+      colnames(data_table)[which(colnames(data_table) %in% stat_names)] <- column_names
+    }
+  }
   out <- data_table %>%
     dplyr::arrange(.data$repetitions) %>%
     dplyr::select(-.data$setup, -.data$repetitions) %>%
     kableExtra::kbl(format = "latex", booktabs = T,
                     digits = 3,
-                    align = "c", caption = caption) %>%
+                    align = "c", caption = caption, escape = F) %>%
     kableExtra::footnote(general = paste("Total repetitions = ",n_reps,
                                          ", total parameter combinations = ", n_setups,
                                          collapse = ",", sep = ""))
@@ -210,3 +220,4 @@ tidy_mc_latex <- function(
 
   return(out)
 }
+

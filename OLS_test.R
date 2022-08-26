@@ -5,114 +5,54 @@
 devtools::load_all()
 
 
-ols_test <- function(b0, b1, b2, n,
-                     sigma2, param_x1 = c(0,5),
-                     param_x2 = c(0,6),
-                     inc_x2 = 0){
-  # Gen x independently
-  x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
-  x2 <- rnorm(n = n,  mean = param_x2[1], sd = param_x2[2])
-  # Generate error term
-  e <- rnorm(n, sd = sqrt(sigma2))
+ols_test <-
+  function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
 
-  # Gen y dependently
-  y <- b0 + b1*x1 + b2*x2 + e
+    # generation of data
+    x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
+    x2 <- rnorm(n = n,  mean = param_x2[1], sd = param_x2[2])
+    e <- rnorm(n, sd = sqrt(sigma2))
+    y <- b0 + b1*x1 + b2*x2 + e
 
-  if (inc_x2 == 0){
-    x2 <- x2 * inc
-    # Estimate OLS on the sample without x2
+    if (inc_x2 == 0){
+      x2 <- x2 * inc_x2
+    }
+
+    # application of method
     estim <- lm(y ~ x1 + x2)
-    out <- list(B0 = estim$coefficients[1],
-                B1 = estim$coefficients[2],
-                s2 = var(estim$residuals))
-  } else {
-    # Estimate OLS on the sample with x2
-    estim <- lm(y ~ x1 + x2)
+
+    # evaluation of the result for a single repetition and parameter combination
     out <- list(B0 = estim$coefficients[1],
                 B1 = estim$coefficients[2],
                 B2 = estim$coefficients[3],
                 s2 = var(estim$residuals))
+    return(out)
   }
-  return(out)
-}
 
 
-param_list <- list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000),
-                   sigma2 = 2)
+param_list_ols <-
+  list(n = c(100, 200, 300))
 
-ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list)
+ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list_ols,
+                 b0 = 1, b1 = 4, b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
+                 sigma2 = 3, inc_x2 = 1)
 
-ols.latex <- tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000))
-
-
-ols.plot_n10_b1 <- plot(x = ols, parameter_comb = list(n = 10))$B1
-
-ols.plot_n10_b1 +
-  ggplot2::theme_minimal() +
-  # ggplot2::ggtitle("Beta 1 results for 10 MC repetitions") +
-  ggplot2::labs(title = "Beta 1 results for 10 MC repetitions")
-
-
-ols.plot_n10_s2 <- plot(x = test1, parameter_comb = list(n = 10))$s2
-
-ols.plot_n10_s2 +
-  ggplot2::theme_minimal() +
-  # ggplot2::ggtitle("Beta 1 results for 10 MC repetitions") +
-  ggplot2::labs(title = "s2 results for 10 MC repetitions")
-
-ols.plot_n10_b1 <- plot(x = test1, parameter_comb = list(n = 10000))$B1
-
-ols.plot_n10k_b1 +
-  ggplot2::theme_minimal() +
-  # ggplot2::ggtitle("Beta 1 results for 10 MC repetitions") +
-  ggplot2::labs(title = "Beta 1 results for 10000 MC repetitions")
-
-
-ols.plot_n10k_s2 <- plot(x = test1, parameter_comb = list(n = 10000))$s2
-
-ols.plot_n10k_s2 +
-  ggplot2::theme_minimal() +
-  # ggplot2::ggtitle("Beta 1 results for 10 MC repetitions") +
-  ggplot2::labs(title = "s2 results for 10000 MC repetitions")
-
+tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000),
+                           column_names = c("$\\beta_0$", "$\\beta_1$",
+                                            "$\\beta_2$", "$s^2$"))
+invisible(ols_plots <- plot(ols))
+test$B1
 
 # Irrelevant variable
 
+ols_irr <- future_mc(fun = ols_test, repetitions = 10000,
+                     param_list = param_list_ols, b0 = 1, b1 = 4,
+                     b2 = 0, param_x1 = c(1,2), param_x2 = c(3,4),
+                     sigma2 = 3, inc_x2 = 1)
 
-ols_test <- function(b0, b1, b2, n,
-                     sigma2){
-  # Gen x independently
-  x1 <- rnorm(n = n, mean = 1, sd = 5)
-  x2 <- rnorm(n = n,  mean = 2, sd = 1)
-  # Generate error term
-  e <- rnorm(n, sd = sqrt(sigma2))
-
-  # Gen y dependently
-  y <- b0 + b1*x1 + b2*x2 + e
-
-
-  # Estimate OLS on the sample
-  estim <- lm(y ~ x1 + x2)
-
-  estim.summary <- summary(estim)
-
-
-  return(list(B2 = estim$coefficients[3],
-              Pval_B2 = ifelse(estim.summary$coefficients[3,4]<0.05, "Reject", "Not reject"),
-              s2 = var(estim$residuals)))
-}
-
-param_list <- list(b0 = 1, b1 = 5, b2 = 0, n = c(10, 100, 1000, 10000),
-                   sigma2 = 4)
-
-ols_irr <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list)
-
-ols_irr.summary <- summary(ols_irr)
-
-ols_irr.latex <- tidy_mc_latex(x)
-
-
-
+ols_irr.latex <- tidy_mc_latex(summary(ols_irr), repetitions_set = c(10, 10000),
+                               column_names = c("$\\beta_0$", "$\\beta_1$",
+                                                "$\\beta_2$", "$s^2$"))
 
 
 
