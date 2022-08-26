@@ -6,9 +6,10 @@
 #'
 #' @param fun The function to be evaluated. See details.
 #' @param repetitions An integer that specifies the number of Monte Carlo iterations
-#' @param param_list A list whose components are named after the parameters of `fun` and each
-#' component is a vector containing the desired grid values for that parameter.
-#' The Monte Carlo Simulation is run for all possible combinations of that parameter list.
+#' @param param_list A list whose components are named after the parameters of `fun` which should vary
+#' for the different Monte Carlo Simulation and each component is a vector containing the desired grid
+#' values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
+#' that parameter list.
 #' @param parallelisation_plan A list whose components are named after possible parameters
 #' of [future::plan()] specifying the parallelisation plan which should be used in the
 #' Monte Carlo Simulation. Default is `strategy = multisession`.
@@ -31,11 +32,12 @@
 #' There are four formal requirements that `fun` has to fulfill:
 #'
 #' * The arguments of `fun` which are present in `param_list` need to be scalar values.
-#' * The value returned by `fun` has to be a named list
-#' * The names of the returned values and those of the arguments of `fun` need to
+#' * The value returned by `fun` has to be a named list and must have the same components for each
+#' iteration and parameter combination.
+#' * The names of the returned values and those of the arguments contained in `param_list` need to
 #'   be different. Moreover, they cannot be `params`, `repetitions` or `setup`
 #' * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument
-#' trough the `...` argument.
+#' through the `...` argument.
 #' In particular, `fun` cannot use variables which are only defined in the global environment.
 #'
 #' In order to use the comfort functions [plot.mc()], [summary.mc()], and [plot.summary.mc()] the
