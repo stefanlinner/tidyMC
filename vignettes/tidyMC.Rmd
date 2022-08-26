@@ -85,7 +85,7 @@ The second argument of `future_mc()` is `repetitions` which should be an integer
 ```{r}
 # param_list
 param_list_ols <- 
-  list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000), sigma2 = -2)
+  list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
 `future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our case those arguments are `param_x2`, `param_x1`, and `inc_x2`.
@@ -106,27 +106,31 @@ The argument `parallelisation_plan` allows the user to set a parallelisation pla
 set.seed(101)
 first_mc_ols <- future_mc(
   fun = ols_test, 
-  repetitions = 10000, 
+  repetitions = 1000, 
   param_list = param_list_ols, 
+  b0 = 1, 
+  b1 = 4, 
+  b2 = 5, 
+  sigma2 = -2,
   param_x1 = c(0,5),
   param_x2 = c(0,6),
-  inc_x2 = 0, 
   check = TRUE
 )
-
-# correctly specify param_list
-param_list_ols <- 
-  list(b0 = 1, b1 = 4, b2 = 5, n = c(10, 100, 1000, 10000), sigma2 = 2, inc_x2 = c(0,1))
 
 set.seed(101)
 first_mc_ols <- future_mc(
   fun = ols_test, 
-  repetitions = 10000, 
+  repetitions = 1000, 
   param_list = param_list_ols, 
+  b0 = 1, 
+  b1 = 4, 
+  b2 = 5, 
+  sigma2 = 2, # correctly specify sigma2
   param_x1 = c(0,5),
   param_x2 = c(0,6),
   check = TRUE
 )
+
 ```
 
 `future_mc` returns a list of type `mc` and length `r length(first_mc_ols)` consisting of a tibble (`first_mc_ols$output`) containing the return value of `fun` for each iteration and parameter combination. In our case `first_mc_ols$output` contains a column for each output `B0`, `B1`, `B2`, and `s2`, as well as a column for each parameter in `param_list_ols` and a column containing the `nice_names` of the parameter combinations. Overall the `first_mc_ols$output` consists of `r nrow(first_mc_ols$output)` rows, i.e., for each parameter combination 10.000 rows: 
@@ -166,7 +170,7 @@ Here an example for the different specifications of `sum_funs`:
 # summarizing output the same way for each parameter combination with own functions
 ## summary functions only have one argument
 quantile_sum <- function(x) quantile(x, probs = 0.75)
-sum_funs1 <- list(B0 = mean, B1 = sd, B2 = quantile_sum, s2 = median)
+sum_funs1 <- list(B0 = quantile_sum, B1 = sd, B2 = mean, s2 = median)
 
 summary_output_spec <- summary(first_mc_ols, sum_funs = sum_funs1)
 
@@ -176,12 +180,15 @@ sum_funs2 <-
     list(B0 = min, B1 = min, B2 = min, s2 = mean), 
     list(B0 = mean, B1 = mean, B2 = mean, s2 = mean),
     list(B0 = median, B1 = median, B2 = median, s2 = mean),
+    list(B0 = max, B1 = max, B2 = max, s2 = mean),
+    list(B0 = min, B1 = min, B2 = min, s2 = mean), 
+    list(B0 = mean, B1 = mean, B2 = mean, s2 = mean),
+    list(B0 = median, B1 = median, B2 = median, s2 = mean),
     list(B0 = max, B1 = max, B2 = max, s2 = mean)
   )
 names(sum_funs2) <- first_mc_ols$nice_names
 summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
 
-summary_default
 ```
 
 The provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
@@ -196,6 +203,3 @@ The provided summary functions are not restricted regarding the complexity of th
 
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
-
-
-

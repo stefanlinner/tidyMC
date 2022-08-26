@@ -356,6 +356,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #'
 plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,...){
 
+
   checkmate::assert_class(x, "mc")
   if(!x$simple_output){
     stop("fun has to return a list with named components. Each component has to be scalar.")
@@ -422,7 +423,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
       purrr::map(
         stat_names,
         function(stat){
-          if(is.numeric(data_plot[[stat]])){
+          if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
               ggplot2::ggplot(ggplot2::aes_string(stat)) +
@@ -431,7 +432,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
               ggplot2::theme_bw()
             print(plot_stat)
             plot_stat
-          } else {
+          } else if(!all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
               ggplot2::ggplot(ggplot2::aes_string(stat)) +
@@ -445,6 +446,8 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
       ) %>%
       purrr::set_names(stat_names)
 
+    plots_which <- plots_which[!purrr::map_lgl(plots_which, is.null)]
+
     return(invisible(plots_which))
 
   }
@@ -455,7 +458,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
       purrr::map(
         stat_names,
         function(stat){
-          if(is.numeric(data_plot[[stat]])){
+          if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
               ggplot2::ggplot(ggplot2::aes_string(stat, col = "params")) +
