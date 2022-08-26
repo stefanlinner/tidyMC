@@ -236,7 +236,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
           .x,
           function(.y){
             checkmate::assert_function(.y,
-            .var.name = "sum_funs")
+                                       .var.name = "sum_funs")
           }
         )
       }
@@ -311,6 +311,8 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
+#' @param plot Boolean that specifies whether the plots should be printed while calling the function or not.
+#' Default: TRUE
 #' @param ... ignored
 #'
 #'
@@ -354,7 +356,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #'
 #'
 #'
-plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,...){
+plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, plot = TRUE, ...){
 
 
   checkmate::assert_class(x, "mc")
@@ -430,7 +432,9 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
               ggplot2::geom_density() +
               ggplot2::facet_grid(~.data$params) +
               ggplot2::theme_bw()
-            print(plot_stat)
+            if(plot){
+              print(plot_stat)
+            }
             plot_stat
           } else if(!all(is.na(data_plot[[stat]]))){
             plot_stat <-
@@ -439,7 +443,9 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
               ggplot2::geom_bar() +
               ggplot2::facet_grid(~.data$params) +
               ggplot2::theme_bw()
-            print(plot_stat)
+            if(plot){
+              print(plot_stat)
+            }
             plot_stat
           }
         }
@@ -468,8 +474,9 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
                 "Joint density plot of", length(join), "setups for the output", stat,sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
-
-            print(plot_stat)
+            if(plot){
+              print(plot_stat)
+            }
             plot_stat
 
           }
@@ -503,6 +510,8 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
 #' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
+#' @param plot Boolean that specifies whether the plots should be printed while calling the function or not.
+#' Default: TRUE
 #' @param ... additional arguments passed to callies.
 #'
 #' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb` can be specified
@@ -536,7 +545,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL,..
 #' test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 #' plot(summary(test))
 #'
-plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...) {
+plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, plot = TRUE, ...) {
 
   checkmate::assert_class(x, "summary.mc")
   setup_names <- names(x)
@@ -665,7 +674,9 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
               ggplot2::geom_line() +
               ggplot2::facet_grid(~.data$setup) +
               ggplot2::theme_bw()
-            print(plot_stat)
+            if(plot){
+              print(plot_stat)
+            }
             plot_stat
           }
         }
@@ -694,7 +705,9 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
                 "Joint time series of", length(join), "setups for the output", stat,sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
-            print(plot_stat)
+            if(plot){
+              print(plot_stat)
+            }
             plot_stat
           }
         }

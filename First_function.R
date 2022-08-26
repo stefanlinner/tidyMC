@@ -76,6 +76,9 @@ plot(test1, parameter_comb = list(param = c(0, 0.5)))
 
 
 
+test1.plot <- plot(test1, plot = FALSE)
+test1.plot$mean
+
 # To do the table we need to give the sum_funs object and provide a function for
 # each result. Functions that don't give the nice output of just one scalar and
 # the time series are ignored from the table.
