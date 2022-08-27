@@ -43,22 +43,28 @@ devtools::load_all()
 ```
 
 # Introduction
-MSC is statistical technique to analyze statistical techniques. 
+Monte Carlo Simulations (henceforth MCS) are used to study the properties of econometrics inference techniques by simulation. 
+They are almost always part of theoretical econometric research to study the performance of some inference technique. They supplement theoretical research most often in one of four ways. Firstly, they are often used to assess the performance of asymptotically valid techniques in smaller samples. Secondly, they are often used to assess how robust a technique is to violations of its theoretical assumptions. Thirdly, they allow to compare the performance of different techniques for a given data generating process (DGP). Fourthly, MCS allows to investigate the properties of inference techniques for which no analytical solution exists.  MCS itself can furthermore be used as a statistical inference technique itself. For example, Bootstrap Inference can be conceptualized as a special case of MCS.  However, easy and efficient implementation of MCS is currently not broadly available.
 
+With our tidyMC package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, tidyMC allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, tidyMC returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, tidyMC provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results. 
 
-# Monte-Carlo Simulation
-Monte Carlo Simulations (henceforth MCS) allow analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known GDP helps to investigate properties of statistical techniques in two situations. For one, it allows to scrutinize the properties of asymptotically consistent estimators in smaller samples. For another, it helps to analyze properties in situations which are analytically not solvable. In this section we want to give a brief overview how and in which circumstances work, mainly following.
+This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo 
+simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes. 
+
+# Monte Carlo Simulation {MCS}
+MCS allow analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate properties of statistical techniques in two situations. For one, it allows to scrutinize the properties of asymptotically consistent estimators in smaller samples. For another, it helps to analyze properties in situations which are analytically not solvable. In this section we want to give a brief overview how and in which circumstances work, mainly following.
 <!-- \citep{kiviet_monte_2011}. -->
 
 
 ## Pseudo Random Number Generation and the Data Generating Process
-MCS generally starts with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
+Using MCS on computers has the greate advantage that, with the necessary informations, the simulations results can be replicated everywhere. This is possible because the given seed and algorithm the numbers created by a random number generator are completely reproducable. 
+MCS generally starts with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions that are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
 
 Creating pseudo-random numbers from a probability distribution generally requires creating pseudo-random draws from a standard uniform distribution. Draws from a uniform distribution are created through the application of a certain algorithm, called random number generators (RNG), to a natural number, called the seed. The created values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. Combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The possibility to replicate the draws allows to exactly reproduce results that build on the pseudo-randomly generated number on different computers. 
 
 The most common algorithm, as well as R's standard algorithm, used for the generation of pseudo-random draws from a standard uniform distribution, is the Mersenne-Twister algorithm. There are however more algorithms available. In R it is also possible to specify your own algorithm to create pseudo-random numbers.  The purpose of the tidyMC-package is to additionally allow easy parallelization od the MCS. With parallel computing, special attention has to be payed to create disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on R-standard L’Ecuyer-CMRG RNG streams. The algorithm creates reproducible sets of $U[0,1]$ numbers for each parallel worker, using an integer seed of length 7. Alternatively a seed of length 1 is accepted, which corresponds to a valid seed of length 7. Because the algorithm creates a subset of random numbers for each workers, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. Alternatively our function allows to supply user-generated lists of random variables. 
 
-Generating pseudo-random numbers from more complex distributions uses the distribution's cumulative distribution function (CDF). It can be shown that every random variable $X$ has a CDF $F$ if $X = F^{-1}(U)$, where U is a random variable uniformly distributed on $(0,1)$. Pseudo-random draws from different probability distributions are conceptually implemented by applying the inverse of CDF to pseudo-random numbers from the uniform distribution. Using the CDF works directly for continuous random variables. If the random variable is discrete, the CDF is a discrete step function. In that case ... .Direct application of the inverse of CDF is however often computationally time-consuming and requires that the inverse CDF is analytically available. To account for the two shortcomings different approaches have been developed for specific distributions, that also easily extend to random vectors. While they build on the idea to use the inverse of the CDF, their concrete design is out of the scope of this paper. A general overview can be found in the documentation of the respective R-functions. 
+Generating pseudo-random numbers from more complex distributions uses the distribution's cumulative distribution function (CDF). It can be shown that every random variable $X$ has a CDF $F$ if $X = F^{-1}(U)$, where U is a random variable uniformly distributed on $(0,1)$. Pseudo-random draws from different probability distributions are conceptually implemented by applying the inverse of CDF to pseudo-random numbers from the uniform distribution. Direct application of the inverse CDF is however often computationally time-consuming and requires that the inverse CDF is analytically available. To account for the two shortcomings different approaches have been developed for specific distributions, that also easily extend to random vectors. While they build on the idea to use the inverse of the CDF, their concrete design is out of the scope of this paper. A general overview can be found in the documentation of the respective R-functions. 
 
 Complex multivariate distribution can then be simulated as functions of standard distributions. A typical example of that is a linear conditional expectation functions, the work horse model of econometrics. In the following example.who creation of uniform numbers. 
 
@@ -182,6 +188,10 @@ tidy_mc_latex(summary(ols_irr), repetitions_set = c(10, 10000),
 
 Lastly, we test the effects of estimating a model using only $x_1$ when the underlying DGP follows the structure of \eqref{eq_DGP}, this problem is most commonly known as having an omitted variable bias. The theoretical consequences of this problem are related to the consistency and unbiasedness of the estimators. Since it is necessary that $x_1$ and $x_2$ share a degree of correlation between them, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions of this methodology. This correlation will lead to an estimator of $\beta_1$ to have a higher or lower expected value (depending on the sign of the correlation) in comparison to the true parameter.
 
+# Package Principles {MCS}
+
+
+# Vignette{vignette}
 
 
 ```{r , echo = FALSE , eval = TRUE, results = "hide", message=FALSE}
@@ -214,8 +224,7 @@ tidy_mc_latex(summary(ols_omi), repetitions_set = c(10, 10000),
 
 
 
-
-
+# Comparison to other Monte Carlo Approaches in R{comparsion}
 
 
 
