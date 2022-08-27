@@ -14,14 +14,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-# When to use tidyMC?
-
-summarize typical tasks of MCs and how tidyMC helps to solve those: see [dpylr package ](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
-
-
 # Package overview
 
-The `tidyMC` package aims to cover the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following steps:
+Monte Carlo Simulations aim to uncover properties of statistical inference techniques. 
+At its core, a Monte Carlo Simulations works through application of the techniques to repeatedly drawn samples from a pre-specified data generating process.  The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following steps:
 
 * Running a Monte Carlo Simulation for a user defined function and given parameters using `future_mc()`
 * Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
@@ -86,7 +82,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our case those arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
@@ -97,7 +93,10 @@ Moreover, there are four formal requirements that `fun` and thus `ols_test` have
 
 We recommend to even further restrict the return value of `fun` to be a named list of scalars. This allows you to use all comfort functions of the `tidyMC` package. As you can see, we did that for `ols_test`.
 
+
 The argument `parallelisation_plan` allows the user to set a parallelisation plan. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()` by `furrr::furrr_options()`. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. As default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
+
+<!-- maybe also say that tests can be skipped? Additionally maybe also give an example of a parralelisation playn, quickly laying out the main options? -->
 
 ```{r, error=TRUE}
 set.seed(101)
@@ -115,7 +114,9 @@ first_mc_ols <- future_mc(
 )
 ```
 
-The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term can not be negative. This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
+The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term can not be negative. 
+<!-- The attentive reader might have already noticed that we misspecifed the variance ?`sigma2 = -2`. By defintion, the variance is non-negtaive and the sepcified function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
+This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
 
 ```{r}
 set.seed(101)
