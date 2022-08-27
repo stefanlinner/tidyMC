@@ -127,14 +127,17 @@ param_list_ols <-
 ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list_ols,
                  b0 = 1, b1 = 4, b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
                  sigma2 = 3, inc_x2 = 1)
-invisible(ols_plots <- plot(ols))
+ols_plots <- plot(ols, plot = FALSE)
 ```
 
 ```{r ols_table, echo = FALSE}
 
 tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000),
-                           column_names = c("$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"))
+                           column_names = c("Number of observations",
+                                            "$\\beta_0$", "$\\beta_1$",
+                                            "$\\beta_2$", "$s^2$"),
+              caption = "OLS consistency MC results") %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 
 ```
 Similarly to show the convergence of the estimators in a graphical manner, we present histograms of the estimated coefficients for all values of $n$. We present the histograms for $\hat{\beta_1}$ and $s^2$ in figures \ref{fig:ols_b1} and \hl{(XX)}, and include the remaining plots in the Appendix. The pattern for both figures is clear, the increase in $n$ reduces the variance of the estimator around the true value, thus the consistency of OLS is empirically visible.
@@ -169,9 +172,11 @@ ols_irr <- future_mc(fun = ols_test, repetitions = 10000,
 
 ```{r irr_ols_table, echo = FALSE}
 tidy_mc_latex(summary(ols_irr), repetitions_set = c(10, 10000),
-                               column_names = c("$\\beta_0$", "$\\beta_1$",
+                               column_names = c("Number of observations",
+                                            "$\\beta_0$", "$\\beta_1$",
                                                 "$\\beta_2$", "$s^2$"),
-              caption = "MC OLS results with an irrelevant variable")
+              caption = "MC OLS results with an irrelevant variable") %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 
 ```
 
@@ -179,6 +184,29 @@ Lastly, we test the effects of estimating a model using only $x_1$ when the unde
 
 
 
+```{r , echo = FALSE , eval = TRUE, results = "hide", message=FALSE}
+param_list_ols <- param_list_ols <-
+  list(n = c(100, 200, 300), inc_x2 = c(0,1))
+
+ols_omi <- future_mc(fun = ols_test, repetitions = 10000,
+                     param_list = param_list_ols, b0 = 1, b1 = 4,
+                     b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
+                     sigma2 = 3)
+
+
+```
+Operationally, we test this theoretical behavior using the same structure as for the last examples, now however we do not include $x_2$ into our estimated model. We present the results in table \ref{tab:ommiols}. To see a clearer difference we present the results for both models where $x_2$ is included and where is not. We see a clear difference in the estimated coefficients, on one hand the estimated intercept is completely overestimated, averaging around a value of 16 no matter the number of observations used or the number of MC replications. On the other hand, the estimated variance of the error term is also completely overestimated and does not seem to converge to the real value. We conclude that the absence of one important variable in the model has a bigger impact when compared to the inclusion of an irrelevant variable.
+
+```{r ommiols, echo = FALSE}
+tidy_mc_latex(summary(ols_omi), repetitions_set = c(10, 10000),
+                           column_names = c("Number of observations",
+                                            "$x_2$ included or not",
+                                            "$\\beta_0$", "$\\beta_1$",
+                                            "$\\beta_2$", "$s^2$"),
+              caption = "Ommited variable bias MC results") %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
+
+```
 
 
 
