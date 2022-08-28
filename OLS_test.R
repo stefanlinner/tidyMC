@@ -55,8 +55,26 @@ ols_irr.latex <- tidy_mc_latex(summary(ols_irr), repetitions_set = c(10, 10000),
                                                 "$\\beta_2$", "$s^2$"))
 
 
+# Omited variable bias
+param_list_ols <- param_list_ols <-
+  list(n = c(100, 200, 300), inc_x2 = c(0,1))
 
-
+ols_omi <- future_mc(fun = ols_test, repetitions = 10000,
+                     param_list = param_list_ols, b0 = 1, b1 = 4,
+                     b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
+                     sigma2 = 3)
+tidy_mc_latex(summary(ols_omi), repetitions_set = c(10, 10000),
+              column_names = c("Number of observations",
+                               "$x_2$ included or not",
+                               "$\\beta_0$", "$\\beta_1$",
+                               "$\\beta_2$", "$s^2$"),
+              caption = "Ommited variable bias MC results") %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::add_footnote(label = "MC simulation of an OLS regression for an
+                           ommited variable bias problem. True parameters used:
+                           $\\beta_0 = 1$, $\\beta_1 = 4$, $\\beta_2 = 5$ and $\\sigma^2 = 3$.
+                           True DGP given by equation (1)",
+                           notation = "none", escape = FALSE, threeparttable = T)
 
 
 

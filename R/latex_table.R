@@ -19,7 +19,8 @@
 #' (the names of the returned list of `fun` in [future_mc()]), which should be displayed in the table.
 #' Default: All outputs are displayed.
 #' @param caption A string specifying the caption of the latex table.
-#' @param column_names Column names for the resulting table. They can be written
+#' @param column_names Column names for the resulting table. This vector must have the same size as
+#' the number of outputs of `fun` and parameters in `param_list` They can be written
 #' in standard LaTeX manner.
 #'
 #' @details Only one of the arguments `which_setup` and `parameter_comb` can be specified
@@ -192,10 +193,10 @@ tidy_mc_latex <- function(
       )
   }
   if(!is.null(column_names)){
-    if (length(column_names)!=length(stat_names)){
+    if (length(column_names)!=length(c(stat_names, param_names))){
       stop("Length of column names differ from the number of columns in the table")
     } else {
-      colnames(data_table)[which(colnames(data_table) %in% stat_names)] <- column_names
+      colnames(data_table)[which(colnames(data_table) %in% c(param_names, stat_names))] <- column_names
     }
   }
   out <- data_table %>%
