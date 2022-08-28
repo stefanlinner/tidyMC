@@ -57,7 +57,7 @@ MCS allow analyzing the properties of classic econometric inference techniques. 
 
 
 ## Pseudo Random Number Generation and the Data Generating Process
-Using MCS on computers has the greate advantage that, with the necessary informations, the simulations results can be replicated everywhere. This is possible because the given seed and algorithm the numbers created by a random number generator are completely reproducable. 
+Using MCS on computers has the great advantage that, with the necessary information, the simulations results can be replicated everywhere. This is possible because, given seed and algorithm, the numbers created by a random number generator are completely reproducible. 
 MCS generally starts with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead the computer's draws from different distributions that are generated through pseudo-random draws from a uniform distribution. While we do not provide a detailed description of the different algorithms used, we explain the underlying intuition behind random number generation. 
 
 Creating pseudo-random numbers from a probability distribution generally requires creating pseudo-random draws from a standard uniform distribution. Draws from a uniform distribution are created through the application of a certain algorithm, called random number generators (RNG), to a natural number, called the seed. The created values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. Combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The possibility to replicate the draws allows to exactly reproduce results that build on the pseudo-randomly generated number on different computers. 
@@ -66,18 +66,17 @@ The most common algorithm, as well as R's standard algorithm, used for the gener
 
 Generating pseudo-random numbers from more complex distributions uses the distribution's cumulative distribution function (CDF). It can be shown that every random variable $X$ has a CDF $F$ if $X = F^{-1}(U)$, where U is a random variable uniformly distributed on $(0,1)$. Pseudo-random draws from different probability distributions are conceptually implemented by applying the inverse of CDF to pseudo-random numbers from the uniform distribution. Direct application of the inverse CDF is however often computationally time-consuming and requires that the inverse CDF is analytically available. To account for the two shortcomings different approaches have been developed for specific distributions, that also easily extend to random vectors. While they build on the idea to use the inverse of the CDF, their concrete design is out of the scope of this paper. A general overview can be found in the documentation of the respective R-functions. 
 
-Complex multivariate distribution can then be simulated as functions of standard distributions. A typical example of that is a linear conditional expectation functions, the work horse model of econometrics. In the following example.who creation of uniform numbers. 
+Complex multivariate distribution can then be simulated as functions of standard distributions. A typical example of that is a linear conditional expectation functions, the work horse model of econometrics. In the following example, we will showcase how MCS allows to simulate the correct distribution of the coefficients.
 
-## MCS moment estimation
-MCS allows to approximate the distribution of a statistic for prespecified DGP. MCS results for a statistic hence hold generally only for the prespecified DGP. Because it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  To provide a general understanding of these two limitations, we next provide a outline of MCS Moment Estimations 
+## Monte Carlo Distrbution Approximation
+MCS is most commonly used to infer properties of the distribution of statistic in a fixed settting, i.e. for a prespecified DGP. The simulation results hence hold only for the prespecified DGP. Because it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  
 
-### MCS set-up
-
-In MCs we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\theta$, some deterministic variables $D$ and some random variables $v$, s.t. $q_n = q_n(\theta,D,n)$. 
-
-Sho here pag 20. how then MC works and why consistent for functions of means
+In MCs we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\beta$, some deterministic variables $D$ and some random variables $v$, s.t. $q_n = q_n(\theta,D,v,n)$. What a Monte Carlos simulation ultimately achieves is a numerical approximation of the true distribution of $q_n$. In a simple i.id. setting an application of the CLT. Let $q_n^R$ be the statistic generate by the $R^th$ Monte Carlo Simulation. What we get is that as the histogram of all $q_n^R$ becomes a unbiased and consistent estimator of $q_n$. ADD THE FORMAL STUFF HERE. p.36! And add here discontciotn between histogram and 
+We are hence able to control the precision of the approximation by setting the number of Monte Carlo estimates. Using the resulting distribution $q_n^R$ we can then use different statistics such as mean and variance to summarize the result. 
 
 
+### Presenting MCS findngs
+p. 122 add maybe here?
 
 <!-- For example we might be interested in the ability of OLS to estimate the variable parameter $\beta_1$ of a simple linear regression model with deterministic regressor. -->
 <!-- In that case specify the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ with corresponding true population paramterers $\theta  = (\beta_0, \beta_1)$, $D = X$ a $n \times 2$ matrix of the deterministic x and the intercept $\beta_0$, and $c = \epsilon$ a $n \times 1$ of $\mathcal{N}(0, \sigma_\epsilon)$ as a normally distributed error term. Using OLS, we estimate $\hat{\beta_1}$ as the second element of $(X^TX)^{-1}X^Ty$. With OLS then $\hat{\beta}_1(\theta, D, v)$. In a MCS we would then generate r $\hat{\beta_1}$ to study how well OLS is able to capture the true $\beta_1$.  -->
@@ -99,7 +98,20 @@ where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\vareps
 \end{align}
 where $k = 2$ is the number of regressors and $\hat{\varepsilon}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size. 
 
-\noindent Using a MCS we can demonstrate the properties of the OLS estimator. Setting $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPS by using different normal distrbutions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution. Now the parameter of interest for our function is the number of observations we use for our estimation, for this we set $n = \{100, 200, 300\}$. Lastly, we repeat this process 10000 times for each parameter combination. We present the results in table \ref{tab:ols_table}, where the first column is related to the number of observations we use in the estimation. Moreover the last 4 columns show the results' mean over a number or repetitions for each parameter combination. Namely, in the first panel the mean over the estimated coefficients from the 10 first repetitions is calculated; the subsequent panel shows the mean calculated using all Monte Carlo repetitions. From the results, we empirically prove the performance of OLS estimation with increasing sample sizes, i.e. using a bigger sample size leads to a more precise estimation of all underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise.
+<!-- Maybe add also estimator of the variance here. We know the theoretical variance of the coefficients and we can then add that to the plot: nice demonstration of how to amend the outputted ggplot object. -->
+
+\noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs by using different normal distributions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution. 
+
+Now the parameter of interest for our function is the number of observations we use for our estimation, for this we set $n = \{100, 200, 300\}$. 
+<!-- Paramter of interest in whch sense -->
+
+Lastly, we repeat this process 10000 times for each parameter combination. 
+<!-- Paramter of interest in whch sense -->
+
+We present the results in table \ref{tab:ols_table}, where the first column is related to the number of observations we use in the estimation. The last 4 columns show the results' mean over a preset number of the 10000 repetitions for each parameter combination. In the first panel the mean over the estimated coefficients from only the 10 first repetitions is calculated; the subsequent panel shows the mean calculated using all Monte Carlo repetitions. 
+<!-- What dies that mean -->
+The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figureh \l{(XX)} and table \hl{(XX)}  confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise.
+<!-- Table should include se of the coefficients -->
 
 ```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE, fig.show='hide'}
 ols_test <-
@@ -146,7 +158,10 @@ tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000),
   kableExtra::kable_styling(latex_options = "HOLD_position")
 
 ```
-Similarly to show the convergence of the estimators in a graphical manner, we present histograms of the estimated coefficients for all values of $n$. We present the histograms for $\hat{\beta_1}$ and $s^2$ in figures \ref{fig:ols_b1} and \hl{(XX)}, and include the remaining plots in the Appendix. The pattern for both figures is clear, the increase in $n$ reduces the variance of the estimator around the true value, thus the consistency of OLS is empirically visible.
+Similarly to show the convergence of the estimators in a graphical manner, we present histograms of the estimated coefficients for all values of $n$. We present the histograms for $\hat{\beta_1}$ and $s^2$ in figures \ref{fig:ols_b1} and \hl{(XX)}, and include the remaining plots in the Appendix. 
+<!-- we hsoe denities and not histograms, which are two different things.-->
+The pattern for both figures is clear, the increase in $n$ reduces the variance of the estimator around the true value, thus the consistency of OLS is empirically visible.
+<!-- Consistent is the wrong term here..-->
 
 ```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results"}
 ols_plots$B1
@@ -227,6 +242,8 @@ tidy_mc_latex(summary(ols_omi), repetitions_set = c(10, 10000),
 # Comparison to other Monte Carlo Approaches in R{comparsion}
 
 
+# Conclusion
+With the tidyMC package we provide research an easy and confortable way to to Monte Carlo Studies. 
 
 
 # Strucutre
