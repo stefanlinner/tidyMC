@@ -82,7 +82,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation for all possible combinations. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
@@ -114,7 +114,7 @@ first_mc_ols <- future_mc(
 )
 ```
 
-The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term can not be negative. 
+The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. 
 <!-- The attentive reader might have already noticed that we misspecifed the variance ?`sigma2 = -2`. By defintion, the variance is non-negtaive and the sepcified function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
 This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
 
@@ -150,22 +150,42 @@ first_mc_ols
 
 
 ### Summarize your results with `summary.mc()`
+If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a stepwise manner. 
 
-If `fun` was further restricted to return a named list of scalars the function `summary.mc()` can be used to summarize the Monte Carlo results of an object of class `mc` that is returned by `future_mc()`. Using the argument `sum_funs` the user can define (different) functions which summarize the simulation results for each output (return values of `fun`) and each parameter combination. Thus, the functions inside `sum_funs` only take one argument, which is the output vector (with length `repetitions`) of one output of one specific parameter combination. The default summary functions are `mean()` for numeric outputs and `summary()` for outputs with non-numeric data types. As `ols_test` outputs are all numeric `mean()` will be used to summarize all outputs by default:
+The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
+\begin{itemize}
+\item First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
+\item Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
+\end{itemize}
+
+For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `B0`, `B1`, `B2`, and `s2`. Lastly each of these is composed of the "path" and scalar result of `mean()`. 
+
+<!-- If `fun` was further restricted to return a named list of scalars the function `summary.mc()` can be used to summarize the Monte Carlo results of an object of class `mc` that is returned by `future_mc()`. Using the argument `sum_funs` the user can define (different) functions which summarize the simulation results for each output (return values of `fun`) and each parameter combination. Thus, the functions inside `sum_funs` only take one argument, which is the output vector (with length `repetitions`) of one output of one specific parameter combination. The default summary functions are `mean()` for numeric outputs and `summary()` for outputs with non-numeric data types. As `ols_test` outputs are all numeric `mean()` will be used to summarize all outputs by default: -->
 
 ```{r}
 # Default
 summary_default <- summary(first_mc_ols)
 summary_default
+str(summary_default[[1]])
 ```
 
-The user can define summary functions by supplying a named (nested) list to `sum_funs`. When the functions provided for each output return only one numeric value (like `mean()` but unlike `summary()`) the results are twofold: first, a single scalar result of the function evaluating the whole output vector. Second, a "path" with length `repetitions` of the step wise calculation of the function's result across the output vector. Thus, for `ols_test`
+<!-- The user can define summary functions by supplying a named (nested) list to `sum_funs`. When the functions provided for each output return only one numeric value (like `mean()` but unlike `summary()`) the results are twofold: first, a single scalar result of the function evaluating the whole output vector. Second, a "path" with length `repetitions` of the step wise calculation of the function's result across the output vector. Thus, for `ols_test` -->
 
-If the user wants to summarize the simulation results of a respective output in the same way for each parameter combination, a list whose components are named after the outputs (names of the returned list of `fun`) is supplied and each component is a function which only takes the vector of results of one output as the main argument.
+This nested list structure should give an idea of the reach and flexibility, the `sum_funs` argument is allowed to have, since the user can specify a function for each element in this list.
 
-If the user wants to summarize the simulation results of a respective output differently for different parameter combinations, a nested list has to be supplied. The components of the outter list must be equal in length and naming to the `nice_names` (see `first_mcs$nice_names`) and each component is another list (inner list). The components of the inner list are then defined the same way as above (components named after the outputs and each component is a function).
+For an intermediate level of customization, the user can provide a combination of summarizing functions for every output, which will be used for all parameter combination. In the case of the OLS example, if we want to apply `mean()` on all estimated coefficients, but we want to use `var()` on the MC results of `s2`, then `sum_funs` should have the following structure:
+```{r, eval = FALSE}
+sum_funs_ols <- list(B0 = mean, B1 = mean , B2 = mean, S2 = var)
+```
+Moreover, the user can specify any function provided it takes the output vector as only available argument.
 
-Here an example for the different specifications of `sum_funs`:
+Lastly for the last level of customization, a nested list named after the `nice_names` where every element follows the structure of the last example (components named after the outputs and each component is a function) can be specified. We present an example for this:
+
+<!-- If the user wants to summarize the simulation results of a respective output in the same way for each parameter combination, a list whose components are named after the outputs (names of the returned list of `fun`) is supplied and each component is a function which only takes the vector of results of one output as the main argument. -->
+
+<!-- If the user wants to summarize the simulation results of a respective output differently for different parameter combinations, a nested list has to be supplied. The components of the outter list must be equal in length and naming to the `nice_names` (see `first_mcs$nice_names`) and each component is another list (inner list). The components of the inner list are then defined the same way as above (components named after the outputs and each component is a function). -->
+
+<!-- Here an example for the different specifications of `sum_funs`: -->
 
 ```{r}
 # summarizing output the same way for each parameter combination with own functions
@@ -190,7 +210,9 @@ summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
 
 ```
 
-The provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
+We would like to reiterate that the provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
+
+<!-- The provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case. -->
 
 
 ### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
@@ -202,3 +224,51 @@ The provided summary functions are not restricted regarding the complexity of th
 
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
+Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a LaTeX document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see extract the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
+
+
+```{r}
+tidy_mc_latex(
+  x = summary(first_mc_ols),
+  repetitions_set = c(10, 1000))
+```
+The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `B0`, `B1`, `B2`, and `s2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
+
+Moreover, the next three arguments in `tidy_mc_latex` are comfort options to select which results of `summary.mc` depending on the parameter combinations will be presented in the table. On one hand, The argument `which_setup` allows the user to make use of the `nice_names` of the parameter combinations in the returned object by `future_mc()` to subset the rows in the table. On the other hand, the argument `parameter_comb` is used to directly filter the parameters by their values. This argument requires a named list, containing vector or scalar values of all parameters to be filtered from. The user must only provide one of this arguments at a time. We show how to make use of both parameters to subset the rows of table for $n = 100$ and $inc_x2=1$:
+
+```{r}
+tidy_mc_latex(
+  x = summary(first_mc_ols),
+  repetitions_set = c(10, 1000),
+  which_setup = first_mc_ols$nice_names[1])
+
+tidy_mc_latex(
+  x = summary(first_mc_ols),
+  repetitions_set = c(10, 1000),
+  parameter_comb = list(n = 100, inc_x2 = 1))
+
+```
+The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `B0` and `s2` the user needs to set `which_out = c("B0", "s2")`.
+
+Lastly, all remaining arguments are directly related to the resulting LaTeX output, namely `caption` is used to provide the caption for the table as a string, and `column_names` which allows the user to change the final column names in the table. The latter argument must be a character vector with a length equal to the number of parameters and outputs of `fun`. For example, for the OLS example this vector would need to be of size 6. Lastly, the names are allowed to be written in standard LaTeX code, e.g. "\beta_0". 
+
+To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the \texttt{kableExtra} package in the standard tidyverse manner. For example:
+
+```{r}
+tidy_mc_latex(summary(first_mc_ols), repetitions_set = c(10, 10000),
+                           column_names = c("Number of observations",
+                                            "$x_2$ included or not",
+                                            "$\\beta_0$", "$\\beta_1$",
+                                            "$\\beta_2$", "$s^2$"),
+              caption = "Ommited variable bias MC results") %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
+```
+
+
+
+
+
+
+
+
+
