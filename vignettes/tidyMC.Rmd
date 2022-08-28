@@ -158,7 +158,7 @@ The first option of summarizing the results is given by just providing the `mc` 
 \item Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
 \end{itemize}
 
-For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `B0`, `B1`, `B2`, and `s2`. Lastly each of these is composed of the "path" and scalar result of `mean()`. 
+For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `b0`, `b1`, `b2`, and `sigma2`. Lastly each of these are composed by the "path" and scalar result of `mean()`. 
 
 <!-- If `fun` was further restricted to return a named list of scalars the function `summary.mc()` can be used to summarize the Monte Carlo results of an object of class `mc` that is returned by `future_mc()`. Using the argument `sum_funs` the user can define (different) functions which summarize the simulation results for each output (return values of `fun`) and each parameter combination. Thus, the functions inside `sum_funs` only take one argument, which is the output vector (with length `repetitions`) of one output of one specific parameter combination. The default summary functions are `mean()` for numeric outputs and `summary()` for outputs with non-numeric data types. As `ols_test` outputs are all numeric `mean()` will be used to summarize all outputs by default: -->
 
@@ -171,11 +171,12 @@ str(summary_default[[1]])
 
 <!-- The user can define summary functions by supplying a named (nested) list to `sum_funs`. When the functions provided for each output return only one numeric value (like `mean()` but unlike `summary()`) the results are twofold: first, a single scalar result of the function evaluating the whole output vector. Second, a "path" with length `repetitions` of the step wise calculation of the function's result across the output vector. Thus, for `ols_test` -->
 
-This nested list structure should give an idea of the reach and flexibility, the `sum_funs` argument is allowed to have, since the user can specify a function for each element in this list.
+This nested list structure should give an idea of the reach and flexibility the `sum_funs` argument is allowed to have, since the user can specify a function for each element in this list.
 
-For an intermediate level of customization, the user can provide a combination of summarizing functions for every output, which will be used for all parameter combination. In the case of the OLS example, if we want to apply `mean()` on all estimated coefficients, but we want to use `var()` on the MC results of `s2`, then `sum_funs` should have the following structure:
+For an intermediate level of customization, the user can provide a combination of summarizing functions for every output, which will be used for all parameter combination. In the case of the OLS example, if we want to apply `mean()` on all estimated coefficients, but we want to use `var()` on the MC results of `sigma2`, the `sum_funs` should have the following structure:
 ```{r, eval = FALSE}
-sum_funs_ols <- list(B0 = mean, B1 = mean , B2 = mean, S2 = var)
+# summarizing output the same way for each parameter combination with one function combination
+sum_funs_ols <- list(b0 = mean, b1 = mean , b2 = mean, sigma2 = var)
 ```
 Moreover, the user can specify any function provided it takes the output vector as only available argument.
 
@@ -188,22 +189,18 @@ Lastly for the last level of customization, a nested list named after the `nice_
 <!-- Here an example for the different specifications of `sum_funs`: -->
 
 ```{r}
-# summarizing output the same way for each parameter combination with own functions
-## summary functions only have one argument
-quantile_sum <- function(x) quantile(x, probs = 0.75)
-sum_funs1 <- list(b0 = quantile_sum, b1 = sd, b2 = mean, sigma2 = median)
 
-summary_output_spec <- summary(first_mc_ols, sum_funs = sum_funs1)
+quantile_sum <- function(x) quantile(x, probs = 0.75)
 
 # summarizing output differently for different parameter combinations
 sum_funs2 <-
   list(
-    list(b0 = min, b1 = min, b2 = min, sigma2 = mean),
-    list(b0 = mean, b1 = mean, b2 = mean, sigma2 = mean),
+    list(b0 = quantile_sum, b1 = min, b2 = min, sigma2 = mean),
+    list(b0 = mean, b1 = quantile_sum, b2 = mean, sigma2 = mean),
     list(b0 = median, b1 = median, b2 = median, sigma2 = mean),
     list(b0 = max, b1 = max, b2 = max, sigma2 = mean),
-    list(b0 = min, b1 = min, b2 = min, sigma2 = mean),
-    list(b0 = mean, b1 = mean, b2 = mean, sigma2 = mean)
+    list(b0 = min, b1 = min, b2 = min, sigma2 = quantile_sum),
+    list(b0 = mean, b1 = mean, b2 = quantile_sum, sigma2 = quantile_sum)
   )
 names(sum_funs2) <- first_mc_ols$nice_names
 summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
@@ -232,7 +229,7 @@ tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000))
 ```
-The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `B0`, `B1`, `B2`, and `s2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
+The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `b0`, `b1`, `b2`, and `sigma2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
 
 Moreover, the next three arguments in `tidy_mc_latex` are comfort options to select which results of `summary.mc` depending on the parameter combinations will be presented in the table. On one hand, The argument `which_setup` allows the user to make use of the `nice_names` of the parameter combinations in the returned object by `future_mc()` to subset the rows in the table. On the other hand, the argument `parameter_comb` is used to directly filter the parameters by their values. This argument requires a named list, containing vector or scalar values of all parameters to be filtered from. The user must only provide one of this arguments at a time. We show how to make use of both parameters to subset the rows of table for $n = 100$ and $inc_x2=1$:
 
@@ -248,7 +245,7 @@ tidy_mc_latex(
   parameter_comb = list(n = 100, inc_x2 = 1))
 
 ```
-The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `B0` and `s2` the user needs to set `which_out = c("B0", "s2")`.
+The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `b0` and `sigma2` the user needs to set `which_out = c("b0", "sigma2")`.
 
 Lastly, all remaining arguments are directly related to the resulting LaTeX output, namely `caption` is used to provide the caption for the table as a string, and `column_names` which allows the user to change the final column names in the table. The latter argument must be a character vector with a length equal to the number of parameters and outputs of `fun`. For example, for the OLS example this vector would need to be of size 6. Lastly, the names are allowed to be written in standard LaTeX code, e.g. "\beta_0". 
 
