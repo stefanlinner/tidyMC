@@ -120,7 +120,12 @@ tidy_mc_latex <- function(
     which_out <- stat_names
   }
 
-  n_reps <- NULL
+  n_reps <- attributes(x)$n_reps
+
+  if(is.null(repetitions_set)){
+    repetitions_set  <- n_reps
+  }
+
   n_setups <- length(setup_names)
 
   data_table <-
@@ -131,21 +136,33 @@ tidy_mc_latex <- function(
           purrr::map_dfc(
             which_out,
             function(stat){
-              if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
-                if(is.null(n_reps)){
-                  n_reps <<- length(x[[setup]][[stat]][[2]])
-                  checkmate::assert_integerish(repetitions_set, lower = 1, upper = n_reps, null.ok = TRUE)
+
+              if(checkmate::test_set_equal(repetitions_set, n_reps)){
+                if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+                  stat_dat <- list(x[[setup]][[stat]][[2]])
+                  names(stat_dat) <- stat
+                  return(stat_dat)
+                } else if(checkmate::test_number(x[[setup]][[stat]][[1]])) {
+                  stat_dat <- list(rep(x[[setup]][[stat]][[1]], n_reps))
+                  names(stat_dat) <- stat
+                  return(stat_dat)
+                } else {
+                  stat_dat <- list(NA)
+                  names(stat_dat) <- stat
+                  return(stat_dat)
                 }
-                if(is.null(repetitions_set)){
-                  repetitions_set <<- length(x[[setup]][[stat]][[2]])
+              }
+
+              if(!checkmate::test_set_equal(repetitions_set, n_reps)){
+                if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+                  stat_dat <- list(x[[setup]][[stat]][[2]])
+                  names(stat_dat) <- stat
+                  return(stat_dat)
+                } else {
+                  stat_dat <- list(NA)
+                  names(stat_dat) <- stat
+                  return(stat_dat)
                 }
-                stat_dat <- list(x[[setup]][[stat]][[2]])
-                names(stat_dat) <- stat
-                return(stat_dat)
-              } else {
-                stat_dat <- list(NA)
-                names(stat_dat) <- stat
-                return(stat_dat)
               }
             }
           ) %>%
@@ -183,7 +200,7 @@ tidy_mc_latex <- function(
     data_table <-
       data_table %>%
       dplyr::filter(
-        dplyr::across(
+        dplyr::if_all(
           names(parameter_comb),
           ~{
             count <<- count + 1
@@ -192,6 +209,13 @@ tidy_mc_latex <- function(
         )
       )
   }
+
+  if(!any(stat_names %in% names(data_table))){
+    stop("No output variable contained in table! Please check which_path or sum_funs of summary function")
+  }
+
+  n_setups_contained <- length(unique(data_table$setup))
+
   if(!is.null(column_names)){
     if (length(column_names)!=length(c(stat_names, param_names))){
       stop("Length of column names differ from the number of columns in the table")
@@ -202,9 +226,9 @@ tidy_mc_latex <- function(
   out <- data_table %>%
     dplyr::arrange(.data$repetitions) %>%
     dplyr::select(-.data$setup, -.data$repetitions) %>%
-    kableExtra::kbl(format = "latex", booktabs = T,
+    kableExtra::kbl(format = "latex", booktabs = TRUE,
                     digits = 3,
-                    align = "c", caption = caption, escape = F) %>%
+                    align = "c", caption = caption, escape = FALSE) %>%
     kableExtra::footnote(general = paste("Total repetitions = ",n_reps,
                                          ", total parameter combinations = ", n_setups,
                                          collapse = ",", sep = ""))
@@ -213,7 +237,7 @@ tidy_mc_latex <- function(
     out <- eval(parse(text =
                         paste("kableExtra::pack_rows(kable_input = out, index = c(",
                               paste( "\"N = ", repetitions_set,
-                                     "\" = ", rep(n_setups, length(repetitions_set)), collapse = ",", sep = ""),
+                                     "\" = ", rep(n_setups_contained, length(repetitions_set)), collapse = ",", sep = ""),
                               "))", collapse = "\n")
     )
     )

@@ -7,6 +7,12 @@
 #' @param object An object of class `mc`, for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
 #' @param sum_funs A named (nested) list containing summary functions. See details.
+#' @param which_path A character vector containing the names of (some of) the named outputs
+#' (the names of the returned list of `fun` in [future_mc()]), for which numeric output a "path"
+#' of the step wise calculation of the summarizing function's result should be returned.
+#' Alternatively, `"all"` or `"none"` can be used to either return the path for all or none of the
+#' numeric outputs.
+#' Default: `"all"`.
 #' @param ... Ignored
 #'
 #' @details In order to use `summary`, the output of [future_mc()] has to be "simple",
@@ -25,7 +31,7 @@
 #'
 #' The user can define summary functions by supplying a named (nested) list to `sum_funs`. When
 #' the functions provided for each output return only one numeric value the results are twofold:
-#' ffirst, a single scalar result of the function evaluating the whole output vector.
+#' first, a single scalar result of the function evaluating the whole output vector.
 #' Second, a "path" with length `repetitions` of the step wise calculation of the function's result
 #' across the output vector.
 #'
@@ -99,7 +105,8 @@
 #'
 #' summary(test, sum_funs = sum_funcs)
 #'
-summary.mc <- function(object, sum_funs = NULL, ...){
+summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
+
 
   checkmate::assert_class(object, "mc")
   if(!object$simple_output){
@@ -108,6 +115,23 @@ summary.mc <- function(object, sum_funs = NULL, ...){
   param_names <- names(object$parameter)
   stat_names <- dplyr::setdiff(names(object$output), c("params", param_names))
   setup_names <- unique(object$output$params)
+
+  if("all" %in% which_path){
+    checkmate::assert_string(which_path, pattern = "^all$")
+  } else if("none" %in% which_path){
+    checkmate::assert_string(which_path, pattern = "^none$")
+  } else {
+    checkmate::assert_subset(which_path, stat_names, empty.ok = FALSE)
+  }
+
+  if("all" %in% which_path){
+    stat_names_path <- stat_names
+  } else if("none" %in% which_path){
+    stat_names_path <- NULL
+  } else {
+    stat_names_path <- which_path
+  }
+
   checkmate::assert_list(sum_funs, null.ok = TRUE)
   if(!is.null(sum_funs)){
     checkmate::assert_choice(
@@ -132,23 +156,39 @@ summary.mc <- function(object, sum_funs = NULL, ...){
       dplyr::group_by(.data$params) %>%
       dplyr::group_map(~{
         purrr::map(
-          .x[, stat_names],
-          function(.y){
+          stat_names,
+          function(stat){
 
-            if(is.numeric(.y)){
+            if(is.numeric(.x[[stat]])){
 
-              out <- list(
-                mean = mean(.y),
-                mean_over_reps = cumsum(.y) / seq_along(.y)
-              )
+              mean_out <- mean(.x[[stat]])
+
+              if(stat %in% stat_names_path & !all(is.na(.x[[stat]]))){
+                mean_over_reps <-
+                  {cumsum(.x[[stat]]) / seq_along(.x[[stat]])} %>%
+                  unname()
+              }
+
+              if(exists("mean_over_reps")){
+                out <- list(
+                  mean = mean_out,
+                  mean_over_reps = mean_over_reps
+                )
+              } else {
+                out <- list(
+                  mean = mean_out
+                )
+              }
+
               return(out)
             }
 
-            if(!is.numeric(.y)){
-              return(summary(.y))
+            if(!is.numeric(.x[[stat]])){
+              return(list(summary = summary(.x[[stat]])))
             }
           }
-        )
+        )%>%
+          purrr::set_names(stat_names)
       }) %>%
       purrr::set_names(setup_names)
 
@@ -179,7 +219,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
           function(.y){
 
             sum_func_out <- sum_funs[[.y]](.[[.y]])
-            if(checkmate::test_number(sum_func_out)){
+            if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
 
               sum_func_over_reps <-
                 purrr::map_dbl(
@@ -187,7 +227,8 @@ summary.mc <- function(object, sum_funs = NULL, ...){
                   function(.z) {
                     sum_funs[[.y]](.[[.y]][1:.z])
                   }
-                )
+                ) %>%
+                unname()
 
               return(
                 list(
@@ -197,7 +238,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
               )
 
             } else {
-              return(sum_func_out)
+              return(list(sum_func = sum_func_out))
             }
 
           }
@@ -256,7 +297,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 
             sum_func_out <- sum_funs[[setup]][[.y]](.[[.y]])
 
-            if(checkmate::test_number(sum_func_out)){
+            if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
 
               sum_func_over_reps <-
                 purrr::map_dbl(
@@ -264,7 +305,8 @@ summary.mc <- function(object, sum_funs = NULL, ...){
                   function(.z) {
                     sum_funs[[setup]][[.y]](.[[.y]][1:.z])
                   }
-                )
+                ) %>%
+                unname()
 
               return(
                 list(
@@ -274,7 +316,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
               )
 
             } else {
-              return(sum_func_out)
+              return(list(sum_func = sum_func_out))
             }
           }
         ) %>%
@@ -287,6 +329,8 @@ summary.mc <- function(object, sum_funs = NULL, ...){
   }
 
   class(sum_out) <- "summary.mc"
+
+  attributes(sum_out)$n_reps <- object$repetitions
 
   sum_out
 
@@ -312,7 +356,7 @@ summary.mc <- function(object, sum_funs = NULL, ...){
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
 #' @param plot Boolean that specifies whether the plots should be printed while calling the function or not.
-#' Default: TRUE
+#' Default: `TRUE`
 #' @param ... ignored
 #'
 #'
@@ -403,7 +447,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
     data_plot <-
       data_plot %>%
       dplyr::filter(
-        dplyr::across(
+        dplyr::if_all(
           names(parameter_comb),
           ~{
             count <<- count + 1
@@ -638,7 +682,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
               )
             ) %>%
             dplyr::filter(
-              dplyr::across(
+              dplyr::if_all(
                 names(parameter_comb),
                 ~{
                   count <<- count + 1
@@ -822,11 +866,11 @@ print.summary.mc <- function(x, ...){
       purrr::walk(
         setup_names,
         function(setup){
-          if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+          if(checkmate::test_number(x[[setup]][[stat]][[1]])){
             cat("  ", setup, ": ", x[[setup]][[stat]][[1]], " \n ", sep = "")
           } else {
             cat("  ", setup, ": \n", sep = "")
-            print(x[[setup]][[stat]])
+            print(x[[setup]][[stat]][[1]])
             cat("\n")
           }
         }

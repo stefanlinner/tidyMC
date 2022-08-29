@@ -40,6 +40,7 @@ Afterwards you can load the package:
 
 ```{r}
 library(tidyMC)
+library(magrittr)
 ```
 
 
@@ -150,13 +151,15 @@ first_mc_ols
 
 
 ### Summarize your results with `summary.mc()`
+
 If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a stepwise manner. 
 
 The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
-\begin{itemize}
-\item First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
-\item Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
-\end{itemize}
+
+* First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
+
+* Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
+
 
 For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `b0`, `b1`, `b2`, and `sigma2`. Lastly each of these are composed by the "path" and scalar result of `mean()`. 
 
@@ -189,7 +192,6 @@ Lastly for the last level of customization, a nested list named after the `nice_
 <!-- Here an example for the different specifications of `sum_funs`: -->
 
 ```{r}
-
 quantile_sum <- function(x) quantile(x, probs = 0.75)
 
 # summarizing output differently for different parameter combinations
@@ -204,7 +206,6 @@ sum_funs2 <-
   )
 names(sum_funs2) <- first_mc_ols$nice_names
 summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
-
 ```
 
 We would like to reiterate that the provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
@@ -221,6 +222,7 @@ We would like to reiterate that the provided summary functions are not restricte
 
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
+
 Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a LaTeX document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see extract the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
 
 
@@ -231,7 +233,7 @@ tidy_mc_latex(
 ```
 The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `b0`, `b1`, `b2`, and `sigma2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
 
-Moreover, the next three arguments in `tidy_mc_latex` are comfort options to select which results of `summary.mc` depending on the parameter combinations will be presented in the table. On one hand, The argument `which_setup` allows the user to make use of the `nice_names` of the parameter combinations in the returned object by `future_mc()` to subset the rows in the table. On the other hand, the argument `parameter_comb` is used to directly filter the parameters by their values. This argument requires a named list, containing vector or scalar values of all parameters to be filtered from. The user must only provide one of this arguments at a time. We show how to make use of both parameters to subset the rows of table for $n = 100$ and $inc_x2=1$:
+Moreover, the next three arguments in `tidy_mc_latex` are comfort options to select which results of `summary.mc` depending on the parameter combinations will be presented in the table. On one hand, The argument `which_setup` allows the user to make use of the `nice_names` of the parameter combinations in the returned object by `future_mc()` to subset the rows in the table. On the other hand, the argument `parameter_comb` is used to directly filter the parameters by their values. This argument requires a named list, containing vector or scalar values of all parameters to be filtered from. The user must only provide one of this arguments at a time. We show how to make use of both parameters to subset the rows of table for $n = 100$ and $inc_{x2}=1$:
 
 ```{r}
 tidy_mc_latex(
@@ -252,7 +254,7 @@ Lastly, all remaining arguments are directly related to the resulting LaTeX outp
 To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the \texttt{kableExtra} package in the standard tidyverse manner. For example:
 
 ```{r}
-tidy_mc_latex(summary(first_mc_ols), repetitions_set = c(10, 10000),
+tidy_mc_latex(summary(first_mc_ols), repetitions_set = c(10, 1000),
                            column_names = c("Number of observations",
                                             "$x_2$ included or not",
                                             "$\\beta_0$", "$\\beta_1$",

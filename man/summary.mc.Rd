@@ -4,13 +4,20 @@
 \alias{summary.mc}
 \title{Summarize the Results of a Monte Carlo Simulation}
 \usage{
-\method{summary}{mc}(object, sum_funs = NULL, ...)
+\method{summary}{mc}(object, sum_funs = NULL, which_path = "all", ...)
 }
 \arguments{
 \item{object}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
 \item{sum_funs}{A named (nested) list containing summary functions. See details.}
+
+\item{which_path}{A character vector containing the names of (some of) the named outputs
+(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), for which numeric output a "path"
+of the step wise calculation of the summarizing function's result should be returned.
+Alternatively, \code{"all"} or \code{"none"} can be used to either return the path for all or none of the
+numeric outputs.
+Default: \code{"all"}.}
 
 \item{...}{Ignored}
 }
@@ -42,7 +49,7 @@ The default summary functions are \code{\link[base:mean]{base::mean()}} for nume
 
 The user can define summary functions by supplying a named (nested) list to \code{sum_funs}. When
 the functions provided for each output return only one numeric value the results are twofold:
-first, a single scalar result of over the whole output vector (with length \code{repetitions}).
+first, a single scalar result of the function evaluating the whole output vector.
 Second, a "path" with length \code{repetitions} of the step wise calculation of the function's result
 across the output vector.
 
@@ -52,7 +59,7 @@ outputs (the names of the returned list of \code{fun} in \code{\link[=future_mc]
 a function which only takes the vector of results of one output as the main argument.
 
 If the user wants to summarize the simulation results of a respective output differently for
-different parameter combination, a nested list has to be supplied. The components of the outer list
+different parameter combinations, a nested list has to be supplied. The components of the outer list
 must be equal in length and naming to the \code{nice_names} of the parameter
 combinations (see value of \code{\link[=future_mc]{future_mc()}}) and each component is another
 list (inner list). The components of the inner list are then defined the

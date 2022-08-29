@@ -20,9 +20,10 @@ future_mc(
 
 \item{repetitions}{An integer that specifies the number of Monte Carlo iterations}
 
-\item{param_list}{A list whose components are named after the parameters of \code{fun} and each
-component is a vector containing the desired grid values for that parameter.
-The Monte Carlo Simulation is run for all possible combinations of that parameter list.}
+\item{param_list}{A list whose components are named after the parameters of \code{fun} which should vary
+for the different Monte Carlo Simulation and each component is a vector containing the desired grid
+values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
+that parameter list.}
 
 \item{parallelisation_plan}{A list whose components are named after possible parameters
 of \code{\link[future:plan]{future::plan()}} specifying the parallelisation plan which should be used in the
@@ -73,11 +74,12 @@ experiment for each of the parameter constellations.
 There are four formal requirements that \code{fun} has to fulfill:
 \itemize{
 \item The arguments of \code{fun} which are present in \code{param_list} need to be scalar values.
-\item The value returned by \code{fun} has to be a named list
-\item The names of the returned values and those of the arguments of \code{fun} need to
+\item The value returned by \code{fun} has to be a named list and must have the same components for each
+iteration and parameter combination.
+\item The names of the returned values and those of the arguments contained in \code{param_list} need to
 be different. Moreover, they cannot be \code{params}, \code{repetitions} or \code{setup}
 \item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument
-trough the \code{...} argument.
+through the \code{...} argument.
 In particular, \code{fun} cannot use variables which are only defined in the global environment.
 }
 

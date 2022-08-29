@@ -4,7 +4,14 @@
 \alias{plot.summary.mc}
 \title{Plot the summarized results of a Monte Carlo Simulation}
 \usage{
-\method{plot}{summary.mc}(x, join = NULL, which_setup = NULL, parameter_comb = NULL, ...)
+\method{plot}{summary.mc}(
+  x,
+  join = NULL,
+  which_setup = NULL,
+  parameter_comb = NULL,
+  plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{summary.mc}. For restrictions see details.}
@@ -21,6 +28,9 @@ Default: All parameter combinations are plotted.}
 (some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
 the values for the parameters to filter by.
 Default: All parameter combinations are plotted.}
+
+\item{plot}{Boolean that specifies whether the plots should be printed while calling the function or not.
+Default: TRUE}
 
 \item{...}{additional arguments passed to callies.}
 }
