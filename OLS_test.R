@@ -29,7 +29,18 @@ ols_test <-
     return(out)
   }
 
+####
+param_list_ols <-
+  list(n = c(100, 200, 300), b2 = c(0,5), inc_x2 = c(0,1))
 
+ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list_ols,
+                 b0 = 1, b1 = 4, param_x1 = c(1,2), param_x2 = c(3,4),
+                 sigma2 = 3)
+
+plot(ols, parameter_comb = list(inc_x2 = 0))$B1 +
+  ggplot2::geom_vline(xintercept = 4, col = "red")
+
+#####
 param_list_ols <-
   list(n = c(100, 200, 300))
 

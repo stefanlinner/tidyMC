@@ -226,21 +226,27 @@ tidy_mc_latex <- function(
   out <- data_table %>%
     dplyr::arrange(.data$repetitions) %>%
     dplyr::select(-.data$setup, -.data$repetitions) %>%
-    kableExtra::kbl(format = "latex", booktabs = TRUE,
-                    digits = 3,
-                    align = "c", caption = caption, escape = FALSE) %>%
-    kableExtra::footnote(general = paste("Total repetitions = ",n_reps,
-                                         ", total parameter combinations = ", n_setups,
-                                         collapse = ",", sep = ""))
+    kableExtra::kbl(
+      format = "latex", booktabs = TRUE,
+      digits = 3,
+      align = "c",
+      caption = caption,
+      escape = FALSE
+    ) %>%
+    kableExtra::add_footnote(label = paste("Total repetitions = ",n_reps,
+                                           ", total parameter combinations = ", n_setups,
+                                           collapse = ",", sep = ""),
+                             notation = "none",
+                             escape = FALSE)
 
-  if(!is.null(repetitions_set)){
-    out <- eval(parse(text =
-                        paste("kableExtra::pack_rows(kable_input = out, index = c(",
-                              paste( "\"N = ", repetitions_set,
-                                     "\" = ", rep(n_setups_contained, length(repetitions_set)), collapse = ",", sep = ""),
-                              "))", collapse = "\n")
-    )
-    )
+  if(!checkmate::test_set_equal(repetitions_set, n_reps)){
+    index <- rep(n_setups_contained, length(repetitions_set))
+    names(index) <- paste("N = ", repetitions_set, sep = "")
+    out <-
+      kableExtra::pack_rows(
+        kable_input = out,
+        index = index
+      )
   }
 
   return(out)

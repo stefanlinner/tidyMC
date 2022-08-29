@@ -207,6 +207,8 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 5, x3 = 1, x4 = 6){
   stat_2 <- var(data)
   test <- LETTERS[sample(1:26, 1)]
 
+  # Sys.sleep()
+
   if(x3 == 0 & x4 == 0){
     next
   }
@@ -225,7 +227,7 @@ param_table <- expand.grid(param_list)
 n_params <- nrow(param_table)
 
 
-repetitions <- 50000
+repetitions <- 1000
 parallelisation_options <- list(seed = TRUE)
 
 
