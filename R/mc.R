@@ -7,7 +7,7 @@
 #' @param fun The function to be evaluated. See details.
 #' @param repetitions An integer that specifies the number of Monte Carlo iterations
 #' @param param_list A list whose components are named after the parameters of `fun` which should vary
-#' for the different Monte Carlo Simulation and each component is a vector containing the desired grid
+#' for the different Monte Carlo Simulation. Each component is a vector containing the desired grid
 #' values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
 #' that parameter list.
 #' @param parallelisation_plan A list whose components are named after possible parameters
@@ -35,13 +35,13 @@
 #' * The value returned by `fun` has to be a named list and must have the same components for each
 #' iteration and parameter combination.
 #' * The names of the returned values and those of the arguments contained in `param_list` need to
-#'   be different. Moreover, they cannot be `params`, `repetitions` or `setup`
+#'   be different. Moreover, they cannot be `"params"`, `"repetitions"` or `"setup"`
 #' * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument
 #' through the `...` argument.
 #' In particular, `fun` cannot use variables which are only defined in the global environment.
 #'
-#' In order to use the comfort functions [plot.mc()], [summary.mc()], and [plot.summary.mc()] the
-#' value returned by `fun` has to be a named list of scalars.
+#' In order to use the comfort functions [plot.mc()], [summary.mc()], [plot.summary.mc()], and
+#' [tidy_mc_latex()] the value returned by `fun` has to be a named list of scalars.
 #'
 #'
 #' @return A list of type `mc` containing the following objects:
@@ -79,12 +79,8 @@
 #'return(list(mean = stat,sd = stat_2))
 #'}
 #'
-#'
 #'param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
 #'                   x1 = 1:2, x2 = 2)
-#'
-#'
-#'
 #'
 #'test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 future_mc <-
@@ -99,11 +95,9 @@ future_mc <-
     ...
   ){
 
-    # Asserting inputs
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named")
-    # Check that all the elements in the param_list are unique
     purrr::walk(
       param_list,
       checkmate::assert_atomic_vector,
@@ -151,7 +145,6 @@ future_mc <-
         function(x) param_table
       )
 
-    # Nice names for the parameters
     nice_names <-
       rep(
         purrr::map_chr(
@@ -222,7 +215,6 @@ future_mc <-
           )
         })
 
-      # Run single test_iteration for each parameter setup
       message("Running single test-iteration for each parameter combination...")
 
       test_runs <-
@@ -266,7 +258,6 @@ future_mc <-
 
     }
 
-    # Results
     message(
       paste(
         "Running whole simulation: Overall ",

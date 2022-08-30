@@ -11,7 +11,7 @@
 #' @param which_setup A character vector containing the `nice_names` for the different parameter
 #' combinations (returned by [future_mc()]), which should be presented in the table.
 #' Default: All parameter combinations are presented.
-#' @param parameter_comb Alternative to which_setup. A named list whose components are named after
+#' @param parameter_comb Alternative to `which_setup`. A named list whose components are named after
 #' (some of) the parameters in `param_list` in [future_mc()]. Each component is a vector containing
 #' the values for the parameters to be filtered by.
 #' Default: All parameter combinations are presented.
@@ -33,7 +33,7 @@
 #' which return just one numeric value.
 #'
 #' @return An object of class `knitr_kable` which can be modified by the functions
-#' in the `kableExtra` package is returned and printed in the console. See`kableExtra`
+#' in the [kableExtra] package is returned.
 #' @export
 #'
 #' @examples

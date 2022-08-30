@@ -38,7 +38,7 @@ Default: \code{TRUE}}
 \value{
 A list whose components are named after the outputs of \code{fun} and each component
 contains an object of class \code{ggplot} and \code{gg} which can be plotted and modified with the
-ggplot2 functions. See \code{ggplot2}.
+\link{ggplot2} functions.
 }
 \description{
 Plot density plots for numeric results and bar plots for non-numeric results

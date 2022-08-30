@@ -21,7 +21,7 @@ future_mc(
 \item{repetitions}{An integer that specifies the number of Monte Carlo iterations}
 
 \item{param_list}{A list whose components are named after the parameters of \code{fun} which should vary
-for the different Monte Carlo Simulation and each component is a vector containing the desired grid
+for the different Monte Carlo Simulation. Each component is a vector containing the desired grid
 values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
 that parameter list.}
 
@@ -77,14 +77,14 @@ There are four formal requirements that \code{fun} has to fulfill:
 \item The value returned by \code{fun} has to be a named list and must have the same components for each
 iteration and parameter combination.
 \item The names of the returned values and those of the arguments contained in \code{param_list} need to
-be different. Moreover, they cannot be \code{params}, \code{repetitions} or \code{setup}
+be different. Moreover, they cannot be \code{"params"}, \code{"repetitions"} or \code{"setup"}
 \item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument
 through the \code{...} argument.
 In particular, \code{fun} cannot use variables which are only defined in the global environment.
 }
 
-In order to use the comfort functions \code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, and \code{\link[=plot.summary.mc]{plot.summary.mc()}} the
-value returned by \code{fun} has to be a named list of scalars.
+In order to use the comfort functions \code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, \code{\link[=plot.summary.mc]{plot.summary.mc()}}, and
+\code{\link[=tidy_mc_latex]{tidy_mc_latex()}} the value returned by \code{fun} has to be a named list of scalars.
 }
 \examples{
 
@@ -101,12 +101,8 @@ if (x2 == 5){
 return(list(mean = stat,sd = stat_2))
 }
 
-
 param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
                   x1 = 1:2, x2 = 2)
-
-
-
 
 test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
 }
