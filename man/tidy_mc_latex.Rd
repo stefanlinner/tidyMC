@@ -10,8 +10,7 @@ tidy_mc_latex(
   which_setup = NULL,
   parameter_comb = NULL,
   which_out = NULL,
-  caption = "Monte Carlo simulations results",
-  column_names = NULL
+  kable_options = NULL
 )
 }
 \arguments{
@@ -35,11 +34,8 @@ Default: All parameter combinations are presented.}
 (the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), which should be displayed in the table.
 Default: All outputs are displayed.}
 
-\item{caption}{A string specifying the caption of the latex table.}
-
-\item{column_names}{Column names for the resulting table. This vector must have the same size as
-the number of outputs of \code{fun} and parameters in \code{param_list} They can be written
-in standard LaTeX manner.}
+\item{kable_options}{A list whose components are named after possible parameters
+of \code{\link[kableExtra:kbl]{kableExtra::kbl()}} customizing the generated table.}
 }
 \value{
 An object of class \code{knitr_kable} which can be modified by the functions

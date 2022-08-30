@@ -47,7 +47,8 @@ Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_co
 at a time.
 
 A plot is only created for (output - parameter combination)-pairs for which in \code{\link[=summary.mc]{summary.mc()}}
-a function is provided in \code{sum_funs} which returns a single numeric value.
+a function is provided in \code{sum_funs} which returns a single numeric value and if the output
+is included in \code{which_path}.
 }
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){

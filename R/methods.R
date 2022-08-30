@@ -562,7 +562,8 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' at a time.
 #'
 #' A plot is only created for (output - parameter combination)-pairs for which in [summary.mc()]
-#' a function is provided in `sum_funs` which returns a single numeric value.
+#' a function is provided in `sum_funs` which returns a single numeric value and if the output
+#' is included in `which_path`.
 #'
 #' @return A list whose components are named after the outputs and each component
 #' contains a `ggplot2` plot.
