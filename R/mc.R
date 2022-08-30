@@ -122,22 +122,20 @@ future_mc <-
     checkmate::assert_list(add_args, names = "named")
     checkmate::assert_subset(names(add_args), fun_argnames)
 
+    if(is.null(parallelisation_options)){
+      parallelisation_options <- list()
+    }
+
+    parallelisation_options_default <- list(seed = TRUE)
+
+    parallelisation_options<-
+      utils::modifyList(parallelisation_options_default, parallelisation_options)
+
     if(is.null(parallelisation_plan)){
       parallelisation_plan <-
         list(
           strategy = future::multisession
         )
-    }
-
-    if(is.null(parallelisation_options)){
-      parallelisation_options <-
-        list(
-          seed = TRUE
-        )
-    } else {
-      if(is.null(parallelisation_options$seed)) {
-        parallelisation_options$seed <- TRUE
-      }
     }
 
     if(parallel){

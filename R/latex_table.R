@@ -18,11 +18,8 @@
 #' @param which_out A character vector containing the names of (some of) the named outputs
 #' (the names of the returned list of `fun` in [future_mc()]), which should be displayed in the table.
 #' Default: All outputs are displayed.
-#' @param caption A string specifying the caption of the latex table.
-#' @param column_names Column names for the resulting table. This vector must have the same size as
-#' the number of outputs of `fun` and parameters in `param_list` They can be written
-#' in standard LaTeX manner.
-#'
+#' @param kable_options A list whose components are named after possible parameters
+#' of [kableExtra::kbl()] customizing the generated table.
 #' @details Only one of the arguments `which_setup` and `parameter_comb` can be specified
 #' at one time.
 #'
@@ -74,8 +71,7 @@ tidy_mc_latex <- function(
     which_setup = NULL,
     parameter_comb = NULL,
     which_out = NULL,
-    caption = "Monte Carlo simulations results",
-    column_names = NULL# HUHU: Allow for more options which are passed to kable?
+    kable_options = NULL
 ){
 
   checkmate::assert_class(x, "summary.mc")
@@ -84,8 +80,11 @@ tidy_mc_latex <- function(
   checkmate::assert_integerish(repetitions_set, lower = 1, null.ok = TRUE)
   checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
   checkmate::assert_subset(which_out, stat_names, empty.ok = TRUE)
+  checkmate::assert_list(kable_options, null.ok = TRUE)
+  if(is.null(kable_options)){
+    kable_options <- list()
+  }
   checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
-  checkmate::assert_character(column_names, null.ok = T)
   purrr::walk(
     parameter_comb,
     checkmate::assert_atomic_vector,
@@ -216,28 +215,29 @@ tidy_mc_latex <- function(
 
   n_setups_contained <- length(unique(data_table$setup))
 
-  if(!is.null(column_names)){
-    if (length(column_names)!=length(c(stat_names, param_names))){
-      stop("Length of column names differ from the number of columns in the table")
-    } else {
-      colnames(data_table)[which(colnames(data_table) %in% c(param_names, stat_names))] <- column_names
-    }
-  }
-  out <- data_table %>%
-    dplyr::arrange(.data$repetitions) %>%
-    dplyr::select(-.data$setup, -.data$repetitions) %>%
-    kableExtra::kbl(
-      format = "latex", booktabs = TRUE,
-      digits = 3,
-      align = "c",
-      caption = caption,
+  default_kable_options <-
+    list(x = data_table %>%
+           dplyr::arrange(.data$repetitions) %>%
+           dplyr::select(-.data$setup, -.data$repetitions),
+         format = "latex",
+         booktabs = TRUE,
+         digits = 3,
+         align = "c",
+         caption = "Monte Carlo simulations results",
+         escape = FALSE
+    )
+  kable_options <- utils::modifyList(default_kable_options, kable_options)
+
+  out <- do.call(kableExtra::kbl, kable_options) %>%
+    kableExtra::add_footnote(
+      label = paste(
+        "Total repetitions = ",n_reps,
+        ", total parameter combinations = ", n_setups,
+        collapse = ",", sep = ""
+      ),
+      notation = "none",
       escape = FALSE
-    ) %>%
-    kableExtra::add_footnote(label = paste("Total repetitions = ",n_reps,
-                                           ", total parameter combinations = ", n_setups,
-                                           collapse = ",", sep = ""),
-                             notation = "none",
-                             escape = FALSE)
+    )
 
   if(!checkmate::test_set_equal(repetitions_set, n_reps)){
     index <- rep(n_setups_contained, length(repetitions_set))
