@@ -225,7 +225,7 @@ param_table <- expand.grid(param_list)
 n_params <- nrow(param_table)
 
 
-repetitions <- 50000
+repetitions <- 5000
 parallelisation_options <- list(seed = TRUE)
 
 
@@ -277,7 +277,7 @@ speed_result2$median
 
 # Parallel comparison of MonteCarlo and future_mc
 
-cores <- parallelly::availableCores()
+cores <- parallelly::availableCores()-2
 
 plan(multisession, workers = cores)
 
