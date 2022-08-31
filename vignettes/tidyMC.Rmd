@@ -126,7 +126,7 @@ first_mc_ols <- future_mc(
 ```
 
 The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. 
-<!-- The attentive reader might have already noticed that we misspecifed the variance ?`sigma2 = -2`. By defintion, the variance is non-negtaive and the sepcified function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
+<!-- The attentive reader might have already noticed that we misspecified the variance ?`sigma2 = -2`. By definition, the variance is non-negative and the used function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
 This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
 
 ```{r}

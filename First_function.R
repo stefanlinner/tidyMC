@@ -382,3 +382,122 @@ speed_results5 <- bench::mark({
 }, check = FALSE)
 speed_results5$median
 
+MonteCarlos_vs_tidyMC <- function(reps, cores){
+
+  out <- data.frame(
+    cores = rep(cores, length(reps)),
+    MC_reps = rep(reps, each = length(cores)),
+    tidyMC = rep(NA_real_, length(reps)),
+    MonteCarlo = rep(NA_real_, length(reps))
+  )
+
+  for(core in cores){
+    for( n in reps){
+      speed_results <- bench::mark({
+        results <-
+          MonteCarlo(
+            func=test_func,
+            nrep=n,
+            param_list=param_list,
+            ncpus = core # Why is it slower??
+          )
+      },
+      {
+        results <- future_mc(
+          test_func,
+          repetitions = n,
+          param_list = param_list,
+          check = FALSE,
+          parallel = TRUE,
+          parallelisation_options = list(seed = TRUE),
+          parallelisation_plan = list(strategy = multisession, workers = core)
+        )
+      }, check = FALSE)
+      out$MonteCarlo[out$cores == core & out$MC_reps == n] <- speed_results$median[1]
+      out$tidyMC[out$cores == core & out$MC_reps == n] <- speed_results$median[2]
+    }
+  }
+
+  return(out)
+}
+
+MC_vs_tidyMC_plot <- MonteCarlos_vs_tidyMC(reps = c(1e2,1e3,1e4,1e5),
+                                           cores = c(1,2,3)) %>%
+  pivot_longer(cols = c(tidyMC, MonteCarlo)) %>%
+  ggplot(aes(x = MC_reps, y = value, col = name)) +
+  geom_line() +
+  facet_grid(cols = vars(cores)) +
+  scale_x_continuous(trans = "log10")
+
+
+Martin_vs_tidyMC <- function(reps, cores){
+
+  out <- data.frame(
+    cores = rep(cores, length(reps)),
+    MC_reps = rep(reps, each = length(cores)),
+    tidyMC = rep(NA_real_, length(reps)),
+    martin_reps = rep(NA_real_, length(reps)),
+    martin_params = rep(NA_real_, length(reps))
+  )
+
+  speed_results <- bench::mark({
+    # parallelise over parameters
+    results_list <-
+      furrr::future_map(
+        .x = 1:n_params,
+        .f = function(.x){
+          purrr::map_df(
+            1:repetitions,
+            .f = function(.y) {
+              purrr::pmap_dfr(param_table[.x,], test_func)
+            }2
+          )
+        },
+        .progress = TRUE,
+        .options = do.call(furrr::furrr_options, parallelisation_options)
+      )
+  },
+  {
+    # Parallel over reps
+    results_list <-
+      furrr::future_map(
+        .x = 1:repetitions,
+        .f = function(.x){
+          purrr::map_df(
+            1:nrow(param_table),
+            .f = function(.y) {
+              purrr::pmap_dfr(param_table[.y,], test_func)
+            }
+          )
+        },
+        .progress = TRUE,
+        .options = do.call(furrr::furrr_options, parallelisation_options)
+      )
+  },
+  {
+    # Parallel over both
+    param_table_reps <-
+      purrr::map_dfr(
+        seq_len(repetitions),
+        function(x) param_table
+      )
+    results_list <-
+      furrr::future_pmap(
+        .l = param_table_reps,
+        .f = test_func,
+        .options = do.call(furrr::furrr_options, parallelisation_options),
+        .progress = TRUE
+      )
+  }, check = FALSE)
+  out$martin_params[out$cores == core & out$MC_reps == n] <- speed_results$median[1]
+  out$martin_reps[out$cores == core & out$MC_reps == n] <- speed_results$median[2]
+  out$tidyMC[out$cores == core & out$MC_reps == n] <- speed_results$median[3]
+}
+
+Martin_vs_tidyMC_plot <- Martin_vs_tidyMC(reps = c(1e2,1e3,1e4,1e5),
+                                           cores = c(1,2,3)) %>%
+  pivot_longer(cols = c(tidyMC, martin_params, martin_reps)) %>%
+  ggplot(aes(x = MC_reps, y = value, col = name)) +
+  geom_line() +
+  facet_grid(cols = vars(cores)) +
+  scale_x_continuous(trans = "log10")
