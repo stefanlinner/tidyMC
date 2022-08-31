@@ -8,16 +8,16 @@
 #' See value of [future_mc()].
 #' @param sum_funs A named (nested) list containing summary functions. See details.
 #' @param which_path A character vector containing the names of (some of) the named outputs
-#' (the names of the returned list of `fun` in [future_mc()]), for which numeric output a "path"
-#' of the step wise calculation of the summarizing function's result should be returned.
-#' Alternatively, `"all"` or `"none"` can be used to either return the path for all or none of the
+#' (the names of the returned list of `fun` in [future_mc()]), for which to return a "path" of the
+#' stepwise calculation of the result of the summary function.
+#' Alternatively, `"all"` or `"none"` can be used to return either the path for all or none of the
 #' numeric outputs.
 #' Default: `"all"`.
 #' @param ... Ignored
 #'
-#' @details In order to use `summary`, the output of [future_mc()] has to be "simple",
+#' @details In order to use `summary()`, the output of [future_mc()] has to be "simple",
 #' which is the case if the return value of `fun` is a named list of scalars. If the
-#' returned value of `fun` is a named list of more complex data structures, `summary`
+#' returned value of `fun` is a named list of more complex data structures, `summary()`
 #' cannot be used.
 #'
 #' With `sum_funs` the user can define (different) functions which summarize
@@ -33,7 +33,7 @@
 #' the functions provided for each output return only one numeric value the results are twofold:
 #' first, a single scalar result of the function evaluating the whole output vector.
 #' Second, a "path" with length `repetitions` of the step wise calculation of the function's result
-#' across the output vector.
+#' across the output vector (assumed that the output is contained in `which_path`).
 #'
 #' If the user wants to summarize the simulation results of a respective output in the same way
 #' for each parameter combination, a list whose components are named after the
@@ -49,15 +49,15 @@
 #'
 #' The provided summary functions are not restricted regarding the complexity of their return value.
 #' However, the path of the summarized output over all simulation repetitions is only returned if the
-#' provided summary functions return a single numeric value. Thus, [plot.summary.mc()] will only work
-#' in this specific case.
+#' provided summary functions return a single numeric value (and the output is contained in `which_path`).
+#' Thus, [plot.summary.mc()] will only work in this specific case.
 #'
 #'
 #' @return A list of type `summary.mc` containing the result of the summary functions of the simulation
 #' results of a respective output and parameter combination.
 #'
 #' If the provided summary functions return a single numeric value, also the path of the summarized output
-#' over all simulation repetitions is returned.
+#' (which are contained in `which_path`) over all simulation repetitions is returned.
 #'
 #' @export
 #'
@@ -365,7 +365,7 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #'
 #' @return A list whose components are named after the outputs of `fun` and each component
 #' contains an object of class `ggplot` and `gg` which can be plotted and modified with the
-#' ggplot2 functions. See `ggplot2`.
+#' [ggplot2] functions.
 #'
 #' @export
 #'
@@ -550,7 +550,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' @param which_setup A character vector containing the `nice_names` for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
-#' @param parameter_comb Alternative to which_setup. A named list whose components are named after
+#' @param parameter_comb Alternative to `which_setup`. A named list whose components are named after
 #' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
@@ -565,8 +565,9 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' a function is provided in `sum_funs` which returns a single numeric value and if the output
 #' is included in `which_path`.
 #'
-#' @return A list whose components are named after the outputs and each component
-#' contains a `ggplot2` plot.
+#' @return A list whose components are named after the outputs of `fun` and each component
+#' contains an object of class `ggplot` and `gg` which can be plotted and modified with the
+#' [ggplot2] functions.
 #'
 #' @export
 #'

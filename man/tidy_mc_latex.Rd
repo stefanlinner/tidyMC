@@ -25,7 +25,7 @@ the last repetition are displayed in the table.}
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be presented in the table.
 Default: All parameter combinations are presented.}
 
-\item{parameter_comb}{Alternative to which_setup. A named list whose components are named after
+\item{parameter_comb}{Alternative to \code{which_setup}. A named list whose components are named after
 (some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}}. Each component is a vector containing
 the values for the parameters to be filtered by.
 Default: All parameter combinations are presented.}
@@ -39,7 +39,7 @@ of \code{\link[kableExtra:kbl]{kableExtra::kbl()}} customizing the generated tab
 }
 \value{
 An object of class \code{knitr_kable} which can be modified by the functions
-in the \code{kableExtra} package is returned and printed in the console. See\code{kableExtra}
+in the \link{kableExtra} package is returned.
 }
 \description{
 Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
