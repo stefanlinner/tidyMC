@@ -67,14 +67,14 @@ This report is structured as follows. Section \@ref(monte-carlo-simulation) give
 simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes. 
 
 # Monte Carlo Simulation {MCS}
-MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances work, mainly following <!-- \citep{kiviet_monte_2011}. -->
+MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances MCS work , mainly following <!-- \citep{kiviet_monte_2011}. -->
 
 
 
 ## Pseudo Random Number Generation and the Data Generating Process
 Using MCS on computers has the great advantage that, with the necessary information, the simulation results can be replicated on most machines. This is possible because, given seed and algorithm, the numbers created by a random number generator are completely reproducible. 
-MCS generally starts with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead, the computer draws from different distributions that are generated through pseudo-random draws from a uniform distribution.  Draws from a uniform distribution are created by using so-called random number generators (RNG). These algorithms are applied to a natural number, called the seed. The resulting values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. The combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The purpose of the \texttt{`tidyMC`} -package is to additionally allow easy parallelization of the MCS. With parallel computing, special attention has to be paid to creating disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on the L’Ecuyer-CMRG RNG streams implemented in \texttt{`furrr`}. The algorithm creates reproducible sets of numbers for each parallel worker, using an integer seed of length 7. Alternatively, a seed of length 1 is accepted, which corresponds to a valid seed of length 7. Because the algorithm creates a subset of random numbers for each worker, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. Moreover, our function allows supplying user-generated lists of random variables. 
-Complex multivariate distributions can then be simulated as functions of different standard distributions. This allows us to generate and work with distributions that are analytically not manageable.
+MCS generally start with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead, the computer draws from different distributions that are generated through pseudo-random draws from a uniform distribution.  Draws from a uniform distribution are created by using so-called random number generators (RNG). These algorithms are applied to a natural number, called the seed. The resulting values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. The combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The purpose of the \texttt{`tidyMC`} -package is to additionally allow easy parallelization of the MCS. With parallel computing, special attention has to be paid to creating disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on the L’Ecuyer-CMRG RNG streams implemented in \texttt{`furrr::furrr_options`}. The algorithm creates reproducible sets of numbers for each parallel worker, using an integer seed of at most length 7. \hl{Alternatively, a seed of length 1 is accepted, which corresponds to a valid seed of length 7}. Because the algorithm creates a subset of random numbers for each worker, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. \hl{Moreover, our function allows supplying user-generated lists of random variables.} 
+\hl{Complex multivariate distributions can then be simulated as functions of different standard distributions. This allows us to generate and work with distributions that are analytically not manageable.}
 
 <!--The possibility to replicate the draws allows for exactly reproducing results that build on the pseudo-randomly generated number on different computers.   The most common algorithm, as well as R's standard algorithm, used for the generation of pseudo-random draws from a standard uniform distribution, is the Mersenne-Twister algorithm. There are however more algorithms available. In R it is also possible to specify your own algorithm to create pseudo-random numbers.
 
@@ -83,12 +83,13 @@ Generating pseudo-random numbers from more complex distributions uses the distri
 
 
 ## Monte Carlo Distribution Approximation
-MCS is most commonly used to infer properties of the distribution of statistics in a fixed setting, i.e. for a prespecified DGP. The simulation results hence hold only for the prespecified DGP. Because it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  In MCS we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\beta$, some deterministic variables $D$, some random variables $v$, and a given number of observations, s.t. $q_n = q_n(\beta,D,v,n)$. What a Monte Carlos simulation ultimately achieves is a numerical approximation of the true distribution of $q_n$ for the specified DGP. Let $q_n^R$ be the statistic generated by the $R^th$ Monte Carlo Simulation. Then the histogram of all $q_n^R$ is an unbiased and consistent estimator of $q_n$. We are hence able to control the precision of the approximation by setting the number of Monte Carlo estimates. Using the resulting distribution $q_n^R$ we can then use different statistics such as mean and variance to summarize the distribution of the statistic for the prespecified DGP. The approach can of course be easily extended to a vector of statistics $q_n$. 
+MCS is most commonly used to infer properties of the distribution of statistics in a fixed setting, i.e. for a prespecified DGP, hence the simulation results hold only for this. Since it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  In MCS we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\beta$, some deterministic variables $D$, some random variables $v$, and a given number of observations, s.t. $q_n = q_n(\beta,D,v,n)$. What a Monte Carlos simulation ultimately achieves is a numerical approximation of the true distribution of $q_n$ for the specified DGP. Let $q_n^R$ be the statistic generated by the $R^th$ Monte Carlo Simulation. Then the histogram of all $q_n^R$ is an unbiased and consistent estimator of $q_n$. Thus, the precision of the approximation is controlled by setting the number of Monte Carlo estimates. We can then use different statistics such as mean and variance on $q_n^R$ to summarize the distribution of the statistic for the prespecified DGP. The approach can of course be easily extended to a vector of statistics $q_n$. 
 
 
 ## Monte Carlo Best Practices
-@cite{dude} gives a few things that need to be considered when doing and presenting an MCS. The results should of course allow the audience to get a precise picture of the Monte Carlo experiment. MCS generally involves testing the attributes of $q_n$ not only for one DGP but for a wide set of DGPs that may include nuisance parameters that may significantly alter the distribution.
-Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications. One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS @cite{dude}, their values have to be chosen with care to appropriately represent the results from the experiment.  The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear- behavior of the key indicators of the performance of the technique. As the later sections will show, \texttt{`tidyMC`} provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators  The packages summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterward to easily communicate the desired results. Due to the flexible design of the \texttt{`tidyMC`}, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator. To make things more concrete we next provide an easy-to-follow example.
+@cite{dude} gives a few things that need to be considered when doing and presenting MCS. The results must allow the audience to get a precise picture of the Monte Carlo experiment. MCS generally involves testing the attributes of $q_n$ not only for one DGP but for a wide set of DGPs that may include \hl{nuisance} parameters that may significantly alter the distribution.
+
+We present one example of a MCS. \hl{Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications.} One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS @cite{dude}, their values have to be chosen with care to appropriately represent the results from the experiment.  The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear- behavior of the key indicators of the performance of the technique. As the later sections will show, \texttt{`tidyMC`} provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators  The packages summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterward to easily communicate the desired results. Due to the flexible design of the \texttt{`tidyMC`}, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator.
 
 
 
@@ -98,9 +99,6 @@ p. 122 add maybe here? For example we might be interested in the ability of OLS 
 <!-- Show distribution of interval  -->
 
 ## OLS consistency
-
-<!-- Add Hayashi as generl source in this chapter? -->
-To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares (OLS) estimator. Given a dependent variable $y$ and a set of iid. regressors $\boldsymbol{X} = \{x_1, x_2\}$ we consider the linear DGP 
 
 To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares(OLS) estimator. Given a dependent variable $y$ and a set of i.id. regressors $X = \{x_1, x_2\}$ we consider the linear DGP 
 \begin{equation}
@@ -114,14 +112,13 @@ where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\vareps
 \end{align}
 where $k = 3$ is the number of regressors and $\hat{\varepsilon}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size. 
 
-<!-- Maybe add also estimator of the variance here. We know the theoretical variance of the coefficients and we can then add that to the plot: nice demonstration of how to amend the outputted ggplot object. Na: I think is too much for how the table will look in the example table -->
-
 \noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $n = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators.  We repeat the estimation 10000 times for each $n$.
 
 The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_s2} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise.
 
 
 ```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE, fig.show='hide'}
+
 ols_test <- 
   function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
     
@@ -140,7 +137,9 @@ ols_test <-
     
     # evaluation of the result for a single repetition and parameter combination
     out <- list(B0 = estim$coefficients[1],
+                B0_se = summary(estim)$coefficients[1,2],
                 B1 = estim$coefficients[2],
+                B1_se = summary(estim)$coefficients[2,2],
                 B2 = estim$coefficients[3],
                 sigma2 = var(estim$residuals))
     return(out)
@@ -148,7 +147,6 @@ ols_test <-
 
 param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1), b2 = c(0,4))
-
 ols <- future_mc(fun = ols_test,
                  repetitions = 10000,
                  param_list = param_list_ols,
@@ -157,23 +155,22 @@ ols <- future_mc(fun = ols_test,
                  param_x1 = c(1,2),
                  param_x2 = c(3,4),
                  sigma2 = 3)
-
-
-ols_plots <- plot(ols, plot = FALSE)
 ```
 
 ```{r ols_table, echo = FALSE}
 
 tidy_mc_latex(summary(ols),
-              parameter_comb =  list(b2 = 4, inc_x2 = 1),
+              parameter_comb =  list(b2 = 4),
               repetitions_set = c(10, 10000),
               kable_options = list(
                 col.names = c("N. Observations",
-                              "$x_2$ included",
                               "$\\beta_2$",
                               "$\\hat{\\beta}_0$",
+                              "$\\sigma(\\hat{\\beta}_0)$",
                               "$\\hat{\\beta}_1$",
+                              "$\\sigma(\\hat{\\beta}_1)$",
                               "$\\hat{\\beta}_2$",
+                              "$\\sigma(\\hat{\\beta}_2)$",
                               "$s^2$"),
                 caption = "Ommited variable bias MC results",
                 escape = FALSE)) %>%
@@ -183,12 +180,12 @@ tidy_mc_latex(summary(ols),
 
 
 ```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results"}
-ols_plots$B1
+(plot(ols, plot = FALSE, parameter_comb = list(inc_x2 = 1, b2 = 4))$B1)
 
 ```
 
 ```{r ols_s2, echo = FALSE, fig.cap="MC $s^2$ results"}
-ols_plots$s2
+(plot(ols, plot = FALSE, parameter_comb = list(inc_x2 = 1, b2 = 4))$B1_se)
 
 ```
 
@@ -198,7 +195,7 @@ ols_plots$s2
 
 Moreover, a common problem for estimation is the inclusion of suitable regressors into the model. Both the inclusion of irrelevant variables and the absence of relevant ones into the regression model cause problems when estimating the true parameters. In this section, we will test the impact both of these problems on the estimated values.
 
-First, we test the consequences of including an irrelevant variable into a model. For the DGP we follow the same structure as in \ref{eq_DGP}, but we set $\beta_2 = 0$ which means that $x_2$ has no influence on $y$. \textit{A priori} the expected result is that $\hat{\beta}_2$ associated with this new variable will be 0, while the efficiency of the other estimators of the model will decrease. Empirically, we test this using the same parameter values and model of the base case, only for another DGP.
+First, we test the consequences of including an irrelevant variable into a model. For the DGPs we follow the same structure as in \ref{eq_DGP}, but we set $\beta_2 = 0$ which means that $x_2$ has no influence on $y$. \textit{A priori} the expected result is that $\hat{\beta}_2$ associated with this new variable will be 0, while the efficiency of the other estimators of the model will decrease. Empirically, we test this using the same parameter values and model of the base case, only for another DGP.
 
 We present our results in table \ref{tab:irr_ols_table}. As expected, for all sample size values, the estimated $\hat{\beta}_2$ is not different from 0, and $\hat{\beta}_1 $ is estimated correctly. Meanwhile, the estimation of $s^2$ becomes more ineficient and inprecise, compared to the results of the base case. These three patterns only becomes more precise the more MC results we use for the calculation.
 
@@ -221,6 +218,8 @@ tidy_mc_latex(summary(ols),
                 escape = FALSE
               )) %>%
   kableExtra::kable_styling(latex_options = "HOLD_position")
+
+
 ```
 
 
@@ -582,11 +581,21 @@ tidy_mc_latex(summary(first_mc_ols),
 
 
 
-# Comparison to other Monte Carlo Approaches in R{comparsion}
+# Comparison to other Monte Carlo Approaches in R
+
+As already stated our conceptualization of an MCS implementation is based upon the basic requirements of this technique and framing the functions into the \texttt{tidyverse} structure. Previously, the \texttt{MonteCarlo} package already developed a convenient framework for the study and paralellised implementation of MCS, to which we compare the structure of our package. The main function for running a MCS in the `MonteCarlo` is the function of the eponymous name. 
+
+Both our `future_mc` and the `MonteCarlo` functions have two main divisions on their structure. First, we have the set-up of the arguments, data containers and error checking, parts of the function. Which can be called as the preamble of the simulation. Lastly, the actual simulation of the MC study over a parameter grid specified by the user. The main differences between our implementation and the `MonteCarlo` packages lay in these two steps of the functions.
+
+On one hand, as mentioned the whole development of our package draws from the benefits of the tidyverse functions. For example: the creation of parameter grids, the structure of the data and repeated calculations, rely heavily in functions provided by the `stringr`, `tibble` and `purrr` packages. Most importantly, for all repeated calculations that normally are handled by for loops we implement them with their `purrr` counterparts. These are all implemented keeping in mind the type of the object to be handled in order to reduce computation time, i.e. the mapping functions are tailored for dealing with specific data types. In contrast, the `MonteCarlo` function is built within a base `R` framework. Moreover, to offer flexibility to the user, the function uses a high number of strings for the creation of for loops, containers and parameter grids which are then parsed and evaluated inside the function.
+
+On the other hand, when it comes to the implementation of the paralellised simulation both functions difer totally from each other. The `MonteCarlo` function is built around the implementation of the `snow` package. This package deals.    
+
+
 
 
 # Conclusion
-With the tidyMC package we provide research an easy and confortable way to to Monte Carlo Studies. 
+With the tidyMC package we provide research an easy and comfortable way to to Monte Carlo Studies. 
 
 
 # Strucutre
