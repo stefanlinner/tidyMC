@@ -96,15 +96,15 @@ p. 122 add maybe here?
 
 ## OLS consistency
 
-To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares(OLS) estimator. Given a dependent variable $y$ and a set of i.id. regressors $X = \{x_1, x_2\}$ we consider the linear DGP 
+To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares (OLS) estimator. Given a dependent variable $y$ and a set of iid. regressors $\boldsymbol{X} = \{x_1, x_2\}$ we consider the linear DGP 
 \begin{equation}
 	\label{eq_DGP}
 	y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon,
 \end{equation}  
-where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\varepsilon$ is a normally distributed error term with variance $\sigma^2$, i.e. $\varepsilon \sim \mathcal{N}(0,\sigma^2)$. The corresponding OLS estimators $\hat{beta}$ and $s^2$ for $\beta$ and $\sigma^2$  are
+where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\varepsilon$ is a normally distributed error term with variance $\sigma^2$, i.e. $\varepsilon \sim \mathcal{N}(0,\sigma^2)$. The corresponding OLS estimators $\hat{\beta}$ and $s^2$ for $\beta$ and $\sigma^2$  are
 \begin{align}
-	\hat{\beta} = (XX)^{-1} XY,\\
-	s^2 =   \frac{1}{n-k} \hat{\varepsilon}' \hat{\varepsilon},
+	\hat{\beta} = (\boldsymbol{X}'\boldsymbol{X})^{-1} \boldsymbol{X}Y,\\
+	s^2 =   \frac{1}{n-k-1} \hat{\varepsilon}' \hat{\varepsilon},
 \end{align}
 where $k = 2$ is the number of regressors and $\hat{\varepsilon}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size. 
 
@@ -112,58 +112,69 @@ where $k = 2$ is the number of regressors and $\hat{\varepsilon}$ is the vector 
 
 \noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $n = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators.  We repeat the estimation 10000 times for each $n$.
 
-We present the results in table \ref{tab:ols_table}, where the first column is related to the number of observations we use in the estimation. The last 4 columns show the results' mean over for each parameter combination up to an specific repetition number. In the first panel the mean over the estimated coefficients from the ten first repetitions is calculated; the subsequent panel shows the mean calculated using all Monte Carlo repetitions. 
-<!-- What dies that mean, Na: is the way our latex tables work, we calculate the results using a handful of MC results and the table extracts the path. Everything we do here has to be done by our functions-->
-The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figure \l{(XX)} and table \hl{(XX)}  confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise.
-<!-- Table should include se of the coefficients. Na: If we include them they are gonna be next to the coefficients not in a nice OLS output way, because of the way our function gives the table output-->
+The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_s2} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise.
+
 
 ```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE, fig.show='hide'}
-ols_test <-
+ols_test <- 
   function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
-
+    
     # generation of data
     x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
     x2 <- rnorm(n = n,  mean = param_x2[1], sd = param_x2[2])
     e <- rnorm(n, sd = sqrt(sigma2))
     y <- b0 + b1*x1 + b2*x2 + e
-
+    
     if (inc_x2 == 0){
       x2 <- x2 * inc_x2
     }
-
+    
     # application of method
     estim <- lm(y ~ x1 + x2)
-
+    
     # evaluation of the result for a single repetition and parameter combination
     out <- list(B0 = estim$coefficients[1],
                 B1 = estim$coefficients[2],
                 B2 = estim$coefficients[3],
-                s2 = var(estim$residuals))
+                sigma2 = var(estim$residuals))
     return(out)
-  }
-
+}
 
 param_list_ols <-
-  list(n = c(100, 200, 300))
+  list(n = c(100, 200, 300), inc_x2 = c(0,1), b2 = c(0,4))
 
-ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list_ols,
-                 b0 = 1, b1 = 4, b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
-                 sigma2 = 3, inc_x2 = 1)
+ols <- future_mc(fun = ols_test,
+                 repetitions = 10000,
+                 param_list = param_list_ols,
+                 b0 = 1,
+                 b1 = 4,
+                 param_x1 = c(1,2),
+                 param_x2 = c(3,4),
+                 sigma2 = 3)
+
+
 ols_plots <- plot(ols, plot = FALSE)
 ```
 
 ```{r ols_table, echo = FALSE}
 
-tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000),
-                           column_names = c("Number of observations",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"),
-              caption = "OLS consistency MC results") %>%
+tidy_mc_latex(summary(ols),
+              parameter_comb =  list(b2 = 4, inc_x2 = 1),
+              repetitions_set = c(10, 10000),
+              kable_options = list(
+                col.names = c("N. Observations",
+                              "$x_2$ included",
+                              "$\\beta_2$",
+                              "$\\hat{\\beta}_0$",
+                              "$\\hat{\\beta}_1$",
+                              "$\\hat{\\beta}_2$",
+                              "$s^2$"),
+                caption = "Ommited variable bias MC results",
+                escape = FALSE)) %>%
   kableExtra::kable_styling(latex_options = "HOLD_position")
 
 ```
-Similarly to show the convergence of the estimators in a graphical manner, we present histograms of the estimated coefficients for all values of $n$. We present the densities for $\hat{\beta_1}$ and $s^2$ in figures \ref{fig:ols_b1} and \hl{(XX)}, and include the remaining plots in the Appendix.
-The pattern for both figures is clear, the increase in $n$ reduces the variance of the estimator around the true value, thus the convergence of the OLS estimators is empirically visible.
+
 
 ```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results"}
 ols_plots$B1
@@ -179,78 +190,59 @@ ols_plots$s2
 
 ##Ommited variable bias and irrelevant regressor inclusion
 
-Moreover, another common problem for estimation is the inclusion of suitable regressors into the model. Both the inclusion of irrelevant variables and the absence of relevant ones into the regression model cause problems when estimating the true parameters. In this section, we will test the impact both of these problems on the estimated values.
-\noindent We continue with the same structure as in equation \eqref{eq_DGP}, we will test, however, the case when $\beta_2 = 0$ which means that $x_2$ has no influence on $y$. This causes a problem in the estimation when the researcher does not know the underlying DGP and includes $x_2$ to the model, because of lack of information or convenience. \textit{A priori} the expected result is that the estimated coefficient associated with this new variable will be 0, while the variance of the residuals however will increase.
+Moreover, a common problem for estimation is the inclusion of suitable regressors into the model. Both the inclusion of irrelevant variables and the absence of relevant ones into the regression model cause problems when estimating the true parameters. In this section, we will test the impact both of these problems on the estimated values.
 
-\noindent We test this hypothesis using a Monte Carlo study, where we use the same coefficient values as for the base example, except that we set $\beta_2=0$. Then we run an OLS model with $x_1$ and $x_2$ as the regressors using $n = (100, 200, 300)$. Lastly, we repeat this 10000 times for every value of $n$. We present the obtained results in table \ref{eq:irr_ols_table}. Two panels are presented again, one for the mean results of the ten first MC repetitions and the second for all repetitions. Again the hypothesis about the behavior of the coefficients is proven to be right, i.e. the estimators for $\beta_0$ and $\beta_1$ appear to converge to the true value. In contrast, the estimator for $\beta_2$ is marginally different from zero for all values of $n$, and from the overall mean results we conclude that this behavior does not change. Lastly, the last point of the hypothesis about the estimator of the variance of the error term is also proven to be right. This is because the results for the estimator $s^2$ have higher values compared to the ones obtained in table \ref{ols_table}. 
+First, we test the consequences of including an irrelevant variable into a model. For the DGP we follow the same structure as in \ref{eq_DGP}, but we set $\beta_2 = 0$ which means that $x_2$ has no influence on $y$. \textit{A priori} the expected result is that $\hat{\beta}_2$ associated with this new variable will be 0, while the efficiency of the other estimators of the model will decrease. Empirically, we test this using the same parameter values and model of the base case, only for another DGP.
 
-```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE}
-ols_irr <- future_mc(fun = ols_test, repetitions = 10000,
-                     param_list = param_list_ols, b0 = 1, b1 = 4,
-                     b2 = 0, param_x1 = c(1,2), param_x2 = c(3,4),
-                     sigma2 = 3, inc_x2 = 1)
+We present our results in table \ref{tab:irr_ols_table}. As expected, for all sample size values, the estimated $\hat{\beta}_2$ is not different from 0, and $\hat{\beta}_1 $ is estimated correctly. Meanwhile, the estimation of $s^2$ becomes more ineficient and inprecise, compared to the results of the base case. These three patterns only becomes more precise the more MC results we use for the calculation.
 
-```
 
 
 ```{r irr_ols_table, echo = FALSE}
-tidy_mc_latex(summary(ols_irr), repetitions_set = c(10, 10000),
-                               column_names = c("Number of observations",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                                "$\\beta_2$", "$s^2$"),
-              caption = "MC OLS results with an irrelevant variable") %>%
-  kableExtra::kable_styling(latex_options = "HOLD_position")
 
+tidy_mc_latex(summary(ols),
+              parameter_comb =  list(b2 = 0, inc_x2 = 1),
+              repetitions_set = c(10, 10000),
+              kable_options = list(
+                col.names = c("N. Observations",
+                              "$x_2$ included",
+                              "$\\beta_2$",
+                              "$\\hat{\\beta}_0$",
+                              "$\\hat{\\beta}_1$",
+                              "$\\hat{\\beta}_2$",
+                              "$s^2$"),
+                caption = "Ommited variable bias MC results",
+                escape = FALSE
+              )) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 ```
 
-Lastly, we test the effects of estimating a model using only $x_1$ when the underlying DGP follows the structure of \eqref{eq_DGP}, this problem is most commonly known as having an omitted variable bias. The theoretical consequences of this problem are related to the consistency and unbiasedness of the estimators. Since it is necessary that $x_1$ and $x_2$ share a degree of correlation between them, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions of this methodology. This correlation will lead to an estimator of $\beta_1$ to have a higher or lower expected value (depending on the sign of the correlation) in comparison to the true parameter.
 
+Lastly, we test the effects of estimating a model using only $x_1$ when the underlying DGP follows the structure of \eqref{eq_DGP}, this problem is most commonly known as having an omitted variable bias. Since it is necessary that $x_1$ and $x_2$ share a degree of correlation between them, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions OLS. This correlation will lead to $\hat{\beta}_1$ to be estimated less efficiently (depending on the sign of the correlation) in comparison to the true parameter.
+
+
+We again follow exactly the same structure as for the base case, only that $x_2$ is not included into the estimation model. To show the loss in efficiency we present the density plots for the Monte Carlo results for $\hat{\beta}_1$ in figure \ref{fig:ommit}. There is a clear difference in term of the variance of the estimated coefficients between the cases for when $x_2$ is included into the model and not. This pattern only repeats itself no matter the number of observations used by the model. Nonetheless, we observe that the OLS estimate remains unbiased in any case.
+
+```{r ommit, echo = FALSE}
+(plot(ols, parameter_comb = list(b2 = 4), plot = FALSE)$B1)
+
+```
 # Package Principles {MCS}
 
 
 # Vignette{vignette}
 
-
-```{r , echo = FALSE , eval = TRUE, results = "hide", message=FALSE}
-param_list_ols <- param_list_ols <-
-  list(n = c(100, 200, 300), inc_x2 = c(0,1))
-
-ols_omi <- future_mc(fun = ols_test, repetitions = 10000,
-                     param_list = param_list_ols, b0 = 1, b1 = 4,
-                     b2 = 5, param_x1 = c(1,2), param_x2 = c(3,4),
-                     sigma2 = 3)
-
-
-```
-Operationally, we test this theoretical behavior using the same structure as for the last examples, now however we do not include $x_2$ into our estimated model. We present the results in table \ref{tab:ommiols}. To see a clearer difference we present the results for both models where $x_2$ is included and where is not. We see a clear difference in the estimated coefficients, on one hand the estimated intercept is completely overestimated, averaging around a value of 16 no matter the number of observations used or the number of MC replications. On the other hand, the estimated variance of the error term is also completely overestimated and does not seem to converge to the real value. We conclude that the absence of one important variable in the model has a bigger impact when compared to the inclusion of an irrelevant variable.
-
-```{r ommiols, echo = FALSE}
-tidy_mc_latex(summary(ols_omi), repetitions_set = c(10, 10000),
-                           column_names = c("Number of observations",
-                                            "$x_2$ included or not",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"),
-              caption = "Ommited variable bias MC results") %>%
-  kableExtra::kable_styling(latex_options = "HOLD_position")
-
-```
-
-
-
-
-
-
 # Package overview
 
-Monte Carlo Simulations aim to uncover properties of statistical inference techniques. 
-At its core, a Monte Carlo Simulations works through application of the techniques to repeatedly drawn samples from a pre-specified data generating process.  The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following steps:
+Monte Carlo Simulations aim to study the properties of statistical inference techniques. 
+At its core, a Monte Carlo Simulations works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process.  The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
 
-Running a Monte Carlo Simulation for a user defined function and given parameters using `future_mc()`
-Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
-Creating plots of the Monte Carlo Simulation and its results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
-Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+* Running a Monte Carlo Simulation for a user defined function over a parameter grid using `future_mc()`
+* Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
+* Creating plots of the Monte Carlo Simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
+* Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
 
-In the following subsections we will show you how you can implement those steps using the `tidyMC` package.
+In the following subsections we will show you how you can implement those tasks using the `tidyMC` package.
 
 
 ## Installing tidyMC
@@ -266,7 +258,15 @@ Afterwards you can load the package:
 
 ```{r}
 library(tidyMC)
+
+```
+Moreover, the following packages will be used in this vignette: 
+
+```{r, warning=FALSE}
+# install.packages("magrittr")
 library(magrittr)
+# install.packages("ggplot2")
+library(ggplot2)
 ```
 
 
@@ -313,15 +313,17 @@ param_list_ols <-
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
-The arguments of `fun` which are present in `param_list` have to be scalar values. Note that the arguments of `ols_test` which are contained in `param_list_ols`: `n` and `inc_x2` are scalar values. The remaining arguments of `ols_test` are allowed to take non-scalar values.
-Every variable used inside `fun` has either to be defined inside `fun` or given as an argument through the `...` argument.
-The value returned by `fun` has to be a named list. In our example the names of the returned list are `b0`, `b1`, `b2`, and `sigma2`.
-The names of the returned values and those of the arguments contained in `param_list` need to be different. Moreover, they cannot be `params`, `repetitions` or `setup` as these names are already occupied. Note that `b0`, `b1`, `b2`, and `sigma2` are the names of the returned values as well as names of arguments of `ols_test`. However, none of those arguments is contained in `param_list_ols`. If we would add either of those variables to `param_list_ols` we would need to change the name of the returned value for the respective variable.
+* The arguments of `fun` which are present in `param_list` have to be scalar values. Note that the arguments of `ols_test` which are contained in `param_list_ols`: `n` and `inc_x2` are scalar values. The remaining arguments of `ols_test` are allowed to take non-scalar values.
+* Every variable used inside `fun` has either to be defined inside `fun` or given as an argument through the `...` argument.
+* The value returned by `fun` has to be a named list. In our example the names of the returned list are `b0`, `b1`, `b2`, and `sigma2`.
+* The names of the returned values and those of the arguments contained in `param_list` need to be different. Moreover, they cannot be `params`, `repetitions` or `setup` as these names are already occupied. Note that `b0`, `b1`, `b2`, and `sigma2` are the names of the returned values as well as names of arguments of `ols_test`. However, none of those arguments is contained in `param_list_ols`. If we would add either of those variables to `param_list_ols` we would need to change the name of the returned value for the respective variable.
 
 We recommend to even further restrict the return value of `fun` to be a named list of scalars. This allows you to use all comfort functions of the `tidyMC` package. As you can see, we did that for `ols_test`.
 
 
-The argument `parallelisation_plan` allows the user to set a parallelisation plan. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()` by `furrr::furrr_options()`. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. As default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
+The argument `parallelisation_plan` allows the user to set a parallelisation plan. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()` by `furrr::furrr_options()`. The argument `seed` for `furrr::furrr_options()` can be specified in `parallelisation_options` following the formal requirements of its respective documentation. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. To construct `parallelisation_plan` the user needs to provide a list named after the arguments of `future::plan`. The main argument `strategy` needs to provide the specific type of parallelisation the user would like to use and the number of cores which are used in the function. Some of the options for strategy are: `multisession`, `multicore` and `cluster`. We strongly recommend the user to read the documentation of the `future` package for a more detailed instruction of how to set up the different strategies.
+
+As a default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
 
 <!-- maybe also say that tests can be skipped? Additionally maybe also give an example of a parralelisation playn, quickly laying out the main options? -->
 
@@ -382,14 +384,14 @@ If `fun` returns a named list of scalars the user can use `summary.mc()` to summ
 
 The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
 
-First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
+* First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
 
-Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
+* Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
 
+Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which ouputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and "none" are also available. 
 
 For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `b0`, `b1`, `b2`, and `sigma2`. Lastly each of these are composed by the "path" and scalar result of `mean()`. 
 
-<!-- If `fun` was further restricted to return a named list of scalars the function `summary.mc()` can be used to summarize the Monte Carlo results of an object of class `mc` that is returned by `future_mc()`. Using the argument `sum_funs` the user can define (different) functions which summarize the simulation results for each output (return values of `fun`) and each parameter combination. Thus, the functions inside `sum_funs` only take one argument, which is the output vector (with length `repetitions`) of one output of one specific parameter combination. The default summary functions are `mean()` for numeric outputs and `summary()` for outputs with non-numeric data types. As `ols_test` outputs are all numeric `mean()` will be used to summarize all outputs by default: -->
 
 ```{r}
 # Default
@@ -398,24 +400,19 @@ summary_default
 str(summary_default[[1]])
 ```
 
-<!-- The user can define summary functions by supplying a named (nested) list to `sum_funs`. When the functions provided for each output return only one numeric value (like `mean()` but unlike `summary()`) the results are twofold: first, a single scalar result of the function evaluating the whole output vector. Second, a "path" with length `repetitions` of the step wise calculation of the function's result across the output vector. Thus, for `ols_test` -->
 
 This nested list structure should give an idea of the reach and flexibility the `sum_funs` argument is allowed to have, since the user can specify a function for each element in this list.
 
 For an intermediate level of customization, the user can provide a combination of summarizing functions for every output, which will be used for all parameter combination. In the case of the OLS example, if we want to apply `mean()` on all estimated coefficients, but we want to use `var()` on the MC results of `sigma2`, the `sum_funs` should have the following structure:
+
 ```{r, eval = FALSE}
 # summarizing output the same way for each parameter combination with one function combination
 sum_funs_ols <- list(b0 = mean, b1 = mean , b2 = mean, sigma2 = var)
 ```
+
 Moreover, the user can specify any function provided it takes the output vector as only available argument.
 
 Lastly for the last level of customization, a nested list named after the `nice_names` where every element follows the structure of the last example (components named after the outputs and each component is a function) can be specified. We present an example for this:
-
-<!-- If the user wants to summarize the simulation results of a respective output in the same way for each parameter combination, a list whose components are named after the outputs (names of the returned list of `fun`) is supplied and each component is a function which only takes the vector of results of one output as the main argument. -->
-
-<!-- If the user wants to summarize the simulation results of a respective output differently for different parameter combinations, a nested list has to be supplied. The components of the outter list must be equal in length and naming to the `nice_names` (see `first_mcs$nice_names`) and each component is another list (inner list). The components of the inner list are then defined the same way as above (components named after the outputs and each component is a function). -->
-
-<!-- Here an example for the different specifications of `sum_funs`: -->
 
 ```{r}
 quantile_sum <- function(x) quantile(x, probs = 0.75)
@@ -436,15 +433,70 @@ summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
 
 We would like to reiterate that the provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
 
-<!-- The provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case. -->
-
 
 ### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
 
+If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned in a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
+
+```{r}
+mc_ols_plot <- plot(first_mc_ols, plot = FALSE)
+names(mc_ols_plot)
+```
+
+As the single list elements are of class `gg` and `ggplot2`, we can easily customize and extend the single plots using familiar `ggplot2` commands: 
+
+```{r}
+mc_ols_plot$b1 + 
+  ggplot2::geom_vline(xintercept = 4, col = "red") + 
+  ggplot2::theme_dark()
+```
+
+When creating the plots the user can also subset the setups which he/she would like to see in the plots using the `first_mc_ols$nice_names` in the function argument `which_setup`, or a named list in `parameter_comb`. The single components of the list have to be named after the parameters specified in `param_list` and contain vectors specifying the values of the parameters to filter by. In the ols example we can filter by the parameters `n` and `inc_x2`:
+
+```{r}
+# subsetting by nice_names
+mc_ols_plot_subset1 <- 
+  plot(first_mc_ols, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])
+#subsetting by parameter values
+mc_ols_plot_subset2 <- 
+  plot(first_mc_ols, plot = FALSE, parameter_comb = list(inc_x2 = 1))
+
+mc_ols_plot_subset1$sigma2
+```
+
+Thus, if the user wants distinct plots for every parameter combination, one needs to subset for the plot for any single setup in `first_mc_ols$nice_names`. 
+
+Finally, you can also plot the simulation results for several parameter combination in one single plot by specifying the argument `join` with the respective `first_mc_ols$nice_names`: 
+
+```{r}
+mc_ols_plot_joint <- plot(first_mc_ols, plot = FALSE, join = first_mc_ols$nice_names)
+mc_ols_plot_joint$b2
+```
+
+Please be aware that the only one of the three arguments `which_setup`, `parameter_comb`, and `join` can be specified at the same time.
 
 
+If the provided summary functions in `summary.mc()` return a single numeric value and thus a path of the summarized output over all simulation repetitions is returned, the user can use `plot.summary.mc()` to plot those paths. The first argument of the function is an object of class `summary.mc` returned by `summary.mc()`. Just as `plot.mc()`, `plot.summary.mc()` returns a list of objects of class `gg` and `ggplot2`. The list will contain one line plot for each output of `fun` displaying the paths of the results of the different simulation setups. The arguments `plot`, `which_setup`, `parameter_comb`, and `join` can be specified the same way as for `plot.mc`: 
 
+```{r}
+sum_mc_plot <- plot(summary_default, plot = FALSE)
+sum_mc_plot$b1 + 
+  ggplot2::geom_vline(xintercept = 100, col = "red") +
+  ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 0.1, vjust = 0.2))
 
+sum_mc_plot_subset1 <- 
+  plot(summary_default, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])
+
+sum_mc_plot_subset2 <- 
+  plot(summary_default, plot = FALSE, parameter_comb = list(inc_x2 = 1))
+
+sum_mc_plot_subset2$b1
+
+sum_mc_plot_joint <- 
+  plot(summary_default, plot = FALSE, join = first_mc_ols$nice_names[4:6])
+
+sum_mc_plot_joint$b1
+```
 
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
@@ -455,12 +507,11 @@ Using `tidy_mc_latex` the user can present the results from `future_mc` directly
 ```{r}
 tidy_mc_latex(
   x = summary(first_mc_ols),
-  repetitions_set = c(10, 1000),
-                           column_names = c("Number of observations",
-                                            "$x_2$ included or not",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"))
+  repetitions_set = c(10, 1000)
+) %>% 
+  print()
 ```
+
 The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `b0`, `b1`, `b2`, and `sigma2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
 
 Moreover, the next three arguments in `tidy_mc_latex` are comfort options to select which results of `summary.mc` depending on the parameter combinations will be presented in the table. On one hand, The argument `which_setup` allows the user to make use of the `nice_names` of the parameter combinations in the returned object by `future_mc()` to subset the rows in the table. On the other hand, the argument `parameter_comb` is used to directly filter the parameters by their values. This argument requires a named list, containing vector or scalar values of all parameters to be filtered from. The user must only provide one of this arguments at a time. We show how to make use of both parameters to subset the rows of table for $n = 100$ and $inc_{x2}=1$:
@@ -469,37 +520,46 @@ Moreover, the next three arguments in `tidy_mc_latex` are comfort options to sel
 tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000),
-  which_setup = first_mc_ols$nice_names[1],
-                           column_names = c("Number of observations",
-                                            "$x_2$ included or not",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"))
+  which_setup = first_mc_ols$nice_names[1]) %>% 
+  print()
 
 tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000),
-  parameter_comb = list(n = 100, inc_x2 = 1),
-                           column_names = c("Number of observations",
-                                            "$x_2$ included or not",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"))
-
+  parameter_comb = list(n = 100, inc_x2 = 1)) %>% 
+  print()
 ```
+
 The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `b0` and `sigma2` the user needs to set `which_out = c("b0", "sigma2")`.
 
-Lastly, all remaining arguments are directly related to the resulting LaTeX output, namely `caption` is used to provide the caption for the table as a string, and `column_names` which allows the user to change the final column names in the table. The latter argument must be a character vector with a length equal to the number of parameters and outputs of `fun`. For example, for the OLS example this vector would need to be of size 6. Lastly, the names are allowed to be written in standard LaTeX code, e.g. "$\beta_0$". 
+Lastly, by providing a named list to the argument `kable_options`, the user can change all arguments of the underlying function `kable::kbl()`. The names of the list have to be equal to the names of the arguments of the function and the contents of every element also has to fullfill its requirements. We provide an example of how this list should be constructed, but for optimal usage we strongly recommend the user to see the documentation of the `kable::kbl()` function.
 
 To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the \texttt{kableExtra} package in the standard tidyverse manner. For example:
 
 ```{r}
-tidy_mc_latex(summary(first_mc_ols), repetitions_set = c(10, 1000),
-                           column_names = c("Number of observations",
-                                            "$x_2$ included or not",
-                                            "$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"),
-              caption = "Ommited variable bias MC results") %>%
-  kableExtra::kable_styling(latex_options = "HOLD_position")
+tidy_mc_latex(summary(first_mc_ols), 
+              repetitions_set = c(10, 1000),
+              kable_options = list(
+                col.names = c("Number of observations",
+                              "$x_2$ included or not",
+                              "$\\beta_0$", "$\\beta_1$",
+                              "$\\beta_2$", "$s^2$"), 
+                caption = "Ommited variable bias MC results",
+                escape = FALSE
+              )
+) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  print()
 ```
+
+
+
+
+
+
+
+
+
 
 
 

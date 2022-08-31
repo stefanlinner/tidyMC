@@ -10,7 +10,7 @@ $endif$
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage[utf8x]{inputenc}
 $if(euro)$
 \usepackage{eurosym}
 $endif$
@@ -54,6 +54,7 @@ $if(lang)$
 \usepackage[shorthands=off,$lang$]{babel}
 \fi
 $endif$
+
 
 % Figure Placement:
 \usepackage{float}
