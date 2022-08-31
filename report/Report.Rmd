@@ -98,13 +98,11 @@ p. 122 add maybe here? For example we might be interested in the ability of OLS 
 <!-- Show distribution of interval  -->
 
 ## OLS consistency
-<<<<<<< HEAD
 
-To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares (OLS) estimator. Given a dependent variable $y$ and a set of iid. regressors $\boldsymbol{X} = \{x_1, x_2\}$ we consider the linear DGP 
-=======
 <!-- Add Hayashi as generl source in this chapter? -->
+To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares (OLS) estimator. Given a dependent variable $y$ and a set of iid. regressors $\boldsymbol{X} = \{x_1, x_2\}$ we consider the linear DGP 
+
 To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares(OLS) estimator. Given a dependent variable $y$ and a set of i.id. regressors $X = \{x_1, x_2\}$ we consider the linear DGP 
->>>>>>> 1458220822062d34ff590426dee181e131454f5b
 \begin{equation}
 	\label{eq_DGP}
 	y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon,
