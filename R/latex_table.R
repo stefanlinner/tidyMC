@@ -127,6 +127,8 @@ tidy_mc_latex <- function(
 
   n_setups <- length(setup_names)
 
+  . <- NULL
+
   data_table <-
     purrr::map_dfr(
       which_setup,
