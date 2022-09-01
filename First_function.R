@@ -228,7 +228,7 @@ n_params <- nrow(param_table)
 
 
 
-repetitions <- 1000
+repetitions <- 300
 
 parallelisation_options <- list(seed = TRUE)
 
@@ -382,6 +382,7 @@ speed_results5 <- bench::mark({
 }, check = FALSE)
 speed_results5$median
 
+
 MonteCarlos_vs_tidyMC <- function(reps, cores){
 
   out <- data.frame(
@@ -450,7 +451,7 @@ Martin_vs_tidyMC <- function(reps, cores){
             1:repetitions,
             .f = function(.y) {
               purrr::pmap_dfr(param_table[.x,], test_func)
-            }2
+            }
           )
         },
         .progress = TRUE,
