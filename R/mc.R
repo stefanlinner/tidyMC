@@ -7,9 +7,12 @@
 #' @param fun The function to be evaluated. See details.
 #' @param repetitions An integer that specifies the number of Monte Carlo iterations
 #' @param param_list A list whose components are named after the parameters of `fun` which should vary
-#' for the different Monte Carlo Simulation. Each component is a vector containing the desired grid
+#' for the different Monte Carlo Simulations. Each component is a vector containing the desired grid
 #' values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
 #' that parameter list.
+#' @param param_table Alternative to `param_list`. A `data.frame` or `data.table` containing a pre-built
+#' grid of values, where the columns are the parameters of `fun` which should vary for the different Monte Carlo
+#' Simulations. This is useful if you only want to run a Monte Carlo Simulation for a subset of all possible combinations.
 #' @param parallelisation_plan A list whose components are named after possible parameters
 #' of [future::plan()] specifying the parallelisation plan which should be used in the
 #' Monte Carlo Simulation. Default is `strategy = multisession`.
@@ -87,7 +90,8 @@ future_mc <-
   function(
     fun,
     repetitions,
-    param_list,
+    param_list = NULL,
+    param_table = NULL,
     parallelisation_plan = NULL,
     parallelisation_options = NULL,
     check = TRUE,
@@ -97,13 +101,22 @@ future_mc <-
 
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
-    checkmate::assert_list(param_list, names = "named")
-    purrr::walk(
-      param_list,
-      checkmate::assert_atomic_vector,
-      unique = TRUE,
-      .var.name = "Element of param_list"
-    )
+    checkmate::assert_list(param_list, names = "named", null.ok = TRUE)
+    if(!is.null(param_list)){
+      purrr::walk(
+        param_list,
+        checkmate::assert_atomic_vector,
+        unique = TRUE,
+        .var.name = "Element of param_list"
+      )
+    }
+    checkmate::assert_data_frame(param_table, col.names = "named", null.ok = TRUE)
+    if(!is.null(param_list) & !is.null(param_table)){
+      stop("Only one of the arguments param_list and param_table can be defined at the same time!")
+    }
+    if(is.null(param_list) & is.null(param_table)){
+      stop("At least one of the arguments param_list and param_table has to be defined!")
+    }
     checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
     checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
     checkmate::assert_logical(check, len = 1)
@@ -112,7 +125,8 @@ future_mc <-
     fun_argnames <- methods::formalArgs(fun)
     add_args <- list(...)
 
-    checkmate::assert_subset(names(param_list), choices = fun_argnames)
+    checkmate::assert_subset(names(param_list), choices = fun_argnames, empty.ok = TRUE)
+    checkmate::assert_subset(names(param_table), choices = fun_argnames, empty.ok = TRUE)
     checkmate::assert_list(add_args, names = "named")
     checkmate::assert_subset(names(add_args), fun_argnames)
 
@@ -136,7 +150,9 @@ future_mc <-
       do.call(future::plan, parallelisation_plan)
     }
 
-    param_table <- expand.grid(param_list)
+    if(!is.null(param_list)){
+      param_table <- expand.grid(param_list)
+    }
     param_names <- names(param_table)
 
     param_table_reps <-

@@ -640,6 +640,8 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
     which_setup <- join
   }
 
+  . <- NULL
+
   data_plot <-
     purrr::map(
       stat_names,

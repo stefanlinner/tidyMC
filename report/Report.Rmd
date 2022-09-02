@@ -297,7 +297,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 

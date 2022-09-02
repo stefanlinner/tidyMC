@@ -7,7 +7,8 @@
 future_mc(
   fun,
   repetitions,
-  param_list,
+  param_list = NULL,
+  param_table = NULL,
   parallelisation_plan = NULL,
   parallelisation_options = NULL,
   check = TRUE,
@@ -21,9 +22,13 @@ future_mc(
 \item{repetitions}{An integer that specifies the number of Monte Carlo iterations}
 
 \item{param_list}{A list whose components are named after the parameters of \code{fun} which should vary
-for the different Monte Carlo Simulation. Each component is a vector containing the desired grid
+for the different Monte Carlo Simulations. Each component is a vector containing the desired grid
 values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
 that parameter list.}
+
+\item{param_table}{Alternative to \code{param_list}. A \code{data.frame} or \code{data.table} containing a pre-built
+grid of values, where the columns are the parameters of \code{fun} which should vary for the different Monte Carlo
+Simulations. This is useful if you only want to run a Monte Carlo Simulation for a subset of all possible combinations.}
 
 \item{parallelisation_plan}{A list whose components are named after possible parameters
 of \code{\link[future:plan]{future::plan()}} specifying the parallelisation plan which should be used in the
