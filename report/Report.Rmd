@@ -211,11 +211,14 @@ We set the same structure of the estimated DGP identical to the base case, only 
 
 ```
 
+<!-- add tansitioning sentece to next chapter -->
 
 # Package Principles {MCS}
 
 
 # Vignette{vignette}
+
+<!-- add one sentece which is like: In the following we are going to show you how to recreate the above results by using the tidymc package -->
 
 # Package overview
 

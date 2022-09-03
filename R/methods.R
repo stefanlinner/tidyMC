@@ -514,8 +514,8 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
               ggplot2::ggplot(ggplot2::aes_string(stat, col = "params")) +
               ggplot2::geom_density() +
               ggplot2::theme_bw() +
-              ggplot2::labs(title = paste(
-                "Joint density plot of", length(join), "setups for the output", stat,sep = " "
+              ggplot2::labs(title = stringr::str_c(
+                "Joint density plot of", length(join), "setups for the output", stat, sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
             if(plot){
@@ -676,7 +676,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
                 function(params){
                   eval(
                     parse(
-                      text = paste(
+                      text = stringr::str_c(
                         "list(", params, ")",
                         sep = ""
                       )
@@ -749,8 +749,8 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
               ggplot2::ggplot(ggplot2::aes_string(x = "repetitions", y = stat, col = "setup")) +
               ggplot2::geom_line() +
               ggplot2::theme_bw() +
-              ggplot2::labs(title = paste(
-                "Joint time series of", length(join), "setups for the output", stat,sep = " "
+              ggplot2::labs(title = stringr::str_c(
+                "Joint time series of", length(join), "setups for the output", stat, sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
             if(plot){
@@ -807,11 +807,11 @@ print.mc <- function(x, ...){
   checkmate::assert_class(x, "mc")
 
   cat("Monte Carlo simulation results for the specified function: \n \n",
-      paste(deparse(x$fun), collapse = "\n"),
+      stringr::str_c(deparse(x$fun), collapse = "\n", sep = " "),
       "\n \n", "The following", length(x$nice_names), "parameter combinations: \n")
   print(x$parameter)
   cat("are each simulated", x$repetitions, "times.",
-      "\n \n The Running time was:", paste(hms::as_hms(x$calculation_time)),
+      "\n \n The Running time was:", stringr::str_c(hms::as_hms(x$calculation_time)),
       "\n \n Parallel:", x$parallel,
       "\n \n The following parallelisation plan was used: \n")
   print(x$plan)

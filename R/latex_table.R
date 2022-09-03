@@ -181,7 +181,7 @@ tidy_mc_latex <- function(
         function(params){
           eval(
             parse(
-              text = paste(
+              text = stringr::str_c(
                 "list(", params, ")",
                 sep = ""
               )
@@ -232,7 +232,7 @@ tidy_mc_latex <- function(
 
   out <- do.call(kableExtra::kbl, kable_options) %>%
     kableExtra::add_footnote(
-      label = paste(
+      label = stringr::str_c(
         "Total repetitions = ",n_reps,
         ", total parameter combinations = ", n_setups,
         collapse = ",", sep = ""
@@ -243,7 +243,7 @@ tidy_mc_latex <- function(
 
   if(!checkmate::test_set_equal(repetitions_set, n_reps)){
     index <- rep(n_setups_contained, length(repetitions_set))
-    names(index) <- paste("N = ", repetitions_set, sep = "")
+    names(index) <- stringr::str_c("N = ", repetitions_set, sep = "")
     out <-
       kableExtra::pack_rows(
         kable_input = out,

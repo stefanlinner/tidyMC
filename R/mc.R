@@ -166,7 +166,7 @@ future_mc <-
         purrr::map_chr(
           seq_len(nrow(param_table)),
           function(.x){
-            paste(
+            stringr::str_c(
               param_names,
               param_table[.x,],
               sep = "=",
@@ -183,13 +183,14 @@ future_mc <-
         quote({
 
           cl <-
-            paste(
+            stringr::str_c(
               purrr::map_chr(
                 param_names,
                 function(.x){
-                  paste(.x, get(.x), sep = " = ")
+                  stringr::str_c(.x, get(.x), sep = " = ")
                 }),
-              collapse = ", "
+              collapse = ", ",
+              sep = " "
             )
 
           tryCatch(
@@ -198,8 +199,8 @@ future_mc <-
                 eval(
                   parse(
                     text =
-                      paste("fun(",
-                            paste(
+                      stringr::str_c("fun(",
+                            stringr::str_c(
                               fun_argnames,
                               fun_argnames,
                               sep = "=",
@@ -214,12 +215,12 @@ future_mc <-
             },
             error  = {
               function(e)
-                paste(
+                stringr::str_c(
                   " \n Function error: ", eval(
                     parse(
                       text =
-                        paste("unlist(rlang::catch_cnd(fun(",
-                              paste(
+                        stringr::str_c("unlist(rlang::catch_cnd(fun(",
+                              stringr::str_c(
                                 fun_argnames,
                                 fun_argnames,
                                 sep = "=",
@@ -275,7 +276,7 @@ future_mc <-
     }
 
     message(
-      paste(
+      stringr::str_c(
         "Running whole simulation: Overall ",
         nrow(param_table),
         " parameter combinations are simulated ...",
@@ -296,9 +297,9 @@ future_mc <-
 
     calculation_time <- Sys.time() - start_time
 
-    message(paste("\n Simulation was successfull!",
+    message(stringr::str_c("\n Simulation was successfull!",
                   "\n Running time: ", hms::as_hms(calculation_time),
-                  collapse = ""))
+                  collapse = "", sep = ""))
 
     if(!check){
       scalar_results <-
