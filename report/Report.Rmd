@@ -61,10 +61,10 @@ With our \texttt{tidyMC} package, we want to enable researchers to easily and ef
 This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo 
 simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes. 
 
-With our \texttt{tidyMC} package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, \texttt{`tidyMC`} allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, \texttt{`tidyMC`} returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, \texttt{`tidyMC`} provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results. 
+<!-- With our \texttt{tidyMC} package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, \texttt{`tidyMC`} allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, \texttt{`tidyMC`} returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, \texttt{`tidyMC`} provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.  -->
 
-This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo 
-simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes. 
+<!-- This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo  -->
+<!-- simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes.  -->
 
 # Monte Carlo Simulation {MCS}
 MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances MCS work , mainly following <!-- \citep{kiviet_monte_2011}. -->
@@ -108,20 +108,20 @@ To demonstrate how a MCS works, we provide an example using the estimation of a 
 \end{equation}  
 where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\varepsilon$ is a normally distributed error term with variance $\sigma^2$, i.e. $\varepsilon \sim \mathcal{N}(0,\sigma^2)$. The corresponding OLS estimators $\hat{\beta}$ and $s^2$ for $\beta$ and $\sigma^2$  are
 \begin{align}
-	\hat{\beta} = (\boldsymbol{X}'\boldsymbol{X})^{-1} \boldsymbol{X}Y,\\
+	\hat{\beta} = (\boldsymbol{X}'\boldsymbol{X})^{-1} \boldsymbol{X}'Y,\\
 	s^2 =   \frac{1}{n-k-1} \hat{\varepsilon}' \hat{\varepsilon},
 \end{align}
 where $k = 3$ is the number of regressors and $\hat{\varepsilon}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size. 
 
 \noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $n = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators.  We repeat the estimation 10000 times for each $n$.
 
-The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_s2} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
+The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_b1_se} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
 
 
 ```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE, fig.show='hide'}
 
 ols_test <- 
-  function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
+  function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc.x2){
     
     # generation of data
     x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
@@ -129,8 +129,8 @@ ols_test <-
     e <- rnorm(n, sd = sqrt(sigma2))
     y <- b0 + b1*x1 + b2*x2 + e
     
-    if (inc_x2 == 0){
-      x2 <- x2 * inc_x2
+    if (inc.x2 == 0){
+      x2 <- x2 * inc.x2
     }
     
     # application of method
@@ -147,7 +147,7 @@ ols_test <-
 }
 
 param_list_ols <-
-  list(n = c(100, 200, 300), inc_x2 = c(0,1))
+  list(n = c(100, 200, 300), inc.x2 = c(0,1))
 
 ols <- future_mc(fun = ols_test,
                  repetitions = 1000,
@@ -163,7 +163,7 @@ ols <- future_mc(fun = ols_test,
 ```{r ols_table, echo = FALSE}
 
 tidy_mc_latex(summary(ols),
-              parameter_comb =  list(inc_x2 = 1),
+              parameter_comb =  list(inc.x2 = 1),
               repetitions_set = c(10, 1000),
               kable_options = list(
                 col.names = c("N. Observations",
@@ -182,12 +182,12 @@ tidy_mc_latex(summary(ols),
 
 
 ```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results"}
-(plot(ols, plot = FALSE, parameter_comb = list(inc_x2 = 1))$B1)
+(plot(ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))$B1)
 
 ```
 
-```{r ols_s2, echo = FALSE, fig.cap="MC $s^2$ results"}
-(plot(ols, plot = FALSE, parameter_comb = list(inc_x2 = 1))$B1_se)
+```{r ols_b1_se, echo = FALSE, fig.cap="MC $s^2$ results"}
+(plot(ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))$B1_se)
 
 ```
 
@@ -212,8 +212,6 @@ We set the same structure of the estimated DGP identical to the base case, only 
 ```
 
 <!-- add tansitioning sentece to next chapter -->
-
-# Package Principles {MCS}
 
 
 # Vignette{vignette}
@@ -268,7 +266,7 @@ library(ggplot2)
 ```{r}
 # fun
 ols_test <- 
-  function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
+  function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc.x2){
     
     # generation of data
     x1 <- rnorm(n = n, mean = param_x1[1], sd = param_x1[2])
@@ -276,8 +274,8 @@ ols_test <-
     e <- rnorm(n, sd = sqrt(sigma2))
     y <- b0 + b1*x1 + b2*x2 + e
     
-    if (inc_x2 == 0){
-      x2 <- x2 * inc_x2
+    if (inc.x2 == 0){
+      x2 <- x2 * inc.x2
     }
     
     # application of method
@@ -292,19 +290,19 @@ ols_test <-
   }
 ```
 
-The second argument of `future_mc()` is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` should be a list whose components are named after the parameters of `fun` which should vary for the different Monte Carlo Simulation and each component is a vector containing the desired grid values for the parameter. Consider the following example for `param_list` and note that its components are named accordingly to the parameters of `ols_test`: `n` and `inc_x2`, respectively:
+The second argument of `future_mc()` is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` should be a list whose components are named after the parameters of `fun` which should vary for the different Monte Carlo Simulation and each component is a vector containing the desired grid values for the parameter. Consider the following example for `param_list` and note that its components are named accordingly to the parameters of `ols_test`: `n` and `inc.x2`, respectively:
 
 ```{r}
 # param_list
 param_list_ols <- 
-  list(n = c(100, 200, 300), inc_x2 = c(0,1))
+  list(n = c(100, 200, 300), inc.x2 = c(0,1))
 ```
 
 `future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
-* The arguments of `fun` which are present in `param_list` have to be scalar values. Note that the arguments of `ols_test` which are contained in `param_list_ols`: `n` and `inc_x2` are scalar values. The remaining arguments of `ols_test` are allowed to take non-scalar values.
+* The arguments of `fun` which are present in `param_list` have to be scalar values. Note that the arguments of `ols_test` which are contained in `param_list_ols`: `n` and `inc.x2` are scalar values. The remaining arguments of `ols_test` are allowed to take non-scalar values.
 
 * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument through the `...` argument.
 
@@ -445,7 +443,7 @@ mc_ols_plot$b1 +
   ggplot2::theme_dark()
 ```
 
-When creating the plots the user can also subset the setups which he/she would like to see in the plots using the `first_mc_ols$nice_names` in the function argument `which_setup`, or a named list in `parameter_comb`. The single components of the list have to be named after the parameters specified in `param_list` and contain vectors specifying the values of the parameters to filter by. In the ols example we can filter by the parameters `n` and `inc_x2`:
+When creating the plots the user can also subset the setups which he/she would like to see in the plots using the `first_mc_ols$nice_names` in the function argument `which_setup`, or a named list in `parameter_comb`. The single components of the list have to be named after the parameters specified in `param_list` and contain vectors specifying the values of the parameters to filter by. In the ols example we can filter by the parameters `n` and `inc.x2`:
 
 ```{r}
 # subsetting by nice_names
@@ -453,7 +451,7 @@ mc_ols_plot_subset1 <-
   plot(first_mc_ols, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])
 #subsetting by parameter values
 mc_ols_plot_subset2 <- 
-  plot(first_mc_ols, plot = FALSE, parameter_comb = list(inc_x2 = 1))
+  plot(first_mc_ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))
 
 mc_ols_plot_subset1$sigma2
 ```
@@ -482,7 +480,7 @@ sum_mc_plot_subset1 <-
   plot(summary_default, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])
 
 sum_mc_plot_subset2 <- 
-  plot(summary_default, plot = FALSE, parameter_comb = list(inc_x2 = 1))
+  plot(summary_default, plot = FALSE, parameter_comb = list(inc.x2 = 1))
 
 sum_mc_plot_subset2$b1
 
@@ -502,8 +500,8 @@ Using `tidy_mc_latex` the user can present the results from `future_mc` directly
 tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000)
-) %>% 
-  print()
+) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 ```
 
 The resulting table is composed of two panels, which corresponds to the length of `repetitions_set`. In them the columns correspond to the results of the summarizing functions for `b0`, `b1`, `b2`, and `sigma2`, and the rows correspond to specific combinations of the parameters provided in `parameter_list`. The footnote in the table shows the number of repetitions and the total parameter combinations provided to `future_mc`.
@@ -514,14 +512,14 @@ Moreover, the next three arguments in `tidy_mc_latex` are comfort options to sel
 tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000),
-  which_setup = first_mc_ols$nice_names[1]) %>% 
-  print()
+  which_setup = first_mc_ols$nice_names[1]) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 
 tidy_mc_latex(
   x = summary(first_mc_ols),
   repetitions_set = c(10, 1000),
-  parameter_comb = list(n = 100, inc_x2 = 1)) %>% 
-  print()
+  parameter_comb = list(n = 100, inc.x2 = 1)) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 ```
 
 The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `b0` and `sigma2` the user needs to set `which_out = c("b0", "sigma2")`.
@@ -542,30 +540,8 @@ tidy_mc_latex(summary(first_mc_ols),
                 escape = FALSE
               )
 ) %>%
-  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
-  print()
+  kableExtra::kable_styling(latex_options = "HOLD_position")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -583,10 +559,34 @@ On one hand, the whole development of our package draws from the benefits of the
 On the other hand, when it comes to the implementation of the paralellised simulation both functions fifer totally from each other. The `MonteCarlo` function is built around the implementation of the `snow` and `snowfall` packages. These packages let the user perform calculations by in an master/worker scheme, this means that the main function call distributes tasks to the "workers" (CPUs). Thus, all workers resolve the tasks they are given and convey their results to the main `R` session giving the instructions. In contrast, `future_mc` draws its computing power from the `future` package through the `furrr` package API. The `future` package conceptualizes parallel computation based on task processing constructs called `futures` which are tasks that are resolved in background process while the main session continues to run. The benefit of this is twofold, for one all tasks are centralized in a queue and are supplied to the workers as soon as they are available which keeps calculation times consistent accross workers. For the other, the main session can still delegate tasks and perform operations, provided that no results are required from the unresolved futures. In the design of `future_mc` we reap these benefits through the use of the `furrr::pmap()` function, to which we provide the user's function and hes/hers desired parameter grid replicated as many times as the number of MonteCarlo repetitions.
 
 
-## 
+## Package Principles {MCS}
 
+In developing the `tidyMC` package, we followed the principle of "fail early and often", i.e. if a function is misspecified, we want our function to fail as early as possible and also return readable and informative error messages. To achieve this goal, the first part of each function in our package consists of assertions to the input parameters, as these are specified by the user and are therefore error-prone. After making sure that the input parameters are correctly specified, the following core of the function should work without problems and can thus be executed. In our package, we ensure the class and general structure of the input parameters by using the `checkmate` package, as the `checkmate` commands can almost always be written in a readable line of code, produce readable error messages and are written in C, so we don't have to worry about execution time overhead.
 
+Since one of our main focuses is to embed our functions in `tidyMC` into the `tidyverse` structure, we have used functions from packages of the `tidyverse` whenever possible. This is particularly evident in the following three cases: First, we use `stringr::str_c()` instead of `paste()` as this is generally faster and more stable. Second, we mostly work with tibbles instead of data.Frames, as they provide more consistent subsetting behaviour and we take advantage of tibbles' higher flexibility by storing lists in columns. Thirdly, for all repeated calculations that are normally handled by for loops, we implement their `purrr` counterparts. These are all implemented taking into account the type of the object being handled to reduce computation time.
 
+To work collaboratively on our package code, we use the version control system `Git` and manage our Git project with `GitHub`. This ensures that our pieces of code are merged correctly and nothing gets lost along the way. It also allows us to track our development over time and easily revert to older versions of our package. We also relied heavily on [Hadley Wickham's book](https://r-pkgs.org/), which is a great summary of best practices in package programming. As recommended by Wickham, when we wanted to use functions from another package, we added the appropriate package to the `NAMESPACE` file with `usethis::use_package()` and then used the form `package::function()` when calling a function from another package in our code. This way, all dependencies are clear to the reader. To reduce package dependencies outside the `tidyverse`, we tried to avoid using packages that are not part of the `tidyverse` whenever possible. 
+
+Our typical development workflow (inspired by Hadley Wickham) looks as follows: 
+
+1. we implement the desired feature in our code relying on `tidyverse` functions
+
+2. we use `devtools::load_all()` to make our (updated) function available for experimentation
+
+3. we run an example to check whether the functionality is implemented correctly
+
+4. we try to take care about the function documentation using `roxgen2` right away, as at this point all requirements for the function and the functionality are best in our mind
+
+5. we run `devtools::check()` and fix all occurring notes, warnings, and errors
+
+6. a group member who was not involved in the coding runs several examples using the function to test its functionality
+  6.1 Whenever a bug occurs, it is reported to the developer of the function, who takes care of fixing the bug
+  
+  6.2 the bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
+  
+  
+  
+## Speed comparison
 
 
 # Conclusion
@@ -595,21 +595,38 @@ With the `tidyMC` package we provide researchers with an easy and comfortable wa
 While we have implemented many different options for the user, there is still room for extensions. Right now the plot function only allows for plotting densities. In a future version, we may add further plotting options. Furthermore, it may be beneficial to add predesigned options for different kinds of flavors of Monte Carlo Simulations. Our current implementation is as general as possible. Specifying the plot and table functions for specific use cases would likely lead to a more comfortable user experience. For example, if different estimators are compared, it might make sense to add preset plot functions that more effectively allows visualizing the differences in performance. However, given the level of generality for which we designed that package, we believe that its current implementation may nonetheless lead to good results for all potential users.
 
 
-# Strucutre
--Introduction to MCS (5)
-- How it works in our package (10)
-  - parallelisation plan
-  - function
-  - return objects
-    - objects
-    - summary
-    - plots
-    - tables 
-  - exampl of outputs
-  - extension: bootstrap
-- Comparison to Monte Carlos package (3)
-  - objects
-  - speed
-    -bench::mark
-- Vignette
+# Unresolved Issues 
+
+With the help of various online resources, especially [Stackoverflow](https://stackoverflow.com/), we were able to fix all errors, warnings and notes returned by `devtools::check()` in a satisfactory way (for us), except for one:
+
+![Unresolved Note.](note_check.PNG)
+
+If this note occurs in the context of a `dplyr` function, the problem can easily be solved by using the `rlang::.data` pronoun after adding `rlang .data` to the `@importFrom` tag in your `roxygen2` header, as explained e.g. in this [post](https://community.rstudio.com/t/how-to-solve-no-visible-binding-for-global-variable-note/28887/2?u=shamindras). However, if this note does not occur in the context of a `dplyr` function, but as in our case with `purrr::map()`, there is (at least to our knowledge) no such nice solution, as also this [stackoverflow post](https://stackoverflow.com/questions/66816638/no-visible-binding-for-global-variable) is not answered. Thus, we decided to use the second option presented in the (R-blogger post)[https://www.r-bloggers.com/2019/08/no-visible-binding-for-global-variable/] and set 
+
+```{r}
+. <- NULL
+```
+
+at the respective part in the code. This solution is often used when working with the `data.table` package and deals with the note in the RCMD-check as the variable `.` then has a visible binding (to `NULL`). However, it feels a bit "hacky" to us and we would like to know if there is another more natural solution to that problem.
+
+
+
+
+<!-- # Strucutre -->
+<!-- -Introduction to MCS (5) -->
+<!-- - How it works in our package (10) -->
+<!--   - parallelisation plan -->
+<!--   - function -->
+<!--   - return objects -->
+<!--     - objects -->
+<!--     - summary -->
+<!--     - plots -->
+<!--     - tables  -->
+<!--   - exampl of outputs -->
+<!--   - extension: bootstrap -->
+<!-- - Comparison to Monte Carlos package (3) -->
+<!--   - objects -->
+<!--   - speed -->
+<!--     -bench::mark -->
+<!-- - Vignette -->
 
