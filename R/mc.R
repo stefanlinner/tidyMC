@@ -61,7 +61,7 @@
 #' * fun: The user-defined function `fun`
 #' * repetitions: The number of repetitions run for each parameter setup
 #' * parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
-#' * plan: A list which was used to specify the parallelisation plan via [future::plan()]
+#' * plan: A list that specified the parallelisation plan via [future::plan()]
 #'
 #' @export
 #'
