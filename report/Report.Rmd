@@ -33,15 +33,9 @@ language: english
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# library(profvis)
-# library(purrr)
-# library(dplyr)
-# library(tibble)
-# library(rlang)
-# library(ggplot2)
+library(tidyverse)
+library(kableExtra)
 library(tidyMC)
-library(magrittr)
-# devtools::load_all()
 ```
 
 # Introduction
@@ -62,7 +56,7 @@ With our `tidyMC` package, we want to enable researchers to easily and efficient
 This report is structured as follows. Section \@ref(Monte Carlo Simulation) gives an introduction to why and how Monte Carlo Simulations work and provides a simple OLS example. Section \@ref(Package Principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in `R`. Section \@ref(Vignette) presents `tidyMC`'s vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \@ref(Comparison to other Monte Carlo Approaches in R) compares the performance of `tidyMC` to the performance of the `MonteCarlo` package and other potential MCS implementations. Section \@ref(Conclusion) concludes.
 
 <!-- HUHU: \@ref doesn`t work. Changed the references, maybe that already fixed it?-->
-<!-- HUHU: Where to place Best practices? before or after vignette? Do it consistently with the order above -->
+<!-- HUHU: Where to place Best practices? before or after vignette? Do it consistently with the order above. Move the package principles -->
 
 <!-- With our \texttt{tidyMC} package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, \texttt{`tidyMC`} allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, \texttt{`tidyMC`} returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, \texttt{`tidyMC`} provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.  -->
 
@@ -96,7 +90,7 @@ MCS is most commonly used to infer properties of the distribution of statistics 
 <!-- @cite{dude}  -->
 gives a few things that need to be considered when doing and presenting MCS. The results must allow the audience to get a precise picture of the Monte Carlo experiment. MCS generally involves testing the attributes of $q_n$ not only for one DGP but for a wide set of DGPs that may include \hl{nuisance} parameters that may significantly alter the distribution.
 
-We present one example of a MCS. \hl{Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications.} One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS cite(dude), their values have to be chosen with care to appropriately represent the results from the experiment. The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear - behavior of the key indicators of the performance of the technique. As the later sections will show, `tidyMC` provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators. The packages' summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterwards to easily communicate the desired results. Due to the flexible design of the `tidyMC`, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator.
+We present one example of a MCS. \hl{Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications.} One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS \hl{cite(dude)}, their values have to be chosen with care to appropriately represent the results from the experiment. The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear - behavior of the key indicators of the performance of the technique. As the later sections will show, `tidyMC` provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators. The packages' summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterwards to easily communicate the desired results. Due to the flexible design of the `tidyMC`, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator.
 
 <!-- HUHU: why use \hl? -->
 <!-- HUHU: Don't forget to replace all 'dude' -->
@@ -567,21 +561,22 @@ To work collaboratively on our package code, we use the version control system `
 
 Our typical development workflow (inspired by Hadley Wickham) looks as follows: 
 
-\begin{enumerate}
-  \item we implement the desired feature in our code relying on `tidyverse` functions
-  \item we use `devtools::load_all()` to make our (updated) function available for experimentation
-  \item we run an example to check whether the functionality is implemented correctly
-  \item we try to take care about the function documentation using `roxgen2` right away, as at this point all requirements for the function and the functionality are best in our mind
-  \item we run `devtools::check()` and fix all occurring notes, warnings, and errors
-  \item a group member who was not involved in the coding runs several examples using the function to test its functionality
-  \begin{enumerate}
-    \item Whenever a bug occurs, it is reported to the developer of the function, who takes care of fixing the bug
-    \item the bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
-  \end{enumerate}
-\end{enumerate}
+* We implement the desired feature in our code relying on `tidyverse` functions
+
+* We run an example to check whether the functionality is implemented correctly
+
+* We use `devtools::load_all` to make our (updated) function available for experimentation
+
+* We try to take care of the function documentation using `roxygen2` right away, as at this point all requirements for     the function and the functionality are best in our mind
+
+* We run `devtools::check` and fix all occurring notes, warnings, and errors
+
+* A group member who was not involved in the coding runs several examples using the function to test its functionality
   
-  <!-- HUHU: Please check if nested list is represtened correctly in pdf -->
+  - Whenever a bug occurs, it is reported to the developer of the function, who takes care of fixing the bug
   
+  - The bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This           test ensures that the same bug will not occur a second time.
+
 ## Speed comparison
 
 
