@@ -45,6 +45,7 @@ library(magrittr)
 ```
 
 # Introduction
+
 Monte Carlo Simulations (henceforth MCS) are used to study the properties of econometrics inference techniques by simulation. 
 They are almost always part of theoretical econometric research to study the performance of some inference technique. They supplement theoretical research most often in one of four ways. Firstly, they are used to assess the performance of asymptotically valid techniques in smaller samples. Secondly, they are  used to assess how robust a technique is to violations of its theoretical assumptions. Thirdly, they allow to compare the performance of different techniques for a given data generating process (DGP). Fourthly, MCS allows to investigate the properties of inference techniques for which no analytic solution exists.  Moreover, MCS itself can be used as a statistical inference technique. For example, Bootstrap Inference can be conceptualized as a special case of MCS. Beyond these examples, there are many more areas where MCS is used. However, independent of its use-case, easy and efficient implementation of MCS is currently only sparsely available.
 
@@ -56,43 +57,49 @@ They are almost always part of theoretical statistical research to research the 
 
 <!-- Na: This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction as to why and how MCS work, and an example of the properties of OLS is presented. Section \@ref(package-principles) explains the coding practices followed during the development and gives a conceptual overview of how MCS are implemented in R. Section \@ref(vignette) presents tidyMC's vignette and gives a detailed description on the functionalities of the package, while providing an an easy-to-follow guide on how to implement MCS. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) benchmarks the performance of tidyMC in comparison to the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes.-->
 
-With our \texttt{tidyMC} package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, `tidyMC` allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, `tidyMC` returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, \texttt{`tidyMC`} provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results. 
+With our `tidyMC` package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language `R`. For one, `tidyMC` allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, `tidyMC` returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, `tidyMC` provides functions to effectively communicate the results of the MCS. Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a `ggplot` object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready `LaTex` tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.
 
-This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo 
-simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes. 
+This report is structured as follows. Section \@ref(Monte Carlo Simulation) gives an introduction to why and how Monte Carlo Simulations work and provides a simple OLS example. Section \@ref(Package Principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in `R`. Section \@ref(Vignette) presents `tidyMC`'s vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \@ref(Comparison to other Monte Carlo Approaches in R) compares the performance of `tidyMC` to the performance of the `MonteCarlo` package and other potential MCS implementations. Section \@ref(Conclusion) concludes.
+
+<!-- HUHU: \@ref doesn`t work. Changed the references, maybe that already fixed it?-->
+<!-- HUHU: Where to place Best practices? before or after vignette? Do it consistently with the order above -->
 
 <!-- With our \texttt{tidyMC} package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language R. For one, \texttt{`tidyMC`} allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, \texttt{`tidyMC`} returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, \texttt{`tidyMC`} provides functions to effectively communicate the results of the MCS.  Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a ggplot object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready LaTex tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.  -->
 
 <!-- This report is structured as follows. Section \@ref(monte-carlo-simulation) gives an introduction to why and how Monte Carlo  -->
 <!-- simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes.  -->
 
-# Monte Carlo Simulation {MCS}
-MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances MCS work , mainly following <!-- \citep{kiviet_monte_2011}. -->
+# Monte Carlo Simulation
 
+MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances MCS work, mainly following <!-- \citep{kiviet_monte_2011}. -->
 
 
 ## Pseudo Random Number Generation and the Data Generating Process
-Using MCS on computers has the great advantage that, with the necessary information, the simulation results can be replicated on most machines. This is possible because, given seed and algorithm, the numbers created by a random number generator are completely reproducible. 
-MCS generally start with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead, the computer draws from different distributions that are generated through pseudo-random draws from a uniform distribution.  Draws from a uniform distribution are created by using so-called random number generators (RNG). These algorithms are applied to a natural number, called the seed. The resulting values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. The combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The purpose of the `tidyMC`-package is to additionally allow easy parallelization of the MCS. With parallel computing, special attention has to be paid to creating disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on the L’Ecuyer-CMRG RNG streams implemented in `furrr::furrr_options`. The algorithm creates reproducible sets of numbers for each parallel worker, using an integer seed of at most length 7. \hl{Alternatively, a seed of length 1 is accepted, which corresponds to a valid seed of length 7}. Because the algorithm creates a subset of random numbers for each worker, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. \hl{Moreover, our function allows supplying user-generated lists of random variables.} 
+
+Using MCS on computers has the great advantage that, with the necessary information, the simulation results can be replicated on most machines. This is possible because, given seed and algorithm, the numbers created by a random number generator are completely reproducible. MCS generally start with a synthetically created i.i.d. sample. Computers are, however, not able to generate truly random draws from different distributions. Instead, the computer draws from different distributions that are generated through pseudo-random draws from a uniform distribution. Draws from a uniform distribution are created by using so-called random number generators (RNG). These algorithms are applied to a natural number, called the seed. The resulting values are pseudo-random because they are indistinguishable from truly random numbers but are fully determined by the combination of the algorithm and the seed. The combined knowledge of the algorithm and the seed allows exact replication of a series of pseudo-random numbers generated. The purpose of the `tidyMC` package is to additionally allow easy parallelization of the MCS. With parallel computing, special attention has to be paid to creating disjoint and sufficiently long sets of draws from a uniform distribution. Our package builds on the L’Ecuyer-CMRG RNG streams implemented in `furrr::furrr_options`. The algorithm creates reproducible sets of numbers for each parallel worker, using an integer seed of at most length 7. \hl{Alternatively, a seed of length 1 is accepted, which corresponds to a valid seed of length 7}. Because the algorithm creates a subset of random numbers for each worker, the stream and hence the MCS results are only reproducible if the same number of parallel workers is used. \hl{Moreover, our function allows supplying user-generated lists of random variables.} 
 \hl{Complex multivariate distributions can then be simulated as functions of different standard distributions. This allows us to generate and work with distributions that are analytically not manageable.}
+
+<!-- HUHU: why use \hl? -->
 
 <!--The possibility to replicate the draws allows for exactly reproducing results that build on the pseudo-randomly generated number on different computers.   The most common algorithm, as well as R's standard algorithm, used for the generation of pseudo-random draws from a standard uniform distribution, is the Mersenne-Twister algorithm. There are however more algorithms available. In R it is also possible to specify your own algorithm to create pseudo-random numbers.
 
 Generating pseudo-random numbers from more complex distributions uses the distribution's cumulative distribution function (CDF). It can be shown that every random variable $X$ has a CDF $F$ if $X = F^{-1}(U)$, where U is a random variable uniformly distributed on $(0,1)$. Pseudo-random draws from different probability distributions are conceptually implemented by applying the inverse of CDF to pseudo-random numbers from the uniform distribution. Direct application of the inverse CDF is however often computationally time-consuming and requires that the inverse CDF is analytically available. To account for the two shortcomings different approaches have been developed for specific distributions, that also easily extend to random vectors. While they build on the idea to use the inverse of the CDF, their concrete design is out of the scope of this paper. A general overview can be found in the documentation of the respective R-functions. --> 
 
 
-
 ## Monte Carlo Distribution Approximation
-MCS is most commonly used to infer properties of the distribution of statistics in a fixed setting, i.e. for a prespecified DGP, hence the simulation results hold only for this. Since it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies.  In MCS we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\beta$, some deterministic variables $D$, some random variables $v$, and a given number of observations, s.t. $q_n = q_n(\beta,D,v,n)$. What a Monte Carlos simulation ultimately achieves is a numerical approximation of the true distribution of $q_n$ for the specified DGP. Let $q_n^R$ be the statistic generated by the $R^th$ Monte Carlo Simulation. Then the histogram of all $q_n^R$ is an unbiased and consistent estimator of $q_n$. Thus, the precision of the approximation is controlled by setting the number of Monte Carlo estimates. We can then use different statistics such as mean and variance on $q_n^R$ to summarize the distribution of the statistic for the prespecified DGP. The approach can of course be easily extended to a vector of statistics $q_n$. 
+
+MCS is most commonly used to infer properties of the distribution of statistics in a fixed setting, i.e. for a prespecified DGP, hence the simulation results hold only for this. Since it additionally only approximates the distribution numerically, we need to control for the resulting approximation inaccuracies. In MCS we generally simulate the distribution of a statistic $q_n$. The statistic can often be expressed as a function of a parameter vector $\beta$, some deterministic variables $D$, some random variables $v$, and a given number of observations, s.t. $q_n = q_n(\beta,D,v,n)$. What a Monte Carlo Simulation ultimately achieves is a numerical approximation of the true distribution of $q_n$ for the specified DGP. Let $q_n^R$ be the statistic generated by the $R^th$ Monte Carlo Simulation. Then the histogram of all $q_n^R$ is an unbiased and consistent estimator of $q_n$. Thus, the precision of the approximation is controlled by setting the number of Monte Carlo estimates. We can then use different statistics such as mean and variance on $q_n^R$ to summarize the distribution of the statistic for the prespecified DGP. The approach can of course be easily extended to a vector of statistics $q_n$.
 
 
 ## Monte Carlo Best Practices
+
 <!-- @cite{dude}  -->
 gives a few things that need to be considered when doing and presenting MCS. The results must allow the audience to get a precise picture of the Monte Carlo experiment. MCS generally involves testing the attributes of $q_n$ not only for one DGP but for a wide set of DGPs that may include \hl{nuisance} parameters that may significantly alter the distribution.
 
-We present one example of a MCS. \hl{Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications.} One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS cite(dude), their values have to be chosen with care to appropriately represent the results from the experiment.  The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear- behavior of the key indicators of the performance of the technique. As the later sections will show, \texttt{`tidyMC`} provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators  The packages summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterward to easily communicate the desired results. Due to the flexible design of the \texttt{`tidyMC`}, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator.
+We present one example of a MCS. \hl{Instead of going through every use case, we next describe one specific MCS use case. The insights from that use case should however be easily transferable to other MCS applications.} One way to perform MCS is mimic analytic derivations. For example, if properties of an asymptotically consistent technique are studied, the MCS should include different nuisance parameters over increasing sample sizes. The report of the results should then include the technique's key performance indicators, such as bias and efficiency, over different combinations of nuisance parameters and sample sizes. As the parameters are the explanatory variables of the MCS cite(dude), their values have to be chosen with care to appropriately represent the results from the experiment. The reported representative selection of sample size and nuisance parameters should then show the - potentially nonlinear - behavior of the key indicators of the performance of the technique. As the later sections will show, `tidyMC` provides easy options to define an arbitrarily large parameter grid to use for the MCS as well as user-defined performance indicators. The packages' summary functions allow the researcher to get a quick overview of the results of the combinations defined in the parameter grid. The plot and table functions allow afterwards to easily communicate the desired results. Due to the flexible design of the `tidyMC`, the parameter grid can easily be extended to include different estimators for comparisons. It also allows using the distribution of the data itself to generate a new sample, from which we can then infer the properties of an estimator.
 
-
+<!-- HUHU: why use \hl? -->
+<!-- HUHU: Don't forget to replace all 'dude' -->
 
 <!-- ### Presenting MCS findngs
 p. 122 add maybe here? For example we might be interested in the ability of OLS to estimate the variable parameter $\beta_1$ of a simple linear regression model with deterministic regressor. -->
@@ -101,22 +108,23 @@ p. 122 add maybe here? For example we might be interested in the ability of OLS 
 
 ## OLS consistency
 
-To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares(OLS) estimator. Given a dependent variable $y$ and a set of i.id. regressors $X = \{x_1, x_2\}$ we consider the linear DGP 
+To demonstrate how a MCS works, we provide an example using the estimation of a linear model using the ordinary least squares (OLS) estimator. Given a dependent variable $\boldsymbol{y}$ and a set of i.i.d. regressors $\boldsymbol{X} = \{\boldsymbol{x_1}, \boldsymbol{x_2}\}$ we consider the linear DGP
 \begin{equation}
 	\label{eq_DGP}
-	y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon,
+	\boldsymbol{y} = \beta_0 + \beta_1 \boldsymbol{x_1} + \beta_2 \boldsymbol{x_2} + \boldsymbol{\varepsilon},
 \end{equation}  
-where $\beta  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\varepsilon$ is a normally distributed error term with variance $\sigma^2$, i.e. $\varepsilon \sim \mathcal{N}(0,\sigma^2)$. The corresponding OLS estimators $\hat{\beta}$ and $s^2$ for $\beta$ and $\sigma^2$  are
+where $\boldsymbol{\beta}  = \{\beta_0, \beta_1, \beta_2\}$ are the coefficients and $\boldsymbol{\varepsilon}$ is a normally distributed error term with variance $\sigma^2$, i.e. $\varepsilon_i \sim \mathcal{N}(0,\sigma^2)$. The corresponding OLS estimators $\boldsymbol{\hat{\beta}}$ and $s^2$ for $\boldsymbol{\beta}$ and $\sigma^2$  are
 \begin{align}
-	\hat{\beta} = (\boldsymbol{X}'\boldsymbol{X})^{-1} \boldsymbol{X}'Y,\\
-	s^2 =   \frac{1}{n-k-1} \hat{\varepsilon}' \hat{\varepsilon},
+	\hat{\beta} = (\boldsymbol{X}'\boldsymbol{X})^{-1} \boldsymbol{X}'\boldsymbol{y},\\
+	s^2 =   \frac{1}{n-k-1} \boldsymbol{\hat{\varepsilon}}' \boldsymbol{\hat{\varepsilon}},
 \end{align}
-where $k = 3$ is the number of regressors and $\hat{\varepsilon}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size. 
+where $k = 2$ is the number of regressors and $\boldsymbol{\hat{\varepsilon}}$ is the vector of residuals. Both estimators are consistent and unbiased. Accordingly OLS should be able to correctly estimate the coefficients for every sample size, while the precision of the estimates should increase in the sample size.
 
-\noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\beta = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables  $x_1$ and $x_2$. Additionally, we generate $\varepsilon$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $n = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators.  We repeat the estimation 10000 times for each $n$.
+\noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\boldsymbol{\beta} = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$. Additionally, we generate $\boldsymbol{\varepsilon}$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $\boldsymbol{n} = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators. We repeat the estimation 1000 times for each $n$.
 
-The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_b1_se} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
+The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \@ref(fig:ols_b1), \@ref(fig:ols_b1_se) and table \@ref(tab:ols_table) confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
 
+<!-- HUHU: I tried to fix the figure references - try if it works now -->
 
 ```{r, echo = FALSE, eval = TRUE, results = "hide", message=FALSE, fig.show='hide'}
 
@@ -186,20 +194,21 @@ tidy_mc_latex(summary(ols),
 
 ```
 
-```{r ols_b1_se, echo = FALSE, fig.cap="MC $s^2$ results"}
+```{r ols_b1_se, echo = FALSE, fig.cap="MC S.d. $\\beta_1$ results"}
 (plot(ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))$B1_se)
 
 ```
 
 
+## Omitted variable problem
 
-## Omitted variable bias
+Moreover, a common problem for estimation is the inclusion of suitable regressors into the model. One common problem is the absence of relevant variables in the model, also called omitted variable problem. In this subsection we test the impact of this problem in OLS estimation.
 
-Moreover, a common problem for estimation is the inclusion of suitable regressors into the model. One common problem is the absence of relevant variables in the model, also called omitted variable bias. In this subsection we test the impact of this problem in OLS estimation.
+We test the effects of estimating a model using only $\boldsymbol{x_1}$ when the underlying DGP follows the structure of \eqref{eq_DGP}. If $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ are correlated, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions OLS. This correlation will lead to a biased estimation of $\beta_1$ (assuming $\boldsymbol{x_1}$ is contained in the model and $\boldsymbol{x_2}$ is omitted). If there is no correlation between $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ and $\boldsymbol{x_2}$ is omitted, $\boldsymbol{x_1}$ and the error term will still be uncorrelated. Thus, in that case, we expect $\hat{\beta}_1$ to still be an unbiased estimator for $\beta_1$. In any case, the exclusion of the relevant variable $\boldsymbol{x_2}$ will result in a less efficient estimation of $\beta_1$, as the estimated model tries to explain the effect of $\boldsymbol{x_2}$ by $\boldsymbol{x_1}$.
 
-We test the effects of estimating a model using only $x_1$ when the underlying DGP follows the structure of \eqref{eq_DGP}. Since it is necessary that $x_1$ and $x_2$ share a degree of correlation between them, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions OLS. This correlation will lead to $\hat{\beta}_1$ to be estimated less efficiently (depending on the sign of the correlation) in comparison to the true parameter.
+We set the structure of the estimated DGP identical to the base case, only that $\boldsymbol{x_2}$ is excluded from the estimation model. To show the loss in efficiency we present the density plots for the Monte Carlo results for $\hat{\beta}_1$ and its standard error in figures \@ref(fig:ommit_b1) and \@ref(fig:ommit_b1_se). There is a clear difference in term of the variance of the estimated MC coefficients between the case where $\boldsymbol{x_2}$ is included into the model and not. In other words, the variance of $\hat{\beta}_1$ decreases much slower for increasing $n$ if $\boldsymbol{x_2}$ is not included in the model. This can also be seen for the standard deviation of $\hat{\beta}_1$: if $\boldsymbol{x_2}$ is included in the model, the standard deviation of $\hat{\beta}_1$ converges to 0 for already small sample sizes $n$. However, if $\boldsymbol{x_2}$ is not included in the model, the standard deviation of $\hat{\beta}_1$ converges much slower to 0, and thus bigger sample sizes would be needed to obtain the same degree of efficiency for $\hat{\beta}_1$. Nonetheless, we observe that the OLS estimate remains unbiased in any case, since $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ are uncorrelated.
 
-We set the same structure of the estimated DGP identical to the base case, only that $x_2$ is not included into the estimation model. To show the loss in efficiency we present the density plots for the Monte Carlo results for $\hat{\beta}_1$ and its standard error in figures \ref{fig:ommit_b1} and \ref{fig:ommit_b1_se} . There is a clear difference in term of the variance of the estimated MC coefficients between the cases for when $x_2$ is included into the model and not, i.e. the velocity of the variance's decrease does not equal the case for then $x_2$ is included. As for the standard deviation of $\hat{\beta}_1$, we observe that the density centers itself around values different from zero. This pattern only repeats itself no matter the number of observations used by the model. Nonetheless, we observe that the OLS estimate remains unbiased in any case.
+<!-- HUHU: Rewrote the above 2 parts quite a bit, please double check. -->
 
 ```{r ommit_b1, echo = FALSE}
 (plot(ols, plot = FALSE)$B1)
@@ -211,17 +220,15 @@ We set the same structure of the estimated DGP identical to the base case, only 
 
 ```
 
-<!-- add tansitioning sentece to next chapter -->
 
+# Vignette
 
-# Vignette{vignette}
+In the following vignette we are going to present how to obtain the results of the \@ref(OLS consistency) and \@ref(Omitted variable problem) chapters by using the `tidyMC` package.
 
-<!-- add one sentece which is like: In the following we are going to show you how to recreate the above results by using the tidymc package -->
 
 # Package overview
 
-Monte Carlo Simulations aim to study the properties of statistical inference techniques. 
-At its core, a Monte Carlo Simulations works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process.  The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
+Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
 
 * Running a Monte Carlo Simulation for a user defined function over a parameter grid using `future_mc()`
 
@@ -229,9 +236,9 @@ At its core, a Monte Carlo Simulations works through the application of the tech
 
 * Creating plots of the Monte Carlo Simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
 
-* Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+* Creating a `LaTeX` table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
 
-In the following subsections we will show you how you can implement those tasks using the `tidyMC` package.
+In the following subsections we will show how you can implement those tasks using the `tidyMC` package.
 
 
 ## Installing tidyMC
@@ -247,9 +254,9 @@ Afterwards you can load the package:
 
 ```{r}
 library(tidyMC)
-
 ```
-Moreover, the following packages will be used in this vignette: 
+
+Moreover, the following packages will be used in this vignette:
 
 ```{r, warning=FALSE}
 # install.packages("magrittr")
@@ -261,7 +268,7 @@ library(ggplot2)
 
 ### Run your first Monte Carlo Simulation with `future_mc()`
 
-`future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Consider the following example for `fun` and note that it performs the required tasks of generating data, applying the method and evaluating the results: 
+`future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Consider the following example for `fun` and note that it performs the required tasks of generating data, applying the method and evaluating the results:
 
 ```{r}
 # fun
@@ -290,7 +297,7 @@ ols_test <-
   }
 ```
 
-The second argument of `future_mc()` is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` should be a list whose components are named after the parameters of `fun` which should vary for the different Monte Carlo Simulation and each component is a vector containing the desired grid values for the parameter. Consider the following example for `param_list` and note that its components are named accordingly to the parameters of `ols_test`: `n` and `inc.x2`, respectively:
+The second argument of `future_mc()` is `repetitions` which should be an integer specifying the number of Monte Carlo iterations. While the third argument `param_list` has to be a list whose components are named after the parameters of `fun` which should vary for the different Monte Carlo Simulation and each component is a vector containing the desired grid values for the parameter. Consider the following example for `param_list` and note that its components are named accordingly to the parameters of `ols_test`: `n` and `inc.x2`, respectively:
 
 ```{r}
 # param_list
@@ -298,7 +305,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc.x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in. The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example those arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
@@ -312,12 +319,9 @@ Moreover, there are four formal requirements that `fun` and thus `ols_test` have
 
 We recommend to even further restrict the return value of `fun` to be a named list of scalars. This allows you to use all comfort functions of the `tidyMC` package. As you can see, we did that for `ols_test`.
 
-
 The argument `parallelisation_plan` allows the user to set a parallelisation plan. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()` by `furrr::furrr_options()`. The argument `seed` for `furrr::furrr_options()` can be specified in `parallelisation_options` following the formal requirements of its respective documentation. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. To construct `parallelisation_plan` the user needs to provide a list named after the arguments of `future::plan`. The main argument `strategy` needs to provide the specific type of parallelisation the user would like to use and the number of cores which are used in the function. Some of the options for strategy are: `multisession`, `multicore` and `cluster`. We strongly recommend the user to read the documentation of the `future` package for a more detailed instruction of how to set up the different strategies.
 
-As a default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
-
-<!-- maybe also say that tests can be skipped? Additionally maybe also give an example of a parralelisation playn, quickly laying out the main options? -->
+As a default (`check = TRUE`) `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
 
 ```{r, error=TRUE}
 set.seed(101)
@@ -335,9 +339,7 @@ first_mc_ols <- future_mc(
 )
 ```
 
-The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. 
-<!-- The attentive reader might have already noticed that we misspecifed the variance ?`sigma2 = -2`. By defintion, the variance is non-negtaive and the sepcified function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
-This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
+The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
 
 ```{r}
 set.seed(101)
@@ -355,7 +357,7 @@ first_mc_ols <- future_mc(
 )
 ```
 
-`future_mc` returns a list of type `mc` and length `r length(first_mc_ols)` consisting of a tibble (`first_mc_ols$output`) containing the return value of `fun` for each iteration and parameter combination. In our case `first_mc_ols$output` contains a column for each output `b0`, `b1`, `b2`, and `sigma2`, as well as a column for each parameter in `param_list_ols` and a column containing the `nice_names` of the parameter combinations. Overall the `first_mc_ols$output` consists of `r nrow(first_mc_ols$output)` rows, i.e., for each parameter combination 1.000 rows: 
+`future_mc` returns a list of type `mc` and length `r length(first_mc_ols)` consisting of a tibble (`first_mc_ols$output`) containing the return value of `fun` for each iteration and parameter combination. In our case `first_mc_ols$output` contains a column for each output `b0`, `b1`, `b2`, and `sigma2`, as well as a column for each parameter in `param_list_ols` and a column containing the `nice_names` of the parameter combinations. Overall the `first_mc_ols$output` consists of `r nrow(first_mc_ols$output)` rows, i.e., for each parameter combination 1.000 rows:
 
 ```{r}
 first_mc_ols$output
@@ -372,18 +374,17 @@ first_mc_ols
 
 ### Summarize your results with `summary.mc()`
 
-If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a stepwise manner. 
+If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a step wise manner.
 
 The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
 
 * First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
 
-* Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
+* Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function.
 
-Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which ouputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and "none" are also available. 
+Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which outputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and `"none"` are also available.
 
 For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `b0`, `b1`, `b2`, and `sigma2`. Lastly each of these are composed by the "path" and scalar result of `mean()`. 
-
 
 ```{r}
 # Default
@@ -391,7 +392,6 @@ summary_default <- summary(first_mc_ols)
 summary_default
 str(summary_default[[1]])
 ```
-
 
 This nested list structure should give an idea of the reach and flexibility the `sum_funs` argument is allowed to have, since the user can specify a function for each element in this list.
 
@@ -428,7 +428,7 @@ We would like to reiterate that the provided summary functions are not restricte
 
 ### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
 
-If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned in a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
+If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned as a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
 
 ```{r}
 mc_ols_plot <- plot(first_mc_ols, plot = FALSE)
@@ -440,7 +440,7 @@ As the single list elements are of class `gg` and `ggplot2`, we can easily custo
 ```{r}
 mc_ols_plot$b1 + 
   ggplot2::geom_vline(xintercept = 4, col = "red") + 
-  ggplot2::theme_dark()
+  ggplot2::theme_minimal()
 ```
 
 When creating the plots the user can also subset the setups which he/she would like to see in the plots using the `first_mc_ols$nice_names` in the function argument `which_setup`, or a named list in `parameter_comb`. The single components of the list have to be named after the parameters specified in `param_list` and contain vectors specifying the values of the parameters to filter by. In the ols example we can filter by the parameters `n` and `inc.x2`:
@@ -456,9 +456,9 @@ mc_ols_plot_subset2 <-
 mc_ols_plot_subset1$sigma2
 ```
 
-Thus, if the user wants distinct plots for every parameter combination, one needs to subset for the plot for any single setup in `first_mc_ols$nice_names`. 
+Thus, if the user wants distinct plots for every parameter combination, one needs to subset the plot for any single setup in `first_mc_ols$nice_names`.
 
-Finally, you can also plot the simulation results for several parameter combination in one single plot by specifying the argument `join` with the respective `first_mc_ols$nice_names`: 
+Finally, you can also plot the simulation results for several parameter combination in one single plot by specifying the argument `join` with the respective `first_mc_ols$nice_names`:
 
 ```{r}
 mc_ols_plot_joint <- plot(first_mc_ols, plot = FALSE, join = first_mc_ols$nice_names)
@@ -493,7 +493,7 @@ sum_mc_plot_joint$b1
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
 
-Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a LaTeX document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see extract the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
+Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a `LaTeX` document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
 
 
 ```{r}
@@ -526,7 +526,7 @@ The user can also subset the outputs of the original function (columns in the ta
 
 Lastly, by providing a named list to the argument `kable_options`, the user can change all arguments of the underlying function `kable::kbl()`. The names of the list have to be equal to the names of the arguments of the function and the contents of every element also has to fulfill its requirements. We provide an example of how this list should be constructed, but for optimal usage we strongly recommend the user to see the documentation of the `kable::kbl()` function.
 
-To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the \texttt{kableExtra} package in the standard tidyverse manner. For example:
+To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the `kableExtra` package in the standard `tidyverse` manner. For example:
 
 ```{r}
 tidy_mc_latex(summary(first_mc_ols), 
@@ -536,14 +536,12 @@ tidy_mc_latex(summary(first_mc_ols),
                               "$x_2$ included or not",
                               "$\\beta_0$", "$\\beta_1$",
                               "$\\beta_2$", "$s^2$"), 
-                caption = "Ommited variable bias MC results",
+                caption = "Ommited variable problem MC results",
                 escape = FALSE
               )
 ) %>%
   kableExtra::kable_styling(latex_options = "HOLD_position")
 ```
-
-
 
 
 # Comparison to other Monte Carlo Approaches in R
@@ -554,45 +552,37 @@ As already stated our conceptualization of an MCS implementation is based upon t
 
 Both our `future_mc` and the `MonteCarlo` functions have two main divisions on their structure. First, we have the set-up of the arguments, data containers and error checking, parts of the function. Which can be called as the preamble of the simulation. Lastly, the actual simulation of the MC study over a parameter grid specified by the user. The main differences between our implementation and the `MonteCarlo` packages lay in these two steps of the functions.
 
-On one hand, the whole development of our package draws from the benefits of the tidyverse functions. For example: the creation of parameter grids, the structure of the data and repeated calculations, rely heavily in functions provided by the `stringr`, `tibble` and `purrr` packages. Most importantly, for all repeated calculations that normally are handled by for loops we implement them with their `purrr` counterparts. These are all implemented keeping in mind the type of the object to be handled in order to reduce computation time, i.e. the mapping functions are tailored for dealing with specific data types. In contrast, the `MonteCarlo` function is built within a base `R` framework. Moreover, to offer flexibility to the user, the function uses a high number of strings for the creation of for loops, containers and parameter grids which are then parsed and evaluated inside the function.
+On one hand, the whole development of our package draws from the benefits of the `tidyverse` functions. For example: the creation of parameter grids, the structure of the data and repeated calculations, rely heavily in functions provided by the `stringr`, `tibble` and `purrr` packages. Most importantly, for all repeated calculations that normally are handled by `for` loops we implement them with their `purrr` counterparts. These are all implemented keeping in mind the type of the object to be handled in order to reduce computation time, i.e. the mapping functions are tailored for dealing with specific data types. In contrast, the `MonteCarlo` function is built within a base `R` framework. Moreover, to offer flexibility to the user, the function uses a high number of strings for the creation of `for` loops, containers and parameter grids which are then parsed and evaluated inside the function.
 
-On the other hand, when it comes to the implementation of the paralellised simulation both functions fifer totally from each other. The `MonteCarlo` function is built around the implementation of the `snow` and `snowfall` packages. These packages let the user perform calculations by in an master/worker scheme, this means that the main function call distributes tasks to the "workers" (CPUs). Thus, all workers resolve the tasks they are given and convey their results to the main `R` session giving the instructions. In contrast, `future_mc` draws its computing power from the `future` package through the `furrr` package API. The `future` package conceptualizes parallel computation based on task processing constructs called `futures` which are tasks that are resolved in background process while the main session continues to run. The benefit of this is twofold, for one all tasks are centralized in a queue and are supplied to the workers as soon as they are available which keeps calculation times consistent accross workers. For the other, the main session can still delegate tasks and perform operations, provided that no results are required from the unresolved futures. In the design of `future_mc` we reap these benefits through the use of the `furrr::pmap()` function, to which we provide the user's function and hes/hers desired parameter grid replicated as many times as the number of MonteCarlo repetitions.
+On the other hand, when it comes to the implementation of the parallelised simulation both functions differ totally from each other. The `MonteCarlo` function is built around the implementation of the `snow` and `snowfall` packages. These packages let the user perform calculations by a master/worker scheme, this means that the main function call distributes tasks to the "workers" (CPUs). Thus, all workers resolve the tasks they are given and convey their results to the main `R` session giving the instructions. In contrast, `future_mc` draws its computing power from the `future` package through the `furrr` package API. The `future` package conceptualizes parallel computation based on task processing constructs called `futures` which are tasks that are resolved in background process while the main session continues to run. The benefit of this is twofold, for one all tasks are centralized in a queue and are supplied to the workers as soon as they are available which keeps calculation times consistent across workers. For the other, the main session can still delegate tasks and perform operations, provided that no results are required from the unresolved futures. In the design of `future_mc` we reap these benefits through the use of the `furrr::pmap()` function, to which we provide the user's function and his/her desired parameter grid replicated as many times as the number of Monte Carlo repetitions.
 
 
-## Package Principles {MCS}
+## Package Principles in `tidyMC`
 
 In developing the `tidyMC` package, we followed the principle of "fail early and often", i.e. if a function is misspecified, we want our function to fail as early as possible and also return readable and informative error messages. To achieve this goal, the first part of each function in our package consists of assertions to the input parameters, as these are specified by the user and are therefore error-prone. After making sure that the input parameters are correctly specified, the following core of the function should work without problems and can thus be executed. In our package, we ensure the class and general structure of the input parameters by using the `checkmate` package, as the `checkmate` commands can almost always be written in a readable line of code, produce readable error messages and are written in C, so we don't have to worry about execution time overhead.
 
-Since one of our main focuses is to embed our functions in `tidyMC` into the `tidyverse` structure, we have used functions from packages of the `tidyverse` whenever possible. This is particularly evident in the following three cases: First, we use `stringr::str_c()` instead of `paste()` as this is generally faster and more stable. Second, we mostly work with tibbles instead of data.Frames, as they provide more consistent subsetting behaviour and we take advantage of tibbles' higher flexibility by storing lists in columns. Thirdly, for all repeated calculations that are normally handled by for loops, we implement their `purrr` counterparts. These are all implemented taking into account the type of the object being handled to reduce computation time.
+Since one of our main focuses is to embed our functions in `tidyMC` into the `tidyverse` structure, we have used functions from packages of the `tidyverse` whenever possible. This is particularly evident in the following three cases: First, we use `stringr::str_c()` instead of `paste()` as this is generally faster and more stable. Second, we mostly work with `tibbles` instead of `data.frames`, as they provide more consistent subsetting behaviour and we take advantage of `tibbles'` higher flexibility by storing lists in columns. Thirdly, for all repeated calculations that are normally handled by `for` loops, we implement their `purrr` counterparts. These are all implemented taking into account the type of the object being handled to reduce computation time.
 
-To work collaboratively on our package code, we use the version control system `Git` and manage our Git project with `GitHub`. This ensures that our pieces of code are merged correctly and nothing gets lost along the way. It also allows us to track our development over time and easily revert to older versions of our package. We also relied heavily on [Hadley Wickham's book](https://r-pkgs.org/), which is a great summary of best practices in package programming. As recommended by Wickham, when we wanted to use functions from another package, we added the appropriate package to the `NAMESPACE` file with `usethis::use_package()` and then used the form `package::function()` when calling a function from another package in our code. This way, all dependencies are clear to the reader. To reduce package dependencies outside the `tidyverse`, we tried to avoid using packages that are not part of the `tidyverse` whenever possible. 
+To work collaboratively on our package code, we use the version control system `Git` and manage our `Git` project with `GitHub`. This ensures that our pieces of code are merged correctly and nothing gets lost along the way. It also allows us to track our development over time and easily revert to older versions of our package. We also relied heavily on [Hadley Wickham's book](https://r-pkgs.org/), which is a great summary of best practices in package programming. As recommended by Wickham, when we wanted to use functions from another package, we added the appropriate package to the `NAMESPACE` file by `usethis::use_package("pkg_name")` and then used the form `package::function()` when calling a function from another package in our code. This way, all dependencies are clear to the reader. To reduce package dependencies outside the `tidyverse`, we tried to avoid using packages that are not part of the `tidyverse` whenever possible.
 
 Our typical development workflow (inspired by Hadley Wickham) looks as follows: 
 
-1. we implement the desired feature in our code relying on `tidyverse` functions
-
-2. we use `devtools::load_all()` to make our (updated) function available for experimentation
-
-3. we run an example to check whether the functionality is implemented correctly
-
-4. we try to take care about the function documentation using `roxgen2` right away, as at this point all requirements for the function and the functionality are best in our mind
-
-5. we run `devtools::check()` and fix all occurring notes, warnings, and errors
-
-6. a group member who was not involved in the coding runs several examples using the function to test its functionality
-  6.1 Whenever a bug occurs, it is reported to the developer of the function, who takes care of fixing the bug
+\begin{enumerate}
+  \item we implement the desired feature in our code relying on `tidyverse` functions
+  \item we use `devtools::load_all()` to make our (updated) function available for experimentation
+  \item we run an example to check whether the functionality is implemented correctly
+  \item we try to take care about the function documentation using `roxgen2` right away, as at this point all requirements for the function and the functionality are best in our mind
+  \item we run `devtools::check()` and fix all occurring notes, warnings, and errors
+  \item a group member who was not involved in the coding runs several examples using the function to test its functionality
+  \begin{enumerate}
+    \item Whenever a bug occurs, it is reported to the developer of the function, who takes care of fixing the bug
+    \item the bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
+  \end{enumerate}
+\end{enumerate}
   
-  6.2 the bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
-  
-  
+  <!-- HUHU: Please check if nested list is represtened correctly in pdf -->
   
 ## Speed comparison
-
-
-# Conclusion
-With the `tidyMC` package we provide researchers with an easy and comfortable way to perform their own Monte Carlo Studies. We provide a general setup, that easily allows for Monte Carlo Studies in all possible flavors. In this report, we used OLS to demonstrate how `tidyMC` may be used to efficiently set up Monte Carlo Simulations over a parameter grid with parallelization. Building on the `tidyverse`, the `tidyMC` package uses the powerful `furrr` package to efficiently parallelize the Monte Carlo study over an arbitrarily complex parameter grid. We compared the `tidyMC` approach to R's currently most popular package for Monte Carlos Simulations, the  `MonteCarlo`package, as well as two alternative approaches. We find that `tidyMC` generally outperforms the alternatives in terms of speed and memory required. Especially with larger Monter Carlos Studies using more parallel workers, our implementation is much quicker and much less memory intensive. To ease getting a quick overview of the simulation results we provide a comprehensive summary function. Lastly, to allow easy communication of the Monte Carlo results, we provide a build in plot function and a function to generate Latex Tables. Both functions are highly customizable, allowing the user to tailor the output to his needs. Because our package is built solely on top of other `tidyverse` packages, it integrates very nicely into the package collection.  However,  its easy usage should benefit all types of `R`user.
-
-While we have implemented many different options for the user, there is still room for extensions. Right now the plot function only allows for plotting densities. In a future version, we may add further plotting options. Furthermore, it may be beneficial to add predesigned options for different kinds of flavors of Monte Carlo Simulations. Our current implementation is as general as possible. Specifying the plot and table functions for specific use cases would likely lead to a more comfortable user experience. For example, if different estimators are compared, it might make sense to add preset plot functions that more effectively allows visualizing the differences in performance. However, given the level of generality for which we designed that package, we believe that its current implementation may nonetheless lead to good results for all potential users.
 
 
 # Unresolved Issues 
@@ -610,23 +600,8 @@ If this note occurs in the context of a `dplyr` function, the problem can easily
 at the respective part in the code. This solution is often used when working with the `data.table` package and deals with the note in the RCMD-check as the variable `.` then has a visible binding (to `NULL`). However, it feels a bit "hacky" to us and we would like to know if there is another more natural solution to that problem.
 
 
+# Conclusion
 
+With the `tidyMC` package we provide researchers with an easy and comfortable way to perform their own Monte Carlo Studies. We provide a general setup, that easily allows for Monte Carlo Studies in all possible flavors. In this report, we used OLS to demonstrate how `tidyMC` may be used to efficiently set up Monte Carlo Simulations over a parameter grid with parallelization. Building on the `tidyverse`, the `tidyMC` package uses the powerful `furrr` package to efficiently parallelize the Monte Carlo study over an arbitrarily complex parameter grid. We compared the `tidyMC` approach to `R`'s currently most popular package for Monte Carlos Simulations, the `MonteCarlo`package, as well as two alternative approaches. We find that `tidyMC` generally outperforms the alternatives in terms of speed and memory required. Especially with larger Monte Carlo Studies using more parallel workers, our implementation is much quicker and much less memory intensive. To ease getting a quick overview of the simulation results we provide a comprehensive summary function. Lastly, to allow easy communication of the Monte Carlo results, we provide a build in plot function and a function to generate `LaTeX` tables. Both functions are highly customizable, allowing the user to tailor the output to his needs. Because our package is built largely on top of other `tidyverse` packages, it integrates very nicely into the package collection.  However, its easy usage should benefit all types of `R` users.
 
-<!-- # Strucutre -->
-<!-- -Introduction to MCS (5) -->
-<!-- - How it works in our package (10) -->
-<!--   - parallelisation plan -->
-<!--   - function -->
-<!--   - return objects -->
-<!--     - objects -->
-<!--     - summary -->
-<!--     - plots -->
-<!--     - tables  -->
-<!--   - exampl of outputs -->
-<!--   - extension: bootstrap -->
-<!-- - Comparison to Monte Carlos package (3) -->
-<!--   - objects -->
-<!--   - speed -->
-<!--     -bench::mark -->
-<!-- - Vignette -->
-
+While we have implemented many different options for the user, there is still room for extensions. Right now the plot function only allows for plotting densities. In a future version, we may add further plotting options. Furthermore, it may be beneficial to add predesigned options for different kinds of flavors of Monte Carlo Simulations. Our current implementation is as general as possible. Specifying the plot and table functions for specific use cases would likely lead to a more comfortable user experience. For example, if different estimators are compared, it might make sense to add preset plot functions that more effectively allows visualizing the differences in performance. However, given the level of generality for which we designed that package, we believe that its current implementation may nonetheless lead to good results for all potential users.

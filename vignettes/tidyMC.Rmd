@@ -18,15 +18,14 @@ knitr::opts_chunk$set(
 
 # Package overview
 
-Monte Carlo Simulations aim to study the properties of statistical inference techniques. 
-At its core, a Monte Carlo Simulations works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process.  The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
+Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
 
 * Running a Monte Carlo Simulation for a user defined function over a parameter grid using `future_mc()`
 * Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
 * Creating plots of the Monte Carlo Simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
-* Creating a LaTeX table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+* Creating a `LaTeX` table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
 
-In the following subsections we will show you how you can implement those tasks using the `tidyMC` package.
+In the following subsections we will show how you can implement those tasks using the `tidyMC` package.
 
 
 ## Installing tidyMC
@@ -42,9 +41,9 @@ Afterwards you can load the package:
 
 ```{r}
 library(tidyMC)
-
 ```
-Moreover, the following packages will be used in this vignette: 
+
+Moreover, the following packages will be used in this vignette:
 
 ```{r, warning=FALSE}
 # install.packages("magrittr")
@@ -93,7 +92,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these \hl{for all possible combinations}. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in.The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example the arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these for all possible combinations. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in.The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example those arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
@@ -107,9 +106,7 @@ We recommend to even further restrict the return value of `fun` to be a named li
 
 The argument `parallelisation_plan` allows the user to set a parallelisation plan. While the argument `parallelisation_options` allows the user to fine tune functions, such as `furrr::future_map()` by `furrr::furrr_options()`. The argument `seed` for `furrr::furrr_options()` can be specified in `parallelisation_options` following the formal requirements of its respective documentation. Moreover, the user can also decide not to run the Monte Carlo in parallel by setting `parallel = FALSE`. To construct `parallelisation_plan` the user needs to provide a list named after the arguments of `future::plan`. The main argument `strategy` needs to provide the specific type of parallelisation the user would like to use and the number of cores which are used in the function. Some of the options for strategy are: `multisession`, `multicore` and `cluster`. We strongly recommend the user to read the documentation of the `future` package for a more detailed instruction of how to set up the different strategies.
 
-As a default `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
-
-<!-- maybe also say that tests can be skipped? Additionally maybe also give an example of a parralelisation playn, quickly laying out the main options? -->
+As a default (`check = TRUE`) `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
 
 ```{r, error=TRUE}
 set.seed(101)
@@ -127,9 +124,7 @@ first_mc_ols <- future_mc(
 )
 ```
 
-The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. 
-<!-- The attentive reader might have already noticed that we misspecified the variance ?`sigma2 = -2`. By definition, the variance is non-negative and the used function is hence nonsenscial. As expected, the failed check informs about the source of the mistake, which impacts all parameter combinations specified.-->
-This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
+The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
 
 ```{r}
 set.seed(101)
@@ -164,7 +159,7 @@ first_mc_ols
 
 ### Summarize your results with `summary.mc()`
 
-If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a stepwise manner. 
+If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a step wise manner. 
 
 The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
 
@@ -172,7 +167,7 @@ The first option of summarizing the results is given by just providing the `mc` 
 
 * Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
 
-Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which ouputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and "none" are also available. 
+Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which outputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and `"none"` are also available.
 
 For the OLS example since all outputs of `ols_test` are numeric, the returned object will be a named nested list composed of four elements named after the `nice_names` returned by `future_mc()`. Each of this elements are itself lists containing the summarized outputs, i.e. `b0`, `b1`, `b2`, and `sigma2`. Lastly each of these are composed by the "path" and scalar result of `mean()`. 
 
@@ -220,7 +215,7 @@ We would like to reiterate that the provided summary functions are not restricte
 
 ### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
 
-If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned in a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
+If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned as a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
 
 ```{r}
 mc_ols_plot <- plot(first_mc_ols, plot = FALSE)
@@ -232,7 +227,7 @@ As the single list elements are of class `gg` and `ggplot2`, we can easily custo
 ```{r}
 mc_ols_plot$b1 + 
   ggplot2::geom_vline(xintercept = 4, col = "red") + 
-  ggplot2::theme_dark()
+  ggplot2::theme_minimal()
 ```
 
 When creating the plots the user can also subset the setups which he/she would like to see in the plots using the `first_mc_ols$nice_names` in the function argument `which_setup`, or a named list in `parameter_comb`. The single components of the list have to be named after the parameters specified in `param_list` and contain vectors specifying the values of the parameters to filter by. In the ols example we can filter by the parameters `n` and `inc_x2`:
@@ -248,7 +243,7 @@ mc_ols_plot_subset2 <-
 mc_ols_plot_subset1$sigma2
 ```
 
-Thus, if the user wants distinct plots for every parameter combination, one needs to subset for the plot for any single setup in `first_mc_ols$nice_names`. 
+Thus, if the user wants distinct plots for every parameter combination, one needs to subset the plot for any single setup in `first_mc_ols$nice_names`. 
 
 Finally, you can also plot the simulation results for several parameter combination in one single plot by specifying the argument `join` with the respective `first_mc_ols$nice_names`: 
 
@@ -285,7 +280,7 @@ sum_mc_plot_joint$b1
 
 ### Create a LaTeX table of your results with `tidy_mc_latex()`
 
-Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a LaTeX document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see extract the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
+Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a `LaTeX` document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
 
 
 ```{r}
@@ -316,9 +311,9 @@ tidy_mc_latex(
 
 The user can also subset the outputs of the original function (columns in the table) using the parameter `which_out`. This is done using a character vector with the names of the outputs, e.g. to only show the columns for `b0` and `sigma2` the user needs to set `which_out = c("b0", "sigma2")`.
 
-Lastly, by providing a named list to the argument `kable_options`, the user can change all arguments of the underlying function `kable::kbl()`. The names of the list have to be equal to the names of the arguments of the function and the contents of every element also has to fullfill its requirements. We provide an example of how this list should be constructed, but for optimal usage we strongly recommend the user to see the documentation of the `kable::kbl()` function.
+Lastly, by providing a named list to the argument `kable_options`, the user can change all arguments of the underlying function `kable::kbl()`. The names of the list have to be equal to the names of the arguments of the function and the contents of every element also has to fulfill its requirements. We provide an example of how this list should be constructed, but for optimal usage we strongly recommend the user to see the documentation of the `kable::kbl()` function.
 
-To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the \texttt{kableExtra} package in the standard tidyverse manner. For example:
+To allow for further customization the returned object by `tidy_mc_latex` is of class `knitr_kable`, therefore the user can utilize most functions from the `kableExtra` package in the standard tidyverse manner. For example:
 
 ```{r}
 tidy_mc_latex(summary(first_mc_ols), 
