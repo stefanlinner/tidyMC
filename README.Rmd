@@ -30,7 +30,7 @@ Until now, the `tidyMC` package is not on CRAN, thus you need to download the de
 
 ```{r, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("stefanlinner/tidyMC")
+devtools::install_github("stefanlinner/tidyMC", build_vignettes = TRUE)
 ```
 
 Afterwards you can load the package:
@@ -48,7 +48,12 @@ library(ggplot2)
 library(kableExtra)
 ```
 
-This is a basic example which shows you how to solve a common problem. For a more elaborate example please see the vignette.
+This is a basic example which shows you how to solve a common problem. For a more elaborate example please see the vignette: 
+
+```{r}
+browseVignettes(package = "tidyMC")
+```
+
 
 Run your first Monte Carlo Simulation using your own parameter grid: 
 

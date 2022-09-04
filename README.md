@@ -29,7 +29,7 @@ download the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("stefanlinner/tidyMC")
+devtools::install_github("stefanlinner/tidyMC", build_vignettes = TRUE)
 ```
 
 Afterwards you can load the package:
@@ -50,7 +50,12 @@ library(kableExtra)
 ```
 
 This is a basic example which shows you how to solve a common problem.
-For a more elaborate example please see the vignette.
+For a more elaborate example please see the vignette:
+
+``` r
+browseVignettes(package = "tidyMC")
+#> starting httpd help server ... done
+```
 
 Run your first Monte Carlo Simulation using your own parameter grid:
 
@@ -85,7 +90,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:00.532581
+#>  Running time: 00:00:00.403919
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -111,7 +116,7 @@ test_mc
 #> 6   1.0  2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:00.532581 
+#>  The Running time was: 00:00:00.403919 
 #>  
 #>  Parallel: TRUE 
 #>  
@@ -132,21 +137,21 @@ Summarize your results:
 sum_res <- summary(test_mc)
 sum_res
 #> Results for the output mean: 
-#>    param=0, x1=1: 2.992931 
-#>    param=0, x1=2: 3.993801 
-#>    param=0.5, x1=1: 3.504979 
-#>    param=0.5, x1=2: 4.500605 
-#>    param=1, x1=1: 4.016486 
-#>    param=1, x1=2: 5.000692 
+#>    param=0, x1=1: 2.999863 
+#>    param=0, x1=2: 4.009949 
+#>    param=0.5, x1=1: 3.493698 
+#>    param=0.5, x1=2: 4.495279 
+#>    param=1, x1=1: 4.00828 
+#>    param=1, x1=2: 5.005333 
 #>  
 #>  
 #> Results for the output var: 
-#>    param=0, x1=1: 0.9805835 
-#>    param=0, x1=2: 0.9987749 
-#>    param=0.5, x1=1: 0.9900559 
-#>    param=0.5, x1=2: 1.012534 
-#>    param=1, x1=1: 1.013331 
-#>    param=1, x1=2: 0.9941887 
+#>    param=0, x1=1: 0.9642235 
+#>    param=0, x1=2: 0.9970918 
+#>    param=0.5, x1=1: 0.9952801 
+#>    param=0.5, x1=2: 0.9974433 
+#>    param=1, x1=1: 1.001459 
+#>    param=1, x1=2: 1.012366 
 #>  
 #> 
 ```
@@ -161,21 +166,21 @@ returned_plot1$mean +
  ggplot2::geom_vline(xintercept = 3)
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
 returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot2$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
 returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
 
 ``` r
 returned_plot1 <- plot(summary(test_mc), plot = FALSE)
@@ -184,21 +189,21 @@ returned_plot1$mean +
   ggplot2::theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
 
 ``` r
 returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], plot = FALSE)
  returned_plot2$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-5.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-5.png" width="100%" />
 
 ``` r
 returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-6.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-6.png" width="100%" />
 
 Show your results in a `LaTeX` table:
 
@@ -207,19 +212,19 @@ tidy_mc_latex(summary(test_mc)) %>%
   print()
 #> \begin{table}
 #> 
-#> \caption{\label{tab:unnamed-chunk-8}Monte Carlo simulations results}
+#> \caption{\label{tab:unnamed-chunk-9}Monte Carlo simulations results}
 #> \centering
 #> \begin{tabular}[t]{cccc}
 #> \toprule
 #> param & x1 & mean & var\\
 #> \midrule
-#> 0.0 & 1 & 2.993 & 0.981\\
-#> 0.0 & 2 & 3.994 & 0.999\\
-#> 0.5 & 1 & 3.505 & 0.990\\
-#> 0.5 & 2 & 4.501 & 1.013\\
-#> 1.0 & 1 & 4.016 & 1.013\\
+#> 0.0 & 1 & 3.000 & 0.964\\
+#> 0.0 & 2 & 4.010 & 0.997\\
+#> 0.5 & 1 & 3.494 & 0.995\\
+#> 0.5 & 2 & 4.495 & 0.997\\
+#> 1.0 & 1 & 4.008 & 1.001\\
 #> \addlinespace
-#> 1.0 & 2 & 5.001 & 0.994\\
+#> 1.0 & 2 & 5.005 & 1.012\\
 #> \bottomrule
 #> \multicolumn{4}{l}{\textsuperscript{} Total repetitions = 1000,}\\
 #> \multicolumn{4}{l}{total parameter combinations}\\
@@ -236,7 +241,7 @@ tidy_mc_latex(
   print()
 #> \begin{table}
 #> 
-#> \caption{\label{tab:unnamed-chunk-8}Mean MCS results}
+#> \caption{\label{tab:unnamed-chunk-9}Mean MCS results}
 #> \centering
 #> \begin{tabular}[t]{ccc}
 #> \toprule
@@ -244,20 +249,20 @@ tidy_mc_latex(
 #> \midrule
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 10}}\\
-#> \hspace{1em}0.0 & 1 & 3.264\\
-#> \hspace{1em}0.0 & 2 & 3.964\\
-#> \hspace{1em}0.5 & 1 & 3.440\\
-#> \hspace{1em}0.5 & 2 & 4.448\\
-#> \hspace{1em}1.0 & 1 & 4.053\\
-#> \hspace{1em}1.0 & 2 & 4.826\\
+#> \hspace{1em}0.0 & 1 & 3.002\\
+#> \hspace{1em}0.0 & 2 & 4.126\\
+#> \hspace{1em}0.5 & 1 & 3.511\\
+#> \hspace{1em}0.5 & 2 & 4.541\\
+#> \hspace{1em}1.0 & 1 & 3.868\\
+#> \hspace{1em}1.0 & 2 & 5.018\\
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 1000}}\\
-#> \hspace{1em}0.0 & 1 & 2.993\\
-#> \hspace{1em}0.0 & 2 & 3.994\\
-#> \hspace{1em}0.5 & 1 & 3.505\\
-#> \hspace{1em}0.5 & 2 & 4.501\\
-#> \hspace{1em}1.0 & 1 & 4.016\\
-#> \hspace{1em}1.0 & 2 & 5.001\\
+#> \hspace{1em}0.0 & 1 & 3.000\\
+#> \hspace{1em}0.0 & 2 & 4.010\\
+#> \hspace{1em}0.5 & 1 & 3.494\\
+#> \hspace{1em}0.5 & 2 & 4.495\\
+#> \hspace{1em}1.0 & 1 & 4.008\\
+#> \hspace{1em}1.0 & 2 & 5.005\\
 #> \bottomrule
 #> \multicolumn{3}{l}{\textsuperscript{} Total repetitions =}\\
 #> \multicolumn{3}{l}{1000, total}\\
