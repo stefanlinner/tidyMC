@@ -578,8 +578,7 @@ Our typical development workflow (inspired by Hadley Wickham) looks as follows:
   - The bug is converted into a failing test (using `testthat`) and the developer's task is to make this test pass. This           test ensures that the same bug will not occur a second time.
 
 ## Speed comparison
-
-To test the performance of `tidyMC` we evaluted the function:
+To test the performance of `tidyMC` we evaluated the function:
 
 ```{r}
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
@@ -588,17 +587,6 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
   stat <- mean(data)
   stat_2 <- var(data)
   
-  if (x2 == 5){
-    stop("x2 can't be 5!")
-  }
-  
-  return(list(mean = stat, var = stat_2))
-}
-```
-
-by benachmarking the performance of the `tidyMc`package against competing implementations. To compare the perfomance we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one, two, or four cores and either one, ten, or 100 parameter combinations to be tested. For each of these setups we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparison were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of ram. 
-
-Our first comparison is between the `MonteCarlo`package and the `tidyMC`package. Figure \hl{xyz}(a) shows the median simulation speed over the different set ups, while Figure \hl{xyz}(b) shows the median memory use. In both figures we see that when using multiple cores, `tidyMC` out perfroms
 
 
 
