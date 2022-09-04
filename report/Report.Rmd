@@ -33,15 +33,8 @@ language: english
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# library(profvis)
-# library(purrr)
-# library(dplyr)
-# library(tibble)
-# library(rlang)
-# library(ggplot2)
 library(tidyMC)
 library(magrittr)
-# devtools::load_all()
 ```
 
 # Introduction

@@ -54,21 +54,37 @@ is included in \code{which_path}.
 \examples{
 test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 
-data <- rnorm(n, mean = param) + x1 + x2
-stat <- mean(data)
-stat_2 <- var(data)
+  data <- rnorm(n, mean = param) + x1 + x2
+  stat <- mean(data)
+  stat_2 <- var(data)
 
-if (x2 == 5){
-  stop("x2 can't be 5!")
+  if (x2 == 5){
+    stop("x2 can't be 5!")
+  }
+
+  return(list(mean = stat, var = stat_2))
 }
 
-return(list(mean = stat, sd = stat_2))
-}
+param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1:2)
 
-param_list <- list(n = 10, param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2, x2 = 2)
+test_mc <- future_mc(
+  fun = test_func,
+  repetitions = 1000,
+  param_list = param_list,
+  n = 10,
+  x2 = 2
+)
 
-test <- future_mc(fun = test_func, repetitions = 1000, param_list = param_list)
-plot(summary(test))
+returned_plot1 <- plot(summary(test_mc))
+
+returned_plot1$mean +
+ ggplot2::theme_minimal()
+
+returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot2$mean
+
+returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot3$mean
 
 }
