@@ -4,7 +4,6 @@
 
 devtools::load_all()
 
-
 ols_test <-
   function(b0, b1, b2, n, sigma2, param_x1, param_x2, inc_x2){
 
@@ -49,8 +48,8 @@ ols <- future_mc(fun = ols_test, repetitions = 10000, param_list = param_list_ol
                  sigma2 = 3, inc_x2 = 1)
 
 tidy_mc_latex(summary(ols), repetitions_set = c(10, 10000),
-                           column_names = c("$\\beta_0$", "$\\beta_1$",
-                                            "$\\beta_2$", "$s^2$"))
+              column_names = c("$\\beta_0$", "$\\beta_1$",
+                               "$\\beta_2$", "$s^2$"))
 invisible(ols_plots <- plot(ols))
 test$B1
 
@@ -102,9 +101,9 @@ x1 <- rnorm(N, mean = 3, 2)
 e <- rnorm(N, sd = sqrt(sigma2))
 y <- b0 + x1*b1 + e
 pop_data.test <- data.frame(inter = rep(1, N),
-                      X1 = x1,
-                      Y = y,
-                      eps = e)
+                            X1 = x1,
+                            Y = y,
+                            eps = e)
 
 
 test_boot <- function(n, pop_data){
