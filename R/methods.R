@@ -56,8 +56,8 @@
 #' @return A list of type `summary.mc` containing the result of the summary functions of the simulation
 #' results of a respective output and parameter combination.
 #'
-#' If the provided summary functions return a single numeric value, also the path of the summarized output
-#' (which are contained in `which_path`) over all simulation repetitions is returned.
+#' If the provided summary functions return a single numeric value, the path of the summarized output
+#' (which are contained in `which_path`) over all simulation repetitions is also returned.
 #'
 #' @export
 #'
