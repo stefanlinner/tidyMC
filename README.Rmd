@@ -2,8 +2,6 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,7 +16,12 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of tidyMC is to ...
+Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
+
+* Running a Monte Carlo Simulation for a user defined function over a parameter grid using `future_mc()`
+* Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
+* Creating plots of the Monte Carlo Simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
+* Creating a `LaTeX` table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
 
 
 ## Installing tidyMC
@@ -39,4 +42,92 @@ library(tidyMC)
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+```{r}
+library(magrittr)
+library(ggplot2)
+library(kableExtra)
+```
+
+This is a basic example which shows you how to solve a common problem. For a more elaborate example please see the vignette.
+
+Run your first Monte Carlo Simulation using your own parameter grid: 
+
+```{r}
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
+  
+  data <- rnorm(n, mean = param) + x1 + x2
+  stat <- mean(data)
+  stat_2 <- var(data)
+  
+  if (x2 == 5){
+    stop("x2 can't be 5!")
+  }
+  
+  return(list(mean = stat, var = stat_2))
+}
+
+param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
+                   x1 = 1:2)
+
+test_mc <- future_mc(
+  fun = test_func,
+  repetitions = 1000,
+  param_list = param_list,
+  n = 10,
+  x2 = 2, 
+  check = TRUE
+)
+
+test_mc
+```
+
+Summarize your results: 
+
+```{r}
+sum_res <- summary(test_mc)
+sum_res
+```
+
+Plot your results / summarized results: 
+
+```{r}
+returned_plot1 <- plot(test_mc, plot = FALSE)
+
+returned_plot1$mean +
+ ggplot2::theme_minimal() +
+ ggplot2::geom_vline(xintercept = 3)
+
+returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot2$mean
+
+returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot3$mean
+
+returned_plot1 <- plot(summary(test_mc), plot = FALSE)
+
+returned_plot1$mean +
+  ggplot2::theme_minimal()
+
+returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], plot = FALSE)
+ returned_plot2$mean
+
+returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot3$mean
+```
+
+
+Show your results in a `LaTeX` table: 
+
+```{r}
+tidy_mc_latex(summary(test_mc)) %>% 
+  print()
+
+tidy_mc_latex(
+    summary(test_mc),
+    repetitions_set = c(10,1000),
+    which_out = "mean",
+    kable_options = list(caption = "Mean MCS results")
+) %>% 
+  print()
+```
+
