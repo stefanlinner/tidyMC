@@ -1,6 +1,6 @@
 ---
 title: "tidyMC"
-subtitle: "An easy-to-use package for Monte-Carlo Simulations"
+subtitle: "Monte Carlo Simulations made easy and tidy"
 type: "Report"
 author: "Ignacio Moreira Lara, Stefan Linner, Konstantin Lehmann"
 discipline: "M.Sc. Econometrics"
