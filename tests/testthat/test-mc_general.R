@@ -91,7 +91,7 @@ testthat::test_that("Functions print",{
 })
 
 
-testthat::test_that("Number of results coincide", {
+testthat::test_that("Number of results coincides", {
   testthat::expect_identical(nrow(out$parameter),
                              length(summary(out, sum_funs = list(mean = mean))))
   testthat::expect_identical(nrow(out$parameter),
