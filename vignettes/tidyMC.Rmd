@@ -45,11 +45,13 @@ library(tidyMC)
 
 Moreover, the following packages will be used in this vignette:
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 # install.packages("magrittr")
 library(magrittr)
 # install.packages("ggplot2")
 library(ggplot2)
+# install.packages("kableExtra")
+library(kableExtra)
 ```
 
 

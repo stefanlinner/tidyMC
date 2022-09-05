@@ -42,11 +42,8 @@ library(tidyMC)
 
 ``` r
 library(magrittr)
-#> Warning: Paket 'magrittr' wurde unter R Version 4.1.3 erstellt
 library(ggplot2)
-#> Warning: Paket 'ggplot2' wurde unter R Version 4.1.3 erstellt
 library(kableExtra)
-#> Warning: Paket 'kableExtra' wurde unter R Version 4.1.3 erstellt
 ```
 
 This is a basic example which shows you how to solve a common problem.
@@ -90,7 +87,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:00.403919
+#>  Running time: 00:00:00.726548
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -116,7 +113,7 @@ test_mc
 #> 6   1.0  2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:00.403919 
+#>  The Running time was: 00:00:00.726548 
 #>  
 #>  Parallel: TRUE 
 #>  
@@ -137,21 +134,21 @@ Summarize your results:
 sum_res <- summary(test_mc)
 sum_res
 #> Results for the output mean: 
-#>    param=0, x1=1: 2.999863 
-#>    param=0, x1=2: 4.009949 
-#>    param=0.5, x1=1: 3.493698 
-#>    param=0.5, x1=2: 4.495279 
-#>    param=1, x1=1: 4.00828 
-#>    param=1, x1=2: 5.005333 
+#>    param=0, x1=1: 2.978156 
+#>    param=0, x1=2: 3.992713 
+#>    param=0.5, x1=1: 3.500902 
+#>    param=0.5, x1=2: 4.51591 
+#>    param=1, x1=1: 4.014331 
+#>    param=1, x1=2: 5.013077 
 #>  
 #>  
 #> Results for the output var: 
-#>    param=0, x1=1: 0.9642235 
-#>    param=0, x1=2: 0.9970918 
-#>    param=0.5, x1=1: 0.9952801 
-#>    param=0.5, x1=2: 0.9974433 
-#>    param=1, x1=1: 1.001459 
-#>    param=1, x1=2: 1.012366 
+#>    param=0, x1=1: 1.01179 
+#>    param=0, x1=2: 1.022623 
+#>    param=0.5, x1=1: 0.9974572 
+#>    param=0.5, x1=2: 0.9995245 
+#>    param=1, x1=1: 1.003151 
+#>    param=1, x1=2: 1.00385 
 #>  
 #> 
 ```
@@ -218,13 +215,13 @@ tidy_mc_latex(summary(test_mc)) %>%
 #> \toprule
 #> param & x1 & mean & var\\
 #> \midrule
-#> 0.0 & 1 & 3.000 & 0.964\\
-#> 0.0 & 2 & 4.010 & 0.997\\
-#> 0.5 & 1 & 3.494 & 0.995\\
-#> 0.5 & 2 & 4.495 & 0.997\\
-#> 1.0 & 1 & 4.008 & 1.001\\
+#> 0.0 & 1 & 2.978 & 1.012\\
+#> 0.0 & 2 & 3.993 & 1.023\\
+#> 0.5 & 1 & 3.501 & 0.997\\
+#> 0.5 & 2 & 4.516 & 1.000\\
+#> 1.0 & 1 & 4.014 & 1.003\\
 #> \addlinespace
-#> 1.0 & 2 & 5.005 & 1.012\\
+#> 1.0 & 2 & 5.013 & 1.004\\
 #> \bottomrule
 #> \multicolumn{4}{l}{\textsuperscript{} Total repetitions = 1000,}\\
 #> \multicolumn{4}{l}{total parameter combinations}\\
@@ -249,20 +246,20 @@ tidy_mc_latex(
 #> \midrule
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 10}}\\
-#> \hspace{1em}0.0 & 1 & 3.002\\
-#> \hspace{1em}0.0 & 2 & 4.126\\
-#> \hspace{1em}0.5 & 1 & 3.511\\
-#> \hspace{1em}0.5 & 2 & 4.541\\
-#> \hspace{1em}1.0 & 1 & 3.868\\
-#> \hspace{1em}1.0 & 2 & 5.018\\
+#> \hspace{1em}0.0 & 1 & 2.959\\
+#> \hspace{1em}0.0 & 2 & 4.061\\
+#> \hspace{1em}0.5 & 1 & 3.569\\
+#> \hspace{1em}0.5 & 2 & 4.568\\
+#> \hspace{1em}1.0 & 1 & 3.936\\
+#> \hspace{1em}1.0 & 2 & 4.991\\
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 1000}}\\
-#> \hspace{1em}0.0 & 1 & 3.000\\
-#> \hspace{1em}0.0 & 2 & 4.010\\
-#> \hspace{1em}0.5 & 1 & 3.494\\
-#> \hspace{1em}0.5 & 2 & 4.495\\
-#> \hspace{1em}1.0 & 1 & 4.008\\
-#> \hspace{1em}1.0 & 2 & 5.005\\
+#> \hspace{1em}0.0 & 1 & 2.978\\
+#> \hspace{1em}0.0 & 2 & 3.993\\
+#> \hspace{1em}0.5 & 1 & 3.501\\
+#> \hspace{1em}0.5 & 2 & 4.516\\
+#> \hspace{1em}1.0 & 1 & 4.014\\
+#> \hspace{1em}1.0 & 2 & 5.013\\
 #> \bottomrule
 #> \multicolumn{3}{l}{\textsuperscript{} Total repetitions =}\\
 #> \multicolumn{3}{l}{1000, total}\\

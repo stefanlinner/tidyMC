@@ -31,7 +31,7 @@ classoption: a4paper
 language: english
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -252,11 +252,13 @@ library(tidyMC)
 
 Moreover, the following packages will be used in this vignette:
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 # install.packages("magrittr")
 library(magrittr)
 # install.packages("ggplot2")
 library(ggplot2)
+# install.packages("kableExtra")
+library(kableExtra)
 ```
 
 
@@ -599,7 +601,7 @@ With the help of various online resources, especially [Stackoverflow](https://st
 
 ![Unresolved Note.](note_check.PNG)
 
-If this note occurs in the context of a `dplyr` function, the problem can easily be solved by using the `rlang::.data` pronoun after adding `rlang .data` to the `@importFrom` tag in your `roxygen2` header, as explained e.g. in this [post](https://community.rstudio.com/t/how-to-solve-no-visible-binding-for-global-variable-note/28887/2?u=shamindras). However, if this note does not occur in the context of a `dplyr` function, but as in our case with `purrr::map()`, there is (at least to our knowledge) no such nice solution, as also this [stackoverflow post](https://stackoverflow.com/questions/66816638/no-visible-binding-for-global-variable) is not answered. Thus, we decided to use the second option presented in the (R-blogger post)[https://www.r-bloggers.com/2019/08/no-visible-binding-for-global-variable/] and set 
+If this note occurs in the context of a `dplyr` function, the problem can easily be solved by using the `rlang::.data` pronoun after adding `rlang .data` to the `@importFrom` tag in your `roxygen2` header, as explained e.g. in this [post](https://community.rstudio.com/t/how-to-solve-no-visible-binding-for-global-variable-note/28887/2?u=shamindras). However, if this note does not occur in the context of a `dplyr` function, but as in our case with `purrr::map()`, there is (at least to our knowledge) no such nice solution, as also this [stackoverflow post](https://stackoverflow.com/questions/66816638/no-visible-binding-for-global-variable) is not answered. Thus, we decided to use the second option presented in the [R-blogger post](https://www.r-bloggers.com/2019/08/no-visible-binding-for-global-variable/) and set 
 
 ```{r}
 . <- NULL

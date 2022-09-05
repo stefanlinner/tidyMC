@@ -42,7 +42,7 @@ library(tidyMC)
 
 ## Example
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(magrittr)
 library(ggplot2)
 library(kableExtra)
