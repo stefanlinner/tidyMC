@@ -52,7 +52,7 @@ at one time.
 Only (output - parameter combination)-pairs for which the summary function specified
 in the \code{sum_funs} argument of \code{\link[=summary.mc]{summary.mc()}} returns a single scalar value appear as
 non-\code{NA} values in the latex table. If a specific output is summarized with functions
-which do not return a single numeric value over all parameter combinations, then this output
+that do not return a single numeric value over all parameter combinations, then this output
 is discarded from the table. Similarly, if for a specific parameter combination all \code{fun} outputs are
 summarized with functions which do not return a single numeric value, then this parameter combination
 is discarded as well. In summary, all outputs must be summarized with functions
@@ -85,10 +85,12 @@ test_mc <- future_mc(
 
 tidy_mc_latex(summary(test_mc))
 
+set.seed(101)
 tidy_mc_latex(
    summary(test_mc),
    repetitions_set = c(10,1000),
    which_out = "mean",
    kable_options = list(caption = "Mean MCS results")
 )
+
 }

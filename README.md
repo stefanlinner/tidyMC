@@ -73,6 +73,8 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1:2)
 
+set.seed(101)
+
 test_mc <- future_mc(
   fun = test_func,
   repetitions = 1000,
@@ -87,7 +89,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:00.726548
+#>  Running time: 00:00:00.292132
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -113,7 +115,7 @@ test_mc
 #> 6   1.0  2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:00.726548 
+#>  The Running time was: 00:00:00.292132 
 #>  
 #>  Parallel: TRUE 
 #>  
@@ -134,21 +136,21 @@ Summarize your results:
 sum_res <- summary(test_mc)
 sum_res
 #> Results for the output mean: 
-#>    param=0, x1=1: 2.978156 
-#>    param=0, x1=2: 3.992713 
-#>    param=0.5, x1=1: 3.500902 
-#>    param=0.5, x1=2: 4.51591 
-#>    param=1, x1=1: 4.014331 
-#>    param=1, x1=2: 5.013077 
+#>    param=0, x1=1: 3.015575 
+#>    param=0, x1=2: 4.003162 
+#>    param=0.5, x1=1: 3.49393 
+#>    param=0.5, x1=2: 4.480855 
+#>    param=1, x1=1: 3.985815 
+#>    param=1, x1=2: 4.994084 
 #>  
 #>  
 #> Results for the output var: 
-#>    param=0, x1=1: 1.01179 
-#>    param=0, x1=2: 1.022623 
-#>    param=0.5, x1=1: 0.9974572 
-#>    param=0.5, x1=2: 0.9995245 
-#>    param=1, x1=1: 1.003151 
-#>    param=1, x1=2: 1.00385 
+#>    param=0, x1=1: 0.9968712 
+#>    param=0, x1=2: 1.026523 
+#>    param=0.5, x1=1: 0.9933278 
+#>    param=0.5, x1=2: 0.9997529 
+#>    param=1, x1=1: 0.9979682 
+#>    param=1, x1=2: 1.005633 
 #>  
 #> 
 ```
@@ -215,13 +217,13 @@ tidy_mc_latex(summary(test_mc)) %>%
 #> \toprule
 #> param & x1 & mean & var\\
 #> \midrule
-#> 0.0 & 1 & 2.978 & 1.012\\
-#> 0.0 & 2 & 3.993 & 1.023\\
-#> 0.5 & 1 & 3.501 & 0.997\\
-#> 0.5 & 2 & 4.516 & 1.000\\
-#> 1.0 & 1 & 4.014 & 1.003\\
+#> 0.0 & 1 & 3.016 & 0.997\\
+#> 0.0 & 2 & 4.003 & 1.027\\
+#> 0.5 & 1 & 3.494 & 0.993\\
+#> 0.5 & 2 & 4.481 & 1.000\\
+#> 1.0 & 1 & 3.986 & 0.998\\
 #> \addlinespace
-#> 1.0 & 2 & 5.013 & 1.004\\
+#> 1.0 & 2 & 4.994 & 1.006\\
 #> \bottomrule
 #> \multicolumn{4}{l}{\textsuperscript{} Total repetitions = 1000,}\\
 #> \multicolumn{4}{l}{total parameter combinations}\\
@@ -246,20 +248,20 @@ tidy_mc_latex(
 #> \midrule
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 10}}\\
-#> \hspace{1em}0.0 & 1 & 2.959\\
-#> \hspace{1em}0.0 & 2 & 4.061\\
-#> \hspace{1em}0.5 & 1 & 3.569\\
-#> \hspace{1em}0.5 & 2 & 4.568\\
-#> \hspace{1em}1.0 & 1 & 3.936\\
-#> \hspace{1em}1.0 & 2 & 4.991\\
+#> \hspace{1em}0.0 & 1 & 3.193\\
+#> \hspace{1em}0.0 & 2 & 3.810\\
+#> \hspace{1em}0.5 & 1 & 3.434\\
+#> \hspace{1em}0.5 & 2 & 4.550\\
+#> \hspace{1em}1.0 & 1 & 4.156\\
+#> \hspace{1em}1.0 & 2 & 5.030\\
 #> \addlinespace[0.3em]
 #> \multicolumn{3}{l}{\textbf{N = 1000}}\\
-#> \hspace{1em}0.0 & 1 & 2.978\\
-#> \hspace{1em}0.0 & 2 & 3.993\\
-#> \hspace{1em}0.5 & 1 & 3.501\\
-#> \hspace{1em}0.5 & 2 & 4.516\\
-#> \hspace{1em}1.0 & 1 & 4.014\\
-#> \hspace{1em}1.0 & 2 & 5.013\\
+#> \hspace{1em}0.0 & 1 & 3.016\\
+#> \hspace{1em}0.0 & 2 & 4.003\\
+#> \hspace{1em}0.5 & 1 & 3.494\\
+#> \hspace{1em}0.5 & 2 & 4.481\\
+#> \hspace{1em}1.0 & 1 & 3.986\\
+#> \hspace{1em}1.0 & 2 & 4.994\\
 #> \bottomrule
 #> \multicolumn{3}{l}{\textsuperscript{} Total repetitions =}\\
 #> \multicolumn{3}{l}{1000, total}\\

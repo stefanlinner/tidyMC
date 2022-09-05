@@ -63,6 +63,7 @@
 #'
 #' tidy_mc_latex(summary(test_mc))
 #'
+#' set.seed(101)
 #' tidy_mc_latex(
 #'    summary(test_mc),
 #'    repetitions_set = c(10,1000),

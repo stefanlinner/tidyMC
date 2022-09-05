@@ -62,7 +62,7 @@ scalars or not
 \item fun: The user-defined function \code{fun}
 \item repetitions: The number of repetitions run for each parameter setup
 \item parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
-\item plan: A list which was used to specify the parallelisation plan via \code{\link[future:plan]{future::plan()}}
+\item plan: A list that specified the parallelisation plan via \code{\link[future:plan]{future::plan()}}
 }
 }
 \description{
@@ -109,6 +109,7 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1:2)
 
+set.seed(101)
 test_mc <- future_mc(
   fun = test_func,
   repetitions = 1000,

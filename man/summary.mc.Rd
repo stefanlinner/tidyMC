@@ -25,8 +25,8 @@ Default: \code{"all"}.}
 A list of type \code{summary.mc} containing the result of the summary functions of the simulation
 results of a respective output and parameter combination.
 
-If the provided summary functions return a single numeric value, also the path of the summarized output
-(which are contained in \code{which_path}) over all simulation repetitions is returned.
+If the provided summary functions return a single numeric value, the path of the summarized output
+(which are contained in \code{which_path}) over all simulation repetitions is also returned.
 }
 \description{
 Summarize the results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}} with
@@ -87,6 +87,7 @@ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
 param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
                    x1 = 1:2)
 
+set.seed(101)
 test_mc <- future_mc(
   fun = test_func,
   repetitions = 1000,

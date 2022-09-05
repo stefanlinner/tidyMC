@@ -80,6 +80,7 @@
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,
@@ -398,6 +399,7 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,
@@ -606,6 +608,7 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,
@@ -832,6 +835,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,
@@ -891,6 +895,7 @@ print.mc <- function(x, ...){
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,

@@ -85,6 +85,7 @@
 #' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
 #'                    x1 = 1:2)
 #'
+#' set.seed(101)
 #' test_mc <- future_mc(
 #'   fun = test_func,
 #'   repetitions = 1000,
