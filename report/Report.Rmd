@@ -105,7 +105,7 @@ where $k = 2$ is the number of regressors and $\boldsymbol{\hat{\varepsilon}}$ i
 
 \noindent Using a MCS we can demonstrate the properties of the OLS estimator. Fixing the coefficients $\boldsymbol{\beta} = \{1, 4, 5\}$ and $\sigma^2 = 3$, we generate different DGPs using different normal distributions to generate the dependent variables $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$. Additionally, we generate $\boldsymbol{\varepsilon}$ from its respective distribution, and we estimate OLS on this sample. The number of observations we use is set to $\boldsymbol{n} = \{100, 200, 300\}$, which will be used to assess the convergence of the OLS estimators. We repeat the estimation 1000 times for each $n$.
 
-The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref(fig:ols_b1_se) and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
+The results demonstrate the performance of OLS estimation with increasing sample sizes. As expected figures \ref{fig:ols_b1}, \ref{fig:ols_b1_se} and table \ref{tab:ols_table} confirm that a bigger sample size leads to a more precise estimation of the underlying population values. Comparing both panels, we see that this behavior is just confirmed, as the estimated values do not differ and they become more precise. Moreover, the densities present show the unbiasedness of the estimator and the decrease of its standard deviation with more observations.
 
 <!-- HUHU: I tried to fix the figure references - try if it works now -->
 
@@ -174,12 +174,12 @@ tidy_mc_latex(summary(ols),
 ```
 
 
-```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results", out.width = "70%", out.height= "70%"}
+```{r ols_b1, echo = FALSE, fig.cap="MC $\\beta_1$ results", out.width = "80%", out.height= "80%", fig.align = 'center'}
 (plot(ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))$B1)
 
 ```
 
-```{r ols_b1_se, echo = FALSE, fig.cap="MC S.d. $\\beta_1$ results", out.width = "70%", out.height= "70%"}
+```{r ols_b1_se, echo = FALSE, fig.cap="MC S.d. $\\beta_1$ results", out.width = "80%", out.height= "80%", fig.align = 'center'}
 (plot(ols, plot = FALSE, parameter_comb = list(inc.x2 = 1))$B1_se)
 
 ```
@@ -191,16 +191,16 @@ Moreover, a common problem for estimation is the inclusion of suitable regressor
 
 We test the effects of estimating a model using only $\boldsymbol{x_1}$ when the underlying DGP follows the structure of \eqref{eq_DGP}. If $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ are correlated, the absence of one of them in the regression model will cause the available variable to be correlated with the error term, thus violating one of the main assumptions OLS. This correlation will lead to a biased estimation of $\beta_1$ (assuming $\boldsymbol{x_1}$ is contained in the model and $\boldsymbol{x_2}$ is omitted). If there is no correlation between $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ and $\boldsymbol{x_2}$ is omitted, $\boldsymbol{x_1}$ and the error term will still be uncorrelated. Thus, in that case, we expect $\hat{\beta}_1$ to still be an unbiased estimator for $\beta_1$. In any case, the exclusion of the relevant variable $\boldsymbol{x_2}$ will result in a less efficient estimation of $\beta_1$, as the estimated model tries to explain the effect of $\boldsymbol{x_2}$ by $\boldsymbol{x_1}$.
 
-We set the structure of the estimated DGP identical to the base case, only that $\boldsymbol{x_2}$ is excluded from the estimation model. To show the loss in efficiency we present the density plots for the Monte Carlo results for $\hat{\beta}_1$ and its standard error in figures \@ref(fig:ommit_b1) and \@ref(fig:ommit_b1_se). There is a clear difference in term of the variance of the estimated MC coefficients between the case where $\boldsymbol{x_2}$ is included into the model and not. In other words, the variance of $\hat{\beta}_1$ decreases much slower for increasing $n$ if $\boldsymbol{x_2}$ is not included in the model. This can also be seen for the standard deviation of $\hat{\beta}_1$: if $\boldsymbol{x_2}$ is included in the model, the standard deviation of $\hat{\beta}_1$ converges to 0 for already small sample sizes $n$. However, if $\boldsymbol{x_2}$ is not included in the model, the standard deviation of $\hat{\beta}_1$ converges much slower to 0, and thus bigger sample sizes would be needed to obtain the same degree of efficiency for $\hat{\beta}_1$. Nonetheless, we observe that the OLS estimate remains unbiased in any case, since $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ are uncorrelated.
+We set the structure of the estimated DGP identical to the base case, only that $\boldsymbol{x_2}$ is excluded from the estimation model. To show the loss in efficiency we present the density plots for the Monte Carlo results for $\hat{\beta}_1$ and its standard error in figures \ref{fig:ommit_b1} and \ref{fig:ommit_b1_se}. There is a clear difference in term of the variance of the estimated MC coefficients between the case where $\boldsymbol{x_2}$ is included into the model and not. In other words, the variance of $\hat{\beta}_1$ decreases much slower for increasing $n$ if $\boldsymbol{x_2}$ is not included in the model. This can also be seen for the standard deviation of $\hat{\beta}_1$: if $\boldsymbol{x_2}$ is included in the model, the standard deviation of $\hat{\beta}_1$ converges to 0 for already small sample sizes $n$. However, if $\boldsymbol{x_2}$ is not included in the model, the standard deviation of $\hat{\beta}_1$ converges much slower to 0, and thus bigger sample sizes would be needed to obtain the same degree of efficiency for $\hat{\beta}_1$. Nonetheless, we observe that the OLS estimate remains unbiased in any case, since $\boldsymbol{x_1}$ and $\boldsymbol{x_2}$ are uncorrelated.
 
 <!-- HUHU: Rewrote the above 2 parts quite a bit, please double check. -->
 
-```{r ommit_b1, echo = FALSE}
+```{r ommit_b1, echo = FALSE, fig.cap="MC S.d. $\\beta_1$ ommited variable problem results", out.width = "80%", out.height= "80%", fig.align = 'center'}
 (plot(ols, plot = FALSE)$B1)
 
 ```
 
-```{r ommit_b1_se, echo = FALSE}
+```{r ommit_b1_se, echo = FALSE, fig.cap="MC S.d. $\\beta_1$ ommited variable problem results", out.width = "80%", out.height= "80%", fig.align = 'center'}
 (plot(ols, plot = FALSE)$B1_se)
 
 ```
