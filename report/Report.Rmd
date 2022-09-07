@@ -548,22 +548,74 @@ On the other hand, when it comes to the implementation of the parallelised simul
 ## Speed comparison
 To test the performance of `tidyMC` we evaluated the function:
 
-```{r}
-# test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-#   
-#   data <- rnorm(n, mean = param) + x1 + x2
-#   stat <- mean(data)
-#   stat_2 <- var(data)
+```{r, echo=TRUE, eval=FALSE}
+ test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
+   
+   data <- rnorm(n, mean = param) + x1 + x2
+   stat <- mean(data)
+   stat_2 <- var(data)
+   
+    return(list(mean = stat, var = stat_2))
+}
 ```  
 
-to benchmark the performance of the `tidyMc`package against competing implementations. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one, two, or four cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
+to benchmark the performance of the `tidyMc`package against competing implementations using the benchmark package [@bench]. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one,four, or eight cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
+\hl{Ignacio_needs_to_add_his_pc!}
 
-Our first comparison is between the `MonteCarlo`package and the `tidyMC`package. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. In both figures, we see that when using multiple cores, `tidyMC` outperforms `Monte Carlo` in terms of speed and memory. The figure also shows that `MonteCarlo`is quicker, when only one core is used. However `tidyMC` is much more memory efficient, especially with large studies that either use many repetitions or that use many parameters.  (ADD COLORS AND PLOT DECRIPTION)
+```{r, eval=TRUE, echo=FALSE, fig.cap="\\label{MC_vs_tidyMC}Comparison of the `tidyMC` and the `MonteCarlo` package", fig.subcap=c('Speed Comparison', 'Memory Allocation Compations'), out.width='.49\\linewidth'}}
+#load("report/speed_result.RData")
+
+ggplot(comparison_results_mc, aes(x = reps, y = median)) +
+  geom_line(aes(col = alg)) +
+  facet_grid(cols = vars(n_params),
+             rows = vars(cores))  +
+  scale_x_continuous(trans = "log10") +
+  labs(y = "Seconds",
+       x = "Number of Repetitions") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+ggplot(comparison_results_mc, aes(x = reps, y = mem_alloc)) +
+  geom_line(aes(col = alg)) +
+  facet_grid(cols = vars(n_params),
+             rows = vars(cores))  +
+  scale_x_continuous(trans = "log10") +
+  labs(y = "Memory",
+       x = "Number of Repetitions") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+```
 
 
+Our first comparison is between the `MonteCarlo`package and the `tidyMC`package. Figure \ref{MC_vs_tidyMC}(a) shows the median simulation speed over the different setups, while Figure \ref{MC_vs_tidyMC}(b) shows the median memory use. In both figures, we see that when using multiple cores, `tidyMC` outperforms `Monte Carlo` in terms of speed and memory. The figure also shows that `MonteCarlo`is quicker, when only one core is used. However `tidyMC` is much more memory efficient, especially with large studies that either use many repetitions or that use many parameters.  (ADD COLORS AND PLOT DECRIPTION)
 
-Our second comparison is between the parallelization over parameters, the parallelization over repetitions, and the `tidyMC` parallelization over everything. For the comparison, we have only used the very core function of our package, without any pretests and other utility functions. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. The blue line shows the results from `tidyMC`, the red line the results from the parallelization over the parameters, and the green line the results from parallelizing over the repetitions. The plots show that in terms of speed our approach of parallelizing over all combinations is superior in all settings to the two other settings. However, in terms of memory usage, tidy MC generally performs worse than the other two. In contrast, parallelizing over repetitions is generally the most memory efficient. 
+```{r, eval=TRUE, echo=FALSE, fig.cap="\\label{martin_vs_tidyMC}Comparison of different parralelization approaches", fig.subcap=c('Speed Comparison', 'Memory Allocation Compations'), out.width='.49\\linewidth'}}
+#load("report/speed_result1.RData")
 
+ggplot(comparison_results_diff_approach, aes(x = reps, y = median)) +
+  geom_line(aes(col = alg)) +
+  facet_grid(cols = vars(n_params),
+             rows = vars(cores))  +
+  scale_x_continuous(trans = "log10") +
+  labs(y = "Seconds",
+       x = "Number of Repetitions") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+ggplot(comparison_results_diff_approach, aes(x = reps, y = mem_alloc)) +
+  geom_line(aes(col = alg)) +
+  facet_grid(cols = vars(n_params),
+             rows = vars(cores))  +
+  scale_x_continuous(trans = "log10") +
+  labs(y = "Memory",
+       x = "Number of Repetitions") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+```
+
+Our second comparison is between the parallelization over parameters, the parallelization over repetitions, and the `tidyMC` parallelization over everything. For the comparison, we have only used the very core function of our package, without any pretests and other utility functions. Figure \ref{martin_vs_tidyMC}(a) shows the median simulation speed over the different setups, while Figure \ref{martin_vs_tidyMC}(b) shows the median memory use. The blue line shows the results from `tidyMC`, the red line the results from parallelization over the parameters, and the green line the results from parallelizing over repetitions. The plots show that in terms of speed our approach of parallelizing over all combinations is superior in all settings. However, in terms of memory usage, tidy MC generally performs worse than the other two. In contrast, parallelizing over repetitions is generally the most memory efficient. 
+
+Overall is `tidyMC` the fastest approach if parralelization is used. When only one core is used `MonteCarlo` is marginally faster. In terms of memory parallelization over the parameters is generally the most memory efficient, whereas `MonteCarlo` requires much more memory.
 
 # Package Principles in `tidyMC`
 \label{sec_packageprinciples}
