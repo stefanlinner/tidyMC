@@ -559,7 +559,7 @@ To test the performance of `tidyMC` we evaluated the function:
 }
 ```  
 
-to benchmark the performance of the `tidyMc`package against competing implementations using the benchmark package [@bench]. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one,four, or eight cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
+to benchmark the performance of the `tidyMc`package against competing implementations using the benchmark package [@benchmark]. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one,four, or eight cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
 \hl{Ignacio_needs_to_add_his_pc!}
 
 ```{r, eval=TRUE, echo=FALSE, fig.cap="\\label{MC_vs_tidyMC}Comparison of the `tidyMC` and the `MonteCarlo` package", fig.subcap=c('Speed Comparison', 'Memory Allocation Compations'), out.width='.49\\linewidth'}}
