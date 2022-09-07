@@ -18,7 +18,7 @@ output:
     template: template.tex
     fig_caption: yes
     citation_package: biblatex
-    number_sections: false
+    number_sections: true
 toc: false
 lot: false
 lof: false
@@ -44,9 +44,9 @@ library(tidyMC)
 Monte Carlo Simulations (henceforth MCS) are used to study the properties of econometrics inference techniques by simulation. 
 They are almost always part of theoretical econometric research to study the performance of some inference technique. They supplement theoretical research most often in one of four ways. Firstly, they are used to assess the performance of asymptotically valid techniques in smaller samples. Secondly, they are  used to assess how robust a technique is to violations of its theoretical assumptions. Thirdly, they allow to compare the performance of different techniques for a given data generating process (DGP). Fourthly, MCS allows to investigate the properties of inference techniques for which no analytic solution exists.  Moreover, MCS itself can be used as a statistical inference technique. For example, Bootstrap Inference can be conceptualized as a special case of MCS. Beyond these examples, there are many more areas where MCS is used. However, independent of its use-case, easy and efficient implementation of MCS is currently only sparsely available.
 
-With our `tidyMC` package, we want to enable researchers to easily and efficiently include MCS in their research using the programming language `R` [@baser]. For one, `tidyMC` allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant computation time reductions. For another, `tidyMC` returns an easy to work with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, `tidyMC` provides functions to effectively communicate the results of the MCS. Using the output, the simulation results can then be easily visualized using the package's plot function. Because the function returns a `ggplot` object, researchers can customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready `LaTex` tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.
+With our `tidyMC` package, we want to enable researchers to easily and efficiently include MCS in their work using the programming language `R` [@baser]. For one, `tidyMC` allows to easily speed up MCS by providing efficient parallelization options over a pre-specified parameter grid. Because MCS involves repeated computation, using parallel workers allows for significant reductions in computation time. For another, `tidyMC` returns an easy-to-work-with output. The output allows to access the result of all simulations for every parameter combination in the parameter grid. Moreover, `tidyMC` provides functions to effectively communicate the results of the MCS. Using the output, the simulation results can then be easily visualized using the package's plot function, which returns a `ggplot` object, that allows researchers to customize the object to their liking. Additionally, the package provides a function that converts the results into publication-ready `LaTeX` tables. The table is heavily customizable and thereby allows researchers to effectively communicate their results.
 
-This report is structured as follows. Section \@ref(Monte Carlo Simulation) gives an introduction to why and how Monte Carlo Simulations work and provides a simple OLS example. . Section \@ref(Vignette) presents `tidyMC`'s vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \@ref(Package Principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in `R`. Section \@ref(Comparison to other Monte Carlo Approaches in R) compares the performance of `tidyMC` to the performance of the `MonteCarlo` package and other potential MCS implementations. Section \@ref(Conclusion) concludes.
+This report is structured as follows: section\ref{sec_montecarlosimulation} gives an introduction to why and how Monte Carlo Simulations work and provides a simple OLS example. Section \ref{sec_vignette} presents `tidyMC`'s vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the `tidyMC` package. Section \ref{sec_comparison} compares the performance of `tidyMC` to the performance of the `MonteCarlo` package and other potential MCS implementations. Section \ref{sec_packageprinciples} explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in `R`. Section \ref{sec_conclusion} concludes.
 
 <!-- HUHU: \@ref doesn`t work. Changed the references, maybe that already fixed it?-->
 <!-- HUHU: Where to place Best practices? before or after vignette? Do it consistently with the order above. Move the package principles -->
@@ -57,7 +57,7 @@ This report is structured as follows. Section \@ref(Monte Carlo Simulation) give
 <!-- simulations work and provides a simple OLS example. Section \@ref(package-principles) explains the coding practices we followed and gives a conceptual overview of how we implemented MCS in R. Section \@ref(vignette) presents tidyMC's vignette. The vignette gives an easy-to-follow guide on how to implement MCS using the tidyMC package. Section \@ref(comparison-to-other-monte-carlo-approaches-in-r) compares the performance of tidyMC to the performance of the MonteCarlo package and other potential MCS implementations.  Section \@ref(conclusion) concludes.  -->
 
 # Monte Carlo Simulation
-
+\label{montecarlosimulation}
 MCS allows analyzing the properties of classic econometric inference techniques. As a simulation-based technique, MCS applies a statistical procedure to many synthetically created samples. The repeated application of the procedure to a fully known DGP helps to investigate the properties of statistical techniques in a wide set of settings. It is possible to use MCS as a simulation-based inference technique itself. In this section, we want to give a brief overview of how and in which circumstances MCS work, mainly following @kiviet2012monte.
 
 
@@ -207,11 +207,12 @@ We set the structure of the estimated DGP identical to the base case, only that 
 
 
 # Vignette
+\label{sec_vignette}
 
 In the following vignette we are going to present how to obtain the results of the \@ref(OLS consistency) and \@ref(Omitted variable problem) chapters by using the `tidyMC` package.
 
 
-# Package overview
+## Package overview
 
 Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
 
@@ -253,7 +254,7 @@ library(kableExtra)
 ```
 
 
-### Run your first Monte Carlo Simulation with `future_mc()`
+## Run your first Monte Carlo Simulation with `future_mc()`
 
 `future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Consider the following example for `fun` and note that it performs the required tasks of generating data, applying the method and evaluating the results:
 
@@ -359,7 +360,7 @@ first_mc_ols
 ```
 
 
-### Summarize your results with `summary.mc()`
+## Summarize your results with `summary.mc()`
 
 If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a step wise manner.
 
@@ -413,7 +414,7 @@ summary_out_param_spec <- summary(first_mc_ols, sum_funs = sum_funs2)
 We would like to reiterate that the provided summary functions are not restricted regarding the complexity of their return value. However, the path of the summarized output over all simulation repetitions is only returned if the provided summary functions return a single numeric value. Thus, the following comfort functions `plot.summary.mc()` and `tidy_mc_latex()` will only work in this specific case.
 
 
-### Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
+## Plot your Monte Carlo Simulation with `plot.mc()` and `plot.summary.mc()`
 
 If `fun` returns a named list of scalars the user can use `plot.mc()` to generate a list of objects of class `gg` and `ggplot2` for all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. Using the argument `plot` the user can indicate whether the generated plots should be printed immediately or only returned as a list. The list will contain one plot for each output of `fun` comparing the results of the different simulation setups. In general, `plot.mc()` generates density plots for numeric outputs and bar plots for non-numeric outputs. In our example a plot for `b0`, `b1`, `b2`, and `sigma2` will be returned in a list of length four and as `b0`, `b1`, `b2`, and `sigma2` are all numeric outputs `plot.mc()` will return density plots for each of those:
 
@@ -478,7 +479,7 @@ sum_mc_plot_joint$b1
 ```
 
 
-### Create a LaTeX table of your results with `tidy_mc_latex()`
+## Create a LaTeX table of your results with `tidy_mc_latex()`
 
 Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a `LaTeX` document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
 
@@ -532,6 +533,7 @@ tidy_mc_latex(summary(first_mc_ols),
 
 
 # Comparison to other Monte Carlo Approaches in R
+\label{sec_comparison}
 
 ## Design of the functions
 
@@ -543,8 +545,28 @@ On one hand, the whole development of our package draws from the benefits of the
 
 On the other hand, when it comes to the implementation of the parallelised simulation both functions differ totally from each other. The `MonteCarlo` function is built around the implementation of the `snow` [@snowpackage] and `snowfall` packages. These packages let the user perform calculations by a master/worker scheme, this means that the main function call distributes tasks to the "workers" (CPUs). Thus, all workers resolve the tasks they are given and convey their results to the main `R` session giving the instructions. In contrast, `future_mc` draws its computing power from the `future` package [@futurepackage through the `furrr` package API [@furrrpackage]. The `future` package conceptualizes parallel computation based on task processing constructs called `futures` which are tasks that are resolved in background process while the main session continues to run. The benefit of this is twofold, for one all tasks are centralized in a queue and are supplied to the workers as soon as they are available which keeps calculation times consistent across workers. For the other, the main session can still delegate tasks and perform operations, provided that no results are required from the unresolved futures. In the design of `future_mc` we reap these benefits through the use of the `furrr::pmap()` function, to which we provide the user's function and his/her desired parameter grid replicated as many times as the number of Monte Carlo repetitions.
 
+## Speed comparison
+To test the performance of `tidyMC` we evaluated the function:
 
-## Package Principles in `tidyMC`
+```{r}
+# test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
+#   
+#   data <- rnorm(n, mean = param) + x1 + x2
+#   stat <- mean(data)
+#   stat_2 <- var(data)
+```  
+
+to benchmark the performance of the `tidyMc`package against competing implementations. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one, two, or four cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
+
+Our first comparison is between the `MonteCarlo`package and the `tidyMC`package. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. In both figures, we see that when using multiple cores, `tidyMC` outperforms `Monte Carlo` in terms of speed and memory. The figure also shows that `MonteCarlo`is quicker, when only one core is used. However `tidyMC` is much more memory efficient, especially with large studies that either use many repetitions or that use many parameters.  (ADD COLORS AND PLOT DECRIPTION)
+
+
+
+Our second comparison is between the parallelization over parameters, the parallelization over repetitions, and the `tidyMC` parallelization over everything. For the comparison, we have only used the very core function of our package, without any pretests and other utility functions. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. The blue line shows the results from `tidyMC`, the red line the results from the parallelization over the parameters, and the green line the results from parallelizing over the repetitions. The plots show that in terms of speed our approach of parallelizing over all combinations is superior in all settings to the two other settings. However, in terms of memory usage, tidy MC generally performs worse than the other two. In contrast, parallelizing over repetitions is generally the most memory efficient. 
+
+
+# Package Principles in `tidyMC`
+\label{sec_packageprinciples}
 
 In developing the `tidyMC` package, we followed the principle of "fail early and often", i.e. if a function is misspecified, we want our function to fail as early as possible and also return readable and informative error messages. To achieve this goal, the first part of each function in our package consists of assertions to the input parameters, as these are specified by the user and are therefore error-prone. After making sure that the input parameters are correctly specified, the following core of the function should work without problems and can thus be executed. In our package, we ensure the class and general structure of the input parameters by using the `checkmate`  package, as the `checkmate` [@checkmatepackage] commands can almost always be written in a readable line of code, produce readable error messages and are written in C, so we don't have to worry about execution time overhead.
 
@@ -570,26 +592,7 @@ Our typical development workflow (inspired by Hadley Wickham) looks as follows:
   
   - The bug is converted into a failing test (using `testthat` [@testthatpackage] and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
 
-## Speed comparison
-To test the performance of `tidyMC` we evaluated the function:
-
-```{r}
-# test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-#   
-#   data <- rnorm(n, mean = param) + x1 + x2
-#   stat <- mean(data)
-#   stat_2 <- var(data)
-```  
-
-to benchmark the performance of the `tidyMc`package against competing implementations. To compare the performances we tested all Monte Carlo implementations using different setups. We compute the Monte Carlos simulations using either one, two, or four cores and either one, ten, or 100 parameter combinations. For each of these setups, we compare the speed and required memory for 100, 1000, and 10000 Monte Carlo repetitions. All comparisons were run on a 2021 Macbook Pro with the M1 processor and 8 Gb of Ram. 
-
-Our first comparison is between the `MonteCarlo`package and the `tidyMC`package. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. In both figures, we see that when using multiple cores, `tidyMC` outperforms `Monte Carlo` in terms of speed and memory. The figure also shows that `MonteCarlo`is quicker, when only one core is used. However `tidyMC` is much more memory efficient, especially with large studies that either use many repetitions or that use many parameters.  (ADD COLORS AND PLOT DECRIPTION)
-
-
-
-Our second comparison is between the parallelization over parameters, the parallelization over repetitions, and the `tidyMC` parallelization over everything. For the comparison, we have only used the very core function of our package, without any pretests and other utility functions. Figure \hl{xyz}(a) shows the median simulation speed over the different setups, while Figure \hl{xyz}(b) shows the median memory use. The blue line shows the results from `tidyMC`, the red line the results from the parallelization over the parameters, and the green line the results from parallelizing over the repetitions. The plots show that in terms of speed our approach of parallelizing over all combinations is superior in all settings to the two other settings. However, in terms of memory usage, tidy MC generally performs worse than the other two. In contrast, parallelizing over repetitions is generally the most memory efficient. 
-
-# Unresolved Issues 
+## Unresolved Issues 
 
 With the help of various online resources, especially [Stackoverflow](https://stackoverflow.com/), we were able to fix all errors, warnings and notes returned by `devtools::check()` in a satisfactory way (for us), except for one:
 
@@ -605,7 +608,13 @@ at the respective part in the code. This solution is often used when working wit
 
 
 # Conclusion
+\label{sec_conclusion}
 
 With the `tidyMC` package we provide researchers with an easy and comfortable way to perform their own Monte Carlo Studies. We provide a general setup, that easily allows for Monte Carlo Studies in all possible flavors. In this report, we used OLS to demonstrate how `tidyMC` may be used to efficiently set up Monte Carlo Simulations over a parameter grid with parallelization. Building on the `tidyverse`, the `tidyMC` package uses the powerful `furrr` package to efficiently parallelize the Monte Carlo study over an arbitrarily complex parameter grid. We compared the `tidyMC` approach to `R`'s currently most popular package for Monte Carlos Simulations, the `MonteCarlo`package, as well as two alternative approaches. We find that `tidyMC` generally outperforms the alternatives in terms of speed and memory required. Especially with larger Monte Carlo Studies using more parallel workers, our implementation is much quicker and much less memory intensive. To ease getting a quick overview of the simulation results we provide a comprehensive summary function. Lastly, to allow easy communication of the Monte Carlo results, we provide a build in plot function and a function to generate `LaTeX` tables. Both functions are highly customizable, allowing the user to tailor the output to his needs. Because our package is built largely on top of other `tidyverse` packages, it integrates very nicely into the package collection.  However, its easy usage should benefit all types of `R` users.
 
 While we have implemented many different options for the user, there is still room for extensions. Right now the plot function only allows for plotting densities. In a future version, we may add further plotting options. Furthermore, it may be beneficial to add predesigned options for different kinds of flavors of Monte Carlo Simulations. Our current implementation is as general as possible. Specifying the plot and table functions for specific use cases would likely lead to a more comfortable user experience. For example, if different estimators are compared, it might make sense to add preset plot functions that more effectively allows visualizing the differences in performance. However, given the level of generality for which we designed that package, we believe that its current implementation may nonetheless lead to good results for all potential users.
+
+\newpage
+
+
+# References
