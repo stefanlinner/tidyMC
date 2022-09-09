@@ -18,12 +18,12 @@ knitr::opts_chunk$set(
 
 # Package overview
 
-Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
+Monte Carlo simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
 
-* Running a Monte Carlo Simulation for a user defined function over a parameter grid using `future_mc()`
+* Running a Monte Carlo simulation for a user defined function over a parameter grid using `future_mc()`
 * Summarizing the results by (optionally) user defined summary functions using `summary.mc()`
-* Creating plots of the Monte Carlo Simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
-* Creating a `LaTeX` table summarizing the results of the Monte Carlo Simulation using `tidy_mc_latex()`
+* Creating plots of the Monte Carlo simulation results, which can be modified by the user using `plot.mc()` and `plot.summary.mc()`
+* Creating a `LaTeX` table summarizing the results of the Monte Carlo simulation using `tidy_mc_latex()`
 
 In the following subsections we will show how you can implement those tasks using the `tidyMC` package.
 
@@ -57,7 +57,7 @@ library(kableExtra)
 
 ### Run your first Monte Carlo Simulation with `future_mc()`
 
-`future_mc()` allows you to run a Monte Carlo Simulation for a user defined function and given parameters. The first argument of `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Consider the following example for `fun` and note that it performs the required tasks of generating data, applying the method and evaluating the results: 
+`future_mc()` allows you to run a Monte Carlo simulation for a user defined function and given parameters. The first argument of `future_mc()` is `fun` which has to be a function that handles the generation of data, the application of the method of interest and the evaluation of the result for a single repetition and parameter combination. `future_mc()` handles the generation of loops over the desired parameter grids and the repetition of the Monte Carlo experiment for each of the parameter constellations. Consider the following example for `fun` and note that it performs the required tasks of generating data, applying the method and evaluating the results: 
 
 ```{r}
 # fun
@@ -94,7 +94,7 @@ param_list_ols <-
   list(n = c(100, 200, 300), inc_x2 = c(0,1))
 ```
 
-`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo Simulation over all of these for all possible combinations. If you don't want to run a Monte Carlo Simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in.The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example those arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
+`future_mc()` takes care of creating all possible parameter combinations of `param_list` and runs the Monte Carlo simulation over all of these for all possible combinations. If you don't want to run a Monte Carlo simulation for every possible parameter combination you can alternatively define `param_table` with a `data.frame` or `data.table` containing the parameter combinations you are interested in.The `...` argument can be used to specify further arguments of `fun` which are not contained in `param_list`. Those arguments will be held fixed for all parameter combinations. In our OLS example those arguments are `b0`, `b1`, `b2`, `sigma2`, `param_x1`, and `param_x2`.
 
 Moreover, there are four formal requirements that `fun` and thus `ols_test` have to fulfill:
 
@@ -126,7 +126,7 @@ first_mc_ols <- future_mc(
 )
 ```
 
-The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo Simulation:
+The attentive reader might already have noticed that we specified `sigma2 = -2` which doesn't make sense, as the variance of the error term cannot be negative. This results in a failed check for all parameter combinations, as this parameter is held fixed for any combination. Once we correct that mistake, we can run our first Monte Carlo simulation:
 
 ```{r}
 set.seed(101)
@@ -152,7 +152,7 @@ first_mc_ols$output
 
 If `ols_test` would not return a named list of scalars, but a named list of non-scalars, then `first_mc_ols$output` would not contain a column for each output, but a single column containing the named list of non-scalars for each iteration and parameter combination.
 
-Moreover, `first_mc_ols` returns much other information about the Monte Carlo Simulation that can be printed in a dense representation:
+Moreover, `first_mc_ols` returns much other information about the Monte Carlo simulation that can be printed in a dense representation:
 
 ```{r}
 first_mc_ols
