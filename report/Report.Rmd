@@ -293,7 +293,7 @@ The argument `parallelisation_plan` allows the user to set a parallelisation pla
 
 As a default (`check = TRUE`) `future_mc()` runs a quick check by running a single test-iteration for each parameter combination in order to check for possible errors in `fun`. If a error occurs the user not only receives the error message but also the parameter combinations for which the error occurred:
 
-```{r, error=TRUE}
+```{r, error=TRUE, warning=FALSE}
 set.seed(101)
 first_mc_ols <- future_mc(
   fun = ols_test, 
