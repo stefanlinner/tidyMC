@@ -626,8 +626,9 @@ Our typical development workflow (inspired by Hadley Wickham) looks as follows:
   - The bug is converted into a failing test (using `testthat` [@testthatpackage] and the developer's task is to make this test pass. This test ensures that the same bug will not occur a second time.
 
 ## Unresolved Issues 
+Overall `tidyMC` is a apckage that we believe simplifies running Monte Carlo Simulations. However two problems we have not yet solved fully satisfactory.
 
-With the help of various online resources, especially [Stackoverflow](https://stackoverflow.com/), we were able to fix all errors, warnings and notes returned by `devtools::check()` in a satisfactory way (for us), except for one:
+For one, with the help of various online resources, especially [Stackoverflow](https://stackoverflow.com/), we were able to fix all errors, warnings and notes returned by `devtools::check()` in a satisfactory way (for us), except for one:
 
 ![Unresolved Note.](note_check.PNG)
 
@@ -639,6 +640,7 @@ If this note occurs in the context of a `dplyr` function, the problem can easily
 
 at the respective part in the code. This solution is often used when working with the `data.table` package and deals with the note in the RCMD-check as the variable `.` then has a visible binding (to `NULL`). However, it feels a bit "hacky" to us and we would like to know if there is another more natural solution to that problem.
 
+For another, we have not fully optimized the performance of the package in terms of speed and memory allocation. Firstly, as the speed comparisons between the `tidyMC` and `MonteCarlo` shows, the performance of `tidyMC` using only one core is not fully satisfactory. While we have tried some performance enhancements, we have not discovered a fully satisfactory soultion. For parralelized Monte Carlo Simulations, the main focus of the package, we are however satisfied with the speed results. Secondly, as the memory allocation comparison between `tidyMC` and other parallelisation approaches shows, `tidyMC` maybe optimized in the way is uses the computers memory. While we decided to optimize the speed of the Monte Carlo simulations, there maybe use cases where memory usage is more important. In future developments, memory allocations maybe something that should be optimized as well. 
 
 # Conclusion
 \label{sec_conclusion}
