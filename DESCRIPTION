@@ -1,5 +1,5 @@
 Package: tidyMC
-Title: What the Package Does (One Line, Title Case)
+Title: Monte Carlo Simulations made easy and tidy
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Konstantin",
