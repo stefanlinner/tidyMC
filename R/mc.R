@@ -390,7 +390,7 @@ future_mc <-
         simple_output = scalar_results,
         nice_names = unique(param_table_reps$params),
         calculation_time = calculation_time,
-        n_results = ncol(res) - ncol(param_table) - 1,
+        n_results = ncol(param_table_reps) - ncol(param_table) - 1,
         seed = parallelisation_options$seed,
         fun = fun,
         repetitions = repetitions,
