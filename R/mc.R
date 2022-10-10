@@ -176,76 +176,45 @@ future_mc <-
 
     if(check){
 
-      # deparsed_function <- deparse(test_func)
-      #
-      # test_func_2 <- eval(parse(text = paste(paste(deparsed_function[1:2], collapse = ""), "\n",
-      #                                        "cl <- paste(func_argnames_equal,
-      # eval(parse(text  = paste(\"c(\", paste(func_argnames, sep = \"\", collapse = \", \"), \")\",
-      #                          sep = \"\", collapse = \"\"))),
-      # sep = \"\", collapse = \", \")",
-      #                                        "\n",
-      #                                        paste("tryCatch({out <- test_func(",
-      #                                              paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
-      #                                              ")", sep = "", collapse = ""), "}, ", "\n", "error  ={ ",
-      #                                        paste("function(e) stop(paste(\"\nFunction error: \", unlist(rlang::catch_cnd(test_func(",
-      #                                              paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
-      #                                              ")))[[1]], \"\n At the parameters: \",  cl, collapse = \"\", sep = \"\"))", sep = "", collapse = ""), "});", "\n",
-      #                                        "return(out)}", sep = "",
-      #                                        collapse = "")))
-
-      fun_2 <- args(fun)
-      body(fun_2, envir = environment()) <-
-        quote({
-
-          cl <-
-            stringr::str_c(
-              purrr::map_chr(
-                param_names,
-                function(.x){
-                  stringr::str_c(.x, get(.x), sep = " = ")
-                }),
-              collapse = ", ",
-              sep = " "
-            )
-
-          tryCatch(
-            {
-              out <-
-                eval(
-                  parse(
-                    text =
-                      stringr::str_c("fun(",
-                                     stringr::str_c(
-                                       fun_argnames,
-                                       fun_argnames,
-                                       sep = "=",
-                                       collapse = ", "
-                                     ),
-                                     ")",
-                                     sep = ""
-                      )
-                  )
-                )
-              return(out)
-            },
-            error  = {
-              function(e)
+      deparsed_function <- deparse(fun)
+      fun_2 <- eval(
+        parse(text =
                 stringr::str_c(
-                  " \n Function error: ", eval(
-                    parse(
-                      text =
-                        stringr::str_c("unlist(rlang::catch_cnd(fun(",
-                                       stringr::str_c(
-                                         fun_argnames,
-                                         fun_argnames,
-                                         sep = "=",
-                                         collapse = ", "
-                                       ),
-                                       ")))[[1]]", sep = ""))),
-                  " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
-            }
-          )
-        })
+                  stringr::str_c(deparsed_function[1:2], collapse = ""),
+                  "\n",
+                  "cl <-
+                  stringr::str_c(
+                    fun_argnames,
+                    eval(parse(text  =
+                              stringr::str_c(\"c(\",
+                                  stringr::str_c(fun_argnames, sep = \"\", collapse = \", \"),
+                                  \")\",
+                               sep = \"\", collapse = \"\")
+                               )
+                        ),
+                  sep = \"=\", collapse = \", \")",
+                  "\n",
+                  stringr::str_c(
+                    "tryCatch({fun(",
+                    stringr::str_c(fun_argnames, fun_argnames, sep = "=", collapse = ", "),
+                    ")",
+                    sep = "", collapse = ""),
+                  "}, ",
+                  "\n",
+                  "error  ={ ",
+                  stringr::str_c(
+                    "function(e) stringr::str_c(\" \n Function error: \", unlist(rlang::catch_cnd(fun(",
+                    stringr::str_c(fun_argnames, fun_argnames, sep = "=", collapse = ", "),
+                    ")))[[1]], \" \n At the parameters: \",  cl, \" \n \", collapse = \"\", sep = \"\")",
+                    sep = "", collapse = ""
+                  ),
+                  "});",
+                  "\n",
+                  "}",
+                  sep = "", collapse = ""
+                )
+        )
+      )
 
       message("Running single test-iteration for each parameter combination...")
 
