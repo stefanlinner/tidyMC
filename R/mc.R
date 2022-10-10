@@ -174,6 +174,8 @@ future_mc <-
         function(x) param_table
       )
 
+    scalar_results <- NULL
+
     if(check){
 
       deparsed_function <- deparse(fun)
@@ -268,18 +270,75 @@ future_mc <-
       )
     )
 
+    . <- NULL
+
+    output_generater <- function(x){
+
+      if(is.null(scalar_results)){
+
+        scalar_results <<-
+          purrr::map_lgl(
+            x[1:nrow(param_table)],
+            function(.x){
+              purrr::map_lgl(
+                .x, function(fun_list_outputs){
+                  checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
+                }
+              ) %>%
+                all()
+            }
+          ) %>%
+          all()
+
+      }
+
+      if(scalar_results){
+        return(purrr::map_dfr(.x = x, function(.x) .x) %>%
+                 dplyr::as_tibble())
+      }
+
+      if(!scalar_results){
+        warning(
+          "You cannot use the comfort functions: plot & summary,
+        because for that fun has to return a list with named components.
+        Each component has to be scalar."
+        )
+        return(tibble::as_tibble_col(x))
+      }
+
+    }
+
     if(parallel){
 
       start_time <- Sys.time()
 
-      results_list <-
-        furrr::future_pmap(
-          .l = param_table_reps,
-          .f = fun,
-          .progress = TRUE,
-          .options = do.call(furrr::furrr_options, parallelisation_options),
-          ...
-        )
+      param_table_reps <-
+        cbind(
+          params = rep(
+            purrr::map_chr(
+              seq_len(nrow(param_table)),
+              function(.x){
+                stringr::str_c(
+                  param_names,
+                  param_table[.x,],
+                  sep = "=",
+                  collapse = ", "
+                )
+              }),
+            repetitions
+          ),
+          param_table_reps,
+          furrr::future_pmap(
+            .l = param_table_reps,
+            .f = fun,
+            .progress = TRUE,
+            .options = do.call(furrr::furrr_options, parallelisation_options),
+            ...
+          ) %>%
+            output_generater()
+        ) %>%
+        dplyr::as_tibble() %>%
+        dplyr::arrange(.data$params)
 
       calculation_time <- Sys.time() - start_time
 
@@ -289,12 +348,30 @@ future_mc <-
 
       start_time <- Sys.time()
 
-      results_list <-
-        purrr::pmap(
-          .l = param_table_reps,
-          .f = fun,
-          ...
-        )
+      param_table_reps <-
+        cbind(
+          params = rep(
+            purrr::map_chr(
+              seq_len(nrow(param_table)),
+              function(.x){
+                stringr::str_c(
+                  param_names,
+                  param_table[.x,],
+                  sep = "=",
+                  collapse = ", "
+                )
+              }),
+            repetitions
+          ),
+          param_table_reps,
+          purrr::pmap(
+            .l = param_table_reps,
+            .f = fun,
+            ...
+          ) %>%
+            output_generater()) %>%
+        dplyr::as_tibble() %>%
+        dplyr::arrange(.data$params)
 
       calculation_time <- Sys.time() - start_time
 
@@ -304,79 +381,14 @@ future_mc <-
                            "\n Running time: ", hms::as_hms(calculation_time),
                            collapse = "", sep = ""))
 
-    if(!check){
-      scalar_results <-
-        purrr::map_lgl(
-          results_list[1:nrow(param_table)],
-          function(.x){
-            purrr::map_lgl(
-              .x, function(fun_list_outputs){
-                checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
-              }
-            ) %>%
-              all()
-          }
-        ) %>%
-        all()
-    }
-
     future::plan("default")
-
-    if(scalar_results) {
-
-      res <-
-        cbind(
-          param_table_reps,
-          purrr::map_dfr(
-            results_list,
-            function(.x){
-              .x
-            }
-          )
-        ) %>%
-        dplyr::as_tibble()
-    }
-
-    if(!scalar_results){
-
-      res <- dplyr::tibble(
-        param_table_reps,
-        results = tibble::as_tibble_col(results_list)
-      )
-
-      warning(
-        "You cannot use the comfort functions: plot & summary,
-        because for that fun has to return a list with named components.
-        Each component has to be scalar."
-      )
-
-    }
-
-    res$params <-
-      rep(
-        purrr::map_chr(
-          seq_len(nrow(param_table)),
-          function(.x){
-            stringr::str_c(
-              param_names,
-              param_table[.x,],
-              sep = "=",
-              collapse = ", "
-            )
-          }),
-        repetitions
-      )
-
-    setups <- unique(res$params)
 
     out <-
       list(
-        output = res %>%
-          dplyr::relocate(.data$params) %>%
-          dplyr::arrange(.data$params),
+        output = param_table_reps,
         parameter = param_table,
         simple_output = scalar_results,
-        nice_names = setups,
+        nice_names = unique(param_table_reps$params),
         calculation_time = calculation_time,
         n_results = ncol(res) - ncol(param_table) - 1,
         seed = parallelisation_options$seed,
