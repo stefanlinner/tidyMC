@@ -154,9 +154,14 @@ future_mc <-
         )
     }
 
-    if(parallel){
-      do.call(future::plan, parallelisation_plan)
+    if(!parallel){
+      parallelisation_plan <-
+        list(
+          strategy = future::sequential
+        )
     }
+
+    do.call(future::plan, parallelisation_plan)
 
     if(!is.null(param_list)){
       param_table <- expand.grid(param_list)
@@ -294,18 +299,37 @@ future_mc <-
       )
     )
 
-    start_time <- Sys.time()
+    if(parallel){
 
-    results_list <-
-      furrr::future_pmap(
-        .l = param_table_reps,
-        .f = fun,
-        .progress = TRUE,
-        .options = do.call(furrr::furrr_options, parallelisation_options),
-        ...
-      )
+      start_time <- Sys.time()
 
-    calculation_time <- Sys.time() - start_time
+      results_list <-
+        furrr::future_pmap(
+          .l = param_table_reps,
+          .f = fun,
+          .progress = TRUE,
+          .options = do.call(furrr::furrr_options, parallelisation_options),
+          ...
+        )
+
+      calculation_time <- Sys.time() - start_time
+
+    }
+
+    if(!parallel){
+
+      start_time <- Sys.time()
+
+      results_list <-
+        purrr::pmap(
+          .l = param_table_reps,
+          .f = fun,
+          ...
+        )
+
+      calculation_time <- Sys.time() - start_time
+
+    }
 
     message(stringr::str_c("\n Simulation was successfull!",
                            "\n Running time: ", hms::as_hms(calculation_time),
@@ -327,9 +351,7 @@ future_mc <-
         all()
     }
 
-    if(parallel){
-      future::plan("default")
-    }
+    future::plan("default")
 
     if(scalar_results) {
 
