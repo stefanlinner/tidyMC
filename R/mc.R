@@ -272,7 +272,7 @@ future_mc <-
 
     . <- NULL
 
-    output_generater <- function(x){
+    output_generator <- function(x){
 
       if(is.null(scalar_results)){
 
@@ -335,7 +335,7 @@ future_mc <-
             .options = do.call(furrr::furrr_options, parallelisation_options),
             ...
           ) %>%
-            output_generater()
+            output_generator()
         ) %>%
         dplyr::as_tibble() %>%
         dplyr::arrange(.data$params)
@@ -369,7 +369,7 @@ future_mc <-
             .f = fun,
             ...
           ) %>%
-            output_generater()) %>%
+            output_generator()) %>%
         dplyr::as_tibble() %>%
         dplyr::arrange(.data$params)
 

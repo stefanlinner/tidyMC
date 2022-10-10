@@ -89,7 +89,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:00.292132
+#>  Running time: 00:00:00.284625
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -115,7 +115,7 @@ test_mc
 #> 6   1.0  2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:00.292132 
+#>  The Running time was: 00:00:00.284625 
 #>  
 #>  Parallel: TRUE 
 #>  
