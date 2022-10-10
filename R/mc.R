@@ -169,22 +169,24 @@ future_mc <-
         function(x) param_table
       )
 
-    nice_names <-
-      rep(
-        purrr::map_chr(
-          seq_len(nrow(param_table)),
-          function(.x){
-            stringr::str_c(
-              param_names,
-              param_table[.x,],
-              sep = "=",
-              collapse = ", "
-            )
-          }),
-        repetitions
-      )
-
     if(check){
+
+      # deparsed_function <- deparse(test_func)
+      #
+      # test_func_2 <- eval(parse(text = paste(paste(deparsed_function[1:2], collapse = ""), "\n",
+      #                                        "cl <- paste(func_argnames_equal,
+      # eval(parse(text  = paste(\"c(\", paste(func_argnames, sep = \"\", collapse = \", \"), \")\",
+      #                          sep = \"\", collapse = \"\"))),
+      # sep = \"\", collapse = \", \")",
+      #                                        "\n",
+      #                                        paste("tryCatch({out <- test_func(",
+      #                                              paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
+      #                                              ")", sep = "", collapse = ""), "}, ", "\n", "error  ={ ",
+      #                                        paste("function(e) stop(paste(\"\nFunction error: \", unlist(rlang::catch_cnd(test_func(",
+      #                                              paste(func_argnames, func_argnames, sep = "=", collapse = ", "),
+      #                                              ")))[[1]], \"\n At the parameters: \",  cl, collapse = \"\", sep = \"\"))", sep = "", collapse = ""), "});", "\n",
+      #                                        "return(out)}", sep = "",
+      #                                        collapse = "")))
 
       fun_2 <- args(fun)
       body(fun_2, envir = environment()) <-
@@ -208,14 +210,14 @@ future_mc <-
                   parse(
                     text =
                       stringr::str_c("fun(",
-                            stringr::str_c(
-                              fun_argnames,
-                              fun_argnames,
-                              sep = "=",
-                              collapse = ", "
-                            ),
-                            ")",
-                            sep = ""
+                                     stringr::str_c(
+                                       fun_argnames,
+                                       fun_argnames,
+                                       sep = "=",
+                                       collapse = ", "
+                                     ),
+                                     ")",
+                                     sep = ""
                       )
                   )
                 )
@@ -228,13 +230,13 @@ future_mc <-
                     parse(
                       text =
                         stringr::str_c("unlist(rlang::catch_cnd(fun(",
-                              stringr::str_c(
-                                fun_argnames,
-                                fun_argnames,
-                                sep = "=",
-                                collapse = ", "
-                              ),
-                              ")))[[1]]", sep = ""))),
+                                       stringr::str_c(
+                                         fun_argnames,
+                                         fun_argnames,
+                                         sep = "=",
+                                         collapse = ", "
+                                       ),
+                                       ")))[[1]]", sep = ""))),
                   " \n At the parameters: ",  cl, " \n" , collapse = "", sep = "")
             }
           )
@@ -306,8 +308,8 @@ future_mc <-
     calculation_time <- Sys.time() - start_time
 
     message(stringr::str_c("\n Simulation was successfull!",
-                  "\n Running time: ", hms::as_hms(calculation_time),
-                  collapse = "", sep = ""))
+                           "\n Running time: ", hms::as_hms(calculation_time),
+                           collapse = "", sep = ""))
 
     if(!check){
       scalar_results <-
@@ -333,7 +335,6 @@ future_mc <-
 
       res <-
         cbind(
-          params = nice_names,
           param_table_reps,
           purrr::map_dfr(
             results_list,
@@ -342,14 +343,12 @@ future_mc <-
             }
           )
         ) %>%
-        dplyr::as_tibble() %>%
-        dplyr::arrange(.data$params)
+        dplyr::as_tibble()
     }
 
     if(!scalar_results){
 
       res <- dplyr::tibble(
-        params =  nice_names,
         param_table_reps,
         results = tibble::as_tibble_col(results_list)
       )
@@ -362,11 +361,28 @@ future_mc <-
 
     }
 
-    setups <- unique(nice_names)
+    res$params <-
+      rep(
+        purrr::map_chr(
+          seq_len(nrow(param_table)),
+          function(.x){
+            stringr::str_c(
+              param_names,
+              param_table[.x,],
+              sep = "=",
+              collapse = ", "
+            )
+          }),
+        repetitions
+      )
+
+    setups <- unique(res$params)
 
     out <-
       list(
-        output = res,
+        output = res %>%
+          dplyr::relocate(.data$params) %>%
+          dplyr::arrange(.data$params),
         parameter = param_table,
         simple_output = scalar_results,
         nice_names = setups,
