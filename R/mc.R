@@ -270,8 +270,6 @@ future_mc <-
       )
     )
 
-    . <- NULL
-
     output_generator <- function(x){
 
       if(is.null(scalar_results)){
