@@ -706,7 +706,7 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           count <- 0
           stat_table <-
             stat_table %>%
-            cbind(
+            data.frame(
               .,
               purrr::map_dfr(
                 .$setup,

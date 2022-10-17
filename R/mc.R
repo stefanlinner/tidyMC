@@ -300,7 +300,7 @@ future_mc <-
           seq_len(repetitions),
           function(x) param_table
         ) %>%
-        cbind(
+        data.frame(
           params = rep(
             purrr::map_chr(
               seq_len(nrow(param_table)),
@@ -340,7 +340,7 @@ future_mc <-
           seq_len(repetitions),
           function(x) param_table
         ) %>%
-        cbind(
+        data.frame(
           params = rep(
             purrr::map_chr(
               seq_len(nrow(param_table)),

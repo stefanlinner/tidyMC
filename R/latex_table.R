@@ -180,7 +180,7 @@ tidy_mc_latex <- function(
     ) %>%
     dplyr::select(which(colMeans(is.na(.)) != 1)) %>%
     dplyr::filter(.data$repetitions %in% repetitions_set) %>%
-    cbind(
+    data.frame(
       .,
       purrr::map_dfr(
         .$setup,
