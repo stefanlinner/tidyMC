@@ -169,10 +169,10 @@ future_mc <-
                   "\n",
                   "cl <-
                   stringr::str_c(
-                    fun_argnames,
+                    param_names,
                     eval(parse(text  =
                               stringr::str_c(\"c(\",
-                                  stringr::str_c(fun_argnames, sep = \"\", collapse = \", \"),
+                                  stringr::str_c(param_names, sep = \"\", collapse = \", \"),
                                   \")\",
                                sep = \"\", collapse = \"\")
                                )
