@@ -9,8 +9,8 @@ future_mc(
   repetitions,
   param_list = NULL,
   param_table = NULL,
-  parallelisation_plan = NULL,
-  parallelisation_options = NULL,
+  parallelisation_plan = list(strategy = future::multisession),
+  parallelisation_options = list(),
   check = TRUE,
   parallel = TRUE,
   ...
@@ -52,7 +52,7 @@ A list of type \code{mc} containing the following objects:
 \itemize{
 \item output: A tibble containing the return value of \code{fun} for each iteration and
 parameter combination
-\item parameter: A data.frame which shows the different parameter combinations
+\item parameter: A tibble which shows the different parameter combinations
 \item simple_output: A boolean value indicating whether the return value of \code{fun} is a named list of
 scalars or not
 \item nice_names: A character vector containing "nice names" for the different parameter setups

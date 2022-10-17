@@ -51,7 +51,7 @@
 #'
 #' * output: A tibble containing the return value of `fun` for each iteration and
 #' parameter combination
-#' * parameter: A data.frame which shows the different parameter combinations
+#' * parameter: A tibble which shows the different parameter combinations
 #' * simple_output: A boolean value indicating whether the return value of `fun` is a named list of
 #' scalars or not
 #' * nice_names: A character vector containing "nice names" for the different parameter setups
@@ -100,8 +100,8 @@ future_mc <-
     repetitions,
     param_list = NULL,
     param_table = NULL,
-    parallelisation_plan = NULL,
-    parallelisation_options = NULL,
+    parallelisation_plan = list(strategy = future::multisession),
+    parallelisation_options = list(),
     check = TRUE,
     parallel = TRUE,
     ...
@@ -138,21 +138,10 @@ future_mc <-
     checkmate::assert_list(add_args, names = "named")
     checkmate::assert_subset(names(add_args), fun_argnames)
 
-    if(is.null(parallelisation_options)){
-      parallelisation_options <- list()
-    }
-
     parallelisation_options_default <- list(seed = TRUE)
 
-    parallelisation_options<-
+    parallelisation_options <-
       utils::modifyList(parallelisation_options_default, parallelisation_options)
-
-    if(is.null(parallelisation_plan)){
-      parallelisation_plan <-
-        list(
-          strategy = future::multisession
-        )
-    }
 
     if(!parallel){
       parallelisation_plan <-
@@ -167,12 +156,6 @@ future_mc <-
       param_table <- expand.grid(param_list)
     }
     param_names <- names(param_table)
-
-    param_table_reps <-
-      purrr::map_dfr(
-        seq_len(repetitions),
-        function(x) param_table
-      )
 
     scalar_results <- NULL
 
@@ -306,11 +289,17 @@ future_mc <-
 
     }
 
+    . <- NULL
+
     if(parallel){
 
       start_time <- Sys.time()
 
-      param_table_reps <-
+      res_table_reps <-
+        purrr::map_dfr(
+          seq_len(repetitions),
+          function(x) param_table
+        ) %>%
         cbind(
           params = rep(
             purrr::map_chr(
@@ -325,9 +314,9 @@ future_mc <-
               }),
             repetitions
           ),
-          param_table_reps,
+          .,
           furrr::future_pmap(
-            .l = param_table_reps,
+            .l = .,
             .f = fun,
             .progress = TRUE,
             .options = do.call(furrr::furrr_options, parallelisation_options),
@@ -346,7 +335,11 @@ future_mc <-
 
       start_time <- Sys.time()
 
-      param_table_reps <-
+      res_table_reps <-
+        purrr::map_dfr(
+          seq_len(repetitions),
+          function(x) param_table
+        ) %>%
         cbind(
           params = rep(
             purrr::map_chr(
@@ -361,13 +354,14 @@ future_mc <-
               }),
             repetitions
           ),
-          param_table_reps,
+          .,
           purrr::pmap(
-            .l = param_table_reps,
+            .l = .,
             .f = fun,
             ...
           ) %>%
-            output_generator()) %>%
+            output_generator()
+        ) %>%
         dplyr::as_tibble() %>%
         dplyr::arrange(.data$params)
 
@@ -383,12 +377,13 @@ future_mc <-
 
     out <-
       list(
-        output = param_table_reps,
-        parameter = param_table,
+        output = res_table_reps,
+        parameter = param_table %>%
+          dplyr::as_tibble(),
         simple_output = scalar_results,
-        nice_names = unique(param_table_reps$params),
+        nice_names = unique(res_table_reps$params),
         calculation_time = calculation_time,
-        n_results = ncol(param_table_reps) - ncol(param_table) - 1,
+        n_results = ncol(res_table_reps) - ncol(param_table) - 1,
         seed = parallelisation_options$seed,
         fun = fun,
         repetitions = repetitions,
