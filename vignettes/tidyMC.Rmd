@@ -187,7 +187,7 @@ This nested list structure should give an idea of the reach and flexibility the 
 For an intermediate level of customization, the user can provide a combination of summarizing functions for every output, which will be used for all parameter combination. In the case of the OLS example, if we want to apply `mean()` on all estimated coefficients, but we want to use `var()` on the MC results of `sigma2`, the `sum_funs` should have the following structure:
 
 ```{r, eval = FALSE}
-# summarizing output the same way for each parameter combination with one function combination
+# summarizing output for each parameter combination with one combination
 sum_funs_ols <- list(b0 = mean, b1 = mean , b2 = mean, sigma2 = var)
 ```
 
@@ -250,7 +250,8 @@ Thus, if the user wants distinct plots for every parameter combination, one need
 Finally, you can also plot the simulation results for several parameter combination in one single plot by specifying the argument `join` with the respective `first_mc_ols$nice_names`: 
 
 ```{r}
-mc_ols_plot_joint <- plot(first_mc_ols, plot = FALSE, join = first_mc_ols$nice_names)
+mc_ols_plot_joint <- plot(first_mc_ols, plot = FALSE, 
+                          join = first_mc_ols$nice_names)
 mc_ols_plot_joint$b2
 ```
 
@@ -263,7 +264,9 @@ If the provided summary functions in `summary.mc()` return a single numeric valu
 sum_mc_plot <- plot(summary_default, plot = FALSE)
 sum_mc_plot$b1 + 
   ggplot2::geom_vline(xintercept = 100, col = "red") +
-  ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 0.1, vjust = 0.2))
+  ggplot2::theme(axis.text.x = element_text(angle = 45, 
+                                            hjust = 0.1, 
+                                            vjust = 0.2))
 
 sum_mc_plot_subset1 <- 
   plot(summary_default, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])

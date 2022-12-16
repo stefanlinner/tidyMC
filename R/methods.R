@@ -6,58 +6,84 @@
 #'
 #' @param object An object of class `mc`, for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
-#' @param sum_funs A named (nested) list containing summary functions. See details.
-#' @param which_path A character vector containing the names of (some of) the named outputs
-#' (the names of the returned list of `fun` in [future_mc()]), for which to return a "path" of the
+#' @param sum_funs A named (nested) list containing summary functions.
+#' #See details.
+#' @param which_path A character vector containing the names of (some of)
+#' the named outputs
+#' (the names of the returned list of `fun` in [future_mc()]),
+#' for which to return a "path" of the
 #' stepwise calculation of the result of the summary function.
-#' Alternatively, `"all"` or `"none"` can be used to return either the path for all or none of the
+#' Alternatively, `"all"` or `"none"` can be used to return either
+#' the path for all or none of the
 #' numeric outputs.
 #' Default: `"all"`.
 #' @param ... Ignored
 #'
-#' @details In order to use `summary()`, the output of [future_mc()] has to be "simple",
-#' which is the case if the return value of `fun` is a named list of scalars. If the
-#' returned value of `fun` is a named list of more complex data structures, `summary()`
+#' @details In order to use `summary()`,
+#' the output of [future_mc()] has to be "simple",
+#' which is the case if the return value of `fun` is a named list of scalars.
+#' If the
+#' returned value of `fun` is a named list of more complex data structures,
+#'  `summary()`
 #' cannot be used.
 #'
 #' With `sum_funs` the user can define (different) functions which summarize
-#' the simulation results for each output (return values of `fun` in [future_mc()])
-#' and each parameter combination. Thus, the functions inside `sum_funs` only take one
-#' argument, which is the output vector (with length `repetitions`) of one output
+#' the simulation results for each output
+#' (return values of `fun` in [future_mc()])
+#' and each parameter combination.
+#' Thus, the functions inside `sum_funs` only take one argument,
+#' which is the output vector (with length `repetitions`) of one output
 #' of one specific parameter combination.
 #'
 #' The default summary functions are [base::mean()] for numeric outputs and
 #' [base::summary()] for outputs with non-numeric data types.
 #'
-#' The user can define summary functions by supplying a named (nested) list to `sum_funs`. When
-#' the functions provided for each output return only one numeric value the results are twofold:
-#' first, a single scalar result of the function evaluating the whole output vector.
-#' Second, a "path" with length `repetitions` of the step wise calculation of the function's result
-#' across the output vector (assumed that the output is contained in `which_path`).
+#' The user can define summary functions by supplying a named
+#' (nested) list to `sum_funs`. When
+#' the functions provided for each output return only one numeric value
+#'  the results are twofold:
+#' first, a single scalar result of the
+#'  function evaluating the whole output vector.
+#' Second, a "path" with length `repetitions` of the s
+#' tep wise calculation of the function's result
+#' across the output vector
+#' (assumed that the output is contained in `which_path`).
 #'
-#' If the user wants to summarize the simulation results of a respective output in the same way
+#' If the user wants to summarize the simulation results of a respective output
+#' in the same way
 #' for each parameter combination, a list whose components are named after the
-#' outputs (the names of the returned list of `fun` in [future_mc()]) is supplied and each component is
-#' a function which only takes the vector of results of one output as the main argument.
+#' outputs (the names of the returned
+#' list of `fun` in [future_mc()]) is supplied and each component is
+#' a function which only takes the vector of results
+#' of one output as the main argument.
 #'
-#' If the user wants to summarize the simulation results of a respective output differently for
-#' different parameter combinations, a nested list has to be supplied. The components of the outer list
+#' If the user wants to summarize the simulation
+#' results of a respective output differently for
+#' different parameter combinations, a nested list has to be supplied.
+#' The components of the outer list
 #' must be equal in length and naming to the `nice_names` of the parameter
 #' combinations (see value of [future_mc()]) and each component is another
 #' list (inner list). The components of the inner list are then defined the
-#' same way as above (components named after the outputs and each component is a function).
+#' same way as above
+#' (components named after the outputs and each component is a function).
 #'
-#' The provided summary functions are not restricted regarding the complexity of their return value.
-#' However, the path of the summarized output over all simulation repetitions is only returned if the
-#' provided summary functions return a single numeric value (and the output is contained in `which_path`).
+#' The provided summary functions are not restricted regarding the complexity
+#' of their return value.
+#' However, the path of the summarized output over all simulation repetitions
+#' is only returned if the
+#' provided summary functions return a single numeric value
+#' (and the output is contained in `which_path`).
 #' Thus, [plot.summary.mc()] will only work in this specific case.
 #'
 #'
-#' @return A list of type `summary.mc` containing the result of the summary functions of the simulation
+#' @return A list of type `summary.mc` containing the
+#' result of the summary functions of the simulation
 #' results of a respective output and parameter combination.
 #'
-#' If the provided summary functions return a single numeric value, the path of the summarized output
-#' (which are contained in `which_path`) over all simulation repetitions is also returned.
+#' If the provided summary functions return a single numeric value,
+#' the path of the summarized output
+#' (which are contained in `which_path`)
+#' over all simulation repetitions is also returned.
 #'
 #' @export
 #'
@@ -363,25 +389,33 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #' @param x An object of class `mc`, for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
 #' @param join A character vector containing the `nice_names` for the different
-#' parameter combinations (returned by [future_mc()]), which should be plotted together.
+#' parameter combinations (returned by [future_mc()]),
+#' which should be plotted together.
 #' Default: Each parameter combination is plotted distinctly.
-#' @param which_setup A character vector containing the `nice_names` for the different parameter
+#' @param which_setup A character vector containing the `nice_names`
+#' for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
-#' @param parameter_comb Alternative to `which_setup`. A named list whose components are named after
-#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
+#' @param parameter_comb Alternative to `which_setup`.
+#' A named list whose components are named after
+#' (some of) the parameters in `param_list` in [future_mc()]
+#' and each component is a vector containing
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
-#' @param plot Boolean that specifies whether the plots should be printed while calling the function or not.
+#' @param plot Boolean that specifies whether
+#' the plots should be printed while calling the function or not.
 #' Default: `TRUE`
 #' @param ... ignored
 #'
 #'
-#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb` can be specified
+#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb`
+#'  can be specified
 #' at one time.
 #'
-#' @return A list whose components are named after the outputs of `fun` and each component
-#' contains an object of class `ggplot` and `gg` which can be plotted and modified with the
+#' @return A list whose components are named after the outputs of `fun`
+#' and each component
+#' contains an object of class `ggplot` and `gg`
+#' which can be plotted and modified with the
 #' [ggplot2] functions.
 #'
 #' @export
@@ -419,13 +453,18 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #'  ggplot2::theme_minimal() +
 #'  ggplot2::geom_vline(xintercept = 3)
 #'
-#' returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FALSE)
+#' returned_plot2 <- plot(test_mc,
+#' which_setup = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot2$mean
 #'
-#' returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
+#' returned_plot3 <- plot(test_mc,
+#' join = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot3$mean
 #'
-plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, plot = TRUE, ...){
+plot.mc <- function(x, join = NULL,
+                    which_setup = NULL,
+                    parameter_comb = NULL,
+                    plot = TRUE, ...){
 
 
   checkmate::assert_class(x, "mc")
@@ -572,33 +611,45 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' Plot the summarized results of a Monte Carlo Simulation
 #'
 #' @description
-#' Plot line plots of the path of the summarized output over all simulation repetitions
-#' of a Monte Carlo simulation run by [future_mc()] and summarized by [summary.mc()]
+#' Plot line plots of the path of the summarized output
+#' over all simulation repetitions
+#' of a Monte Carlo simulation run by
+#' [future_mc()] and summarized by [summary.mc()]
 #'
 #' @param x An object of class `summary.mc`. For restrictions see details.
 #' @param join A character vector containing the `nice_names` for the different
-#' parameter combinations (returned by [future_mc()]), which should be plotted together.
+#' parameter combinations (returned by [future_mc()]),
+#' which should be plotted together.
 #' Default: Each parameter combination is plotted distinct.
-#' @param which_setup A character vector containing the `nice_names` for the different parameter
+#' @param which_setup A character vector containing the `nice_names`
+#' for the different parameter
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
-#' @param parameter_comb Alternative to `which_setup`. A named list whose components are named after
-#' (some of) the parameters in `param_list` in [future_mc()] and each component is a vector containing
+#' @param parameter_comb Alternative to `which_setup`.
+#'  A named list whose components are named after
+#' (some of) the parameters in `param_list` in [future_mc()]
+#' and each component is a vector containing
 #' the values for the parameters to filter by.
 #' Default: All parameter combinations are plotted.
-#' @param plot Boolean that specifies whether the plots should be printed while calling the function or not.
+#' @param plot Boolean that specifies whether the plots
+#' should be printed while calling the function or not.
 #' Default: TRUE
 #' @param ... additional arguments passed to callies.
 #'
-#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb` can be specified
+#' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb`
+#'  can be specified
 #' at a time.
 #'
-#' A plot is only created for (output - parameter combination)-pairs for which in [summary.mc()]
-#' a function is provided in `sum_funs` which returns a single numeric value and if the output
+#' A plot is only created for (output - parameter combination)-pairs
+#' for which in [summary.mc()]
+#' a function is provided in `sum_funs`
+#' which returns a single numeric value and if the output
 #' is included in `which_path`.
 #'
-#' @return A list whose components are named after the outputs of `fun` and each component
-#' contains an object of class `ggplot` and `gg` which can be plotted and modified with the
+#' @return A list whose components are named after the outputs of `fun`
+#' and each component
+#' contains an object of class `ggplot` and `gg` which can be plotted
+#' and modified with the
 #' [ggplot2] functions.
 #'
 #' @export
@@ -847,7 +898,8 @@ plot.summary.mc <- function(x,
 #' @param x An object of class `mc`.
 #' @param ... ignored
 #'
-#' @return print shows a complete representation of the run Monte Carlo Simulation
+#' @return print shows a complete representation
+#' of the run Monte Carlo Simulation
 #' @export
 #'
 #' @examples
@@ -908,7 +960,8 @@ print.mc <- function(x, ...){
 #' @param x An object of class `summary.mc`
 #' @param ... ignored
 #'
-#' @return print shows a nice representation of the summarized results of a Monte Carlo Simulation
+#' @return print shows a nice representation of the
+#' summarized results of a Monte Carlo Simulation
 #' @export
 #'
 #' @examples

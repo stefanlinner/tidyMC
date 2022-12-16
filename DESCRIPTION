@@ -2,6 +2,10 @@ Package: tidyMC
 Title: Monte Carlo Simulations made easy and tidy
 Version: 0.0.0.9000
 Authors@R: 
+    person(given = "Ignacio",
+           family = "Moreira Lara",
+           role = c("aut", "cre"),
+           email = "ignacio.moreira-lara@tu-dortmund.de")
     person(given = "Konstantin",
            family = "Lehmann",
            role = c("aut", "cre"),
@@ -10,12 +14,9 @@ Authors@R:
        family = "Linner",
        role = c("aut", "cre"),
        email = "stefan.linner@tu-dortmund.de")
-    person(given = "Ignacio",
-       family = "Moreira Lara",
-       role = c("aut", "cre"),
-       email = "ignacio.moreira-lara@tu-dortmund.de")
 Description: Framework to run Monte Carlo simulations over a parameter grid. 
-             Allows to parralilize the simulations. Generates plots and LaTex tables
+             Allows to parralilize the simulations. 
+             Generates plots and LaTex tables
              summarizing the results from the simulation. 
 License: MIT + file LICENSE
 Imports:

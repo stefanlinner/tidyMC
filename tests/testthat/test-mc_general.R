@@ -30,7 +30,7 @@ testthat::test_that("Errors check work", {
     future_mc(fun = test_func, repetitions = 10, param_list = param_list),
     regexp = "Function error:"
   )
-  testthat::expect_error({ # List of functions for the summary has to have names
+  testthat::expect_error({ # List of functions the summary has to have names
     summary(out, sum_funs = list(mean))
   }, regexp = "Must have names")
   testthat::expect_error({ # The results have to be named
@@ -51,7 +51,8 @@ testthat::test_that("Errors check work", {
     future_mc(fun = test_func2, repetitions = 10, param_list = param_list)
   })
 
-  testthat::expect_error(tidy_mc_latex(summary(out), repetitions_set = c(10, 20000),
+  testthat::expect_error(tidy_mc_latex(summary(out),
+                                       repetitions_set = c(10, 20000),
                                        which_out = "mean"))
   testthat::expect_error({ # A variable from the global environment cannot be called
     rand_var <- rnorm(1)
@@ -93,7 +94,8 @@ testthat::test_that("Functions print",{
 
 testthat::test_that("Number of results coincides", {
   testthat::expect_identical(nrow(out$parameter),
-                             length(summary(out, sum_funs = list(mean = mean))))
+                             length(summary(out,
+                                            sum_funs = list(mean = mean))))
   testthat::expect_identical(nrow(out$parameter),
                              length(summary(out)))
   testthat::expect_identical(length(out$nice_names), nrow(out$parameter))

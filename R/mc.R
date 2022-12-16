@@ -5,62 +5,94 @@
 #' desired parameter grids.
 #'
 #' @param fun The function to be evaluated. See details.
-#' @param repetitions An integer that specifies the number of Monte Carlo iterations
-#' @param param_list A list whose components are named after the parameters of `fun` which should vary
-#' for the different Monte Carlo Simulations. Each component is a vector containing the desired grid
-#' values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
+#' @param repetitions An integer that
+#' specifies the number of Monte Carlo iterations
+#' @param param_list A list whose components a
+#' re named after the parameters of `fun` which should vary
+#' for the different Monte Carlo Simulations.
+#' Each component is a vector containing the desired grid
+#' values for that parameter.
+#' The Monte Carlo Simulation is run for all possible combinations of
 #' that parameter list.
-#' @param param_table Alternative to `param_list`. A `data.frame` or `data.table` containing a pre-built
-#' grid of values, where the columns are the parameters of `fun` which should vary for the different Monte Carlo
-#' Simulations. This is useful if you only want to run a Monte Carlo Simulation for a subset of all possible combinations.
-#' @param parallelisation_plan A list whose components are named after possible parameters
-#' of [future::plan()] specifying the parallelisation plan which should be used in the
+#' @param param_table Alternative to `param_list`.
+#' A `data.frame` or `data.table` containing a pre-built
+#' grid of values, where the columns are the parameters of `fun`
+#' which should vary for the different Monte Carlo
+#' Simulations.
+#' This is useful if you only want to run a Monte Carlo Simulation
+#' for a subset of all possible combinations.
+#' @param parallelisation_plan A list whose components are named
+#' after possible parameters
+#' of [future::plan()] specifying the
+#' parallelisation plan which should be used in the
 #' Monte Carlo Simulation. Default is `strategy = multisession`.
-#' @param parallelisation_options A list whose components are named after possible parameters
-#' of [furrr::furrr_options()] for fine tuning functions, such as [furrr::future_map()]. Default is
-#' `seed = TRUE` as long as not specified differently in order to assure reproducibility.
-#' @param check Boolean that specifies whether a single test-iteration should be run for each parameter
-#' combination in order to check for possible occuring errors in `fun`. Default is `TRUE`.
-#' @param parallel Boolean that specifies whether the Monte Carlo simulation should be run in parallel.
+#' @param parallelisation_options A list whose components are named
+#' after possible parameters
+#' of [furrr::furrr_options()] for fine tuning functions,
+#' such as [furrr::future_map()]. Default is
+#' `seed = TRUE` as long as not specified differently
+#' in order to assure reproducibility.
+#' @param check Boolean that specifies whether a single test-iteration
+#' should be run for each parameter
+#' combination in order to check for possible
+#' occuring errors in `fun`. Default is `TRUE`.
+#' @param parallel Boolean that specifies whether
+#'  the Monte Carlo simulation should be run in parallel.
 #' Default is `TRUE`.
-#' @param ... Additional parameters that are passed on to `fun` and which are not part of the parameter
+#' @param ... Additional parameters that are passed on to `fun`
+#' and which are not part of the parameter
 #' grid.
 #'
-#' @details The user defined function `fun` handles (if specified) the generation of data, the
+#' @details The user defined function `fun` handles
+#' (if specified) the generation of data, the
 #' application of the method of interest and the evaluation of the result for a
-#' single repetition and parameter combination. `future_mc` handles the generation
-#' of loops over the desired parameter grids and the repetition of the Monte Carlo
-#' experiment for each of the parameter constellations.
+#' single repetition and parameter combination.
+#' `future_mc` handles the generation of loops over the desired parameter grids
+#' and the repetition of the Monte Carlo experiment
+#' for each of the parameter constellations.
 #'
 #' There are four formal requirements that `fun` has to fulfill:
 #'
-#' * The arguments of `fun` which are present in `param_list` need to be scalar values.
-#' * The value returned by `fun` has to be a named list and must have the same components for each
+#' * The arguments of `fun` which are present in `param_list`
+#' need to be scalar values.
+#' * The value returned by `fun` has to be a named list
+#' and must have the same components for each
 #' iteration and parameter combination.
-#' * The names of the returned values and those of the arguments contained in `param_list` need to
-#'   be different. Moreover, they cannot be `"params"`, `"repetitions"` or `"setup"`
-#' * Every variable used inside `fun` has either to be defined inside `fun` or given as an argument
-#' through the `...` argument.
-#' In particular, `fun` cannot use variables which are only defined in the global environment.
+#' * The names of the returned values and
+#' those of the arguments contained in `param_list` need to
+#'   be different.
+#'   Moreover, they cannot be `"params"`, `"repetitions"` or `"setup"`
+#' * Every variable used inside `fun` has either to be defined inside `fun`
+#' or given as an argument through the `...` argument.
+#' In particular, `fun` cannot use variables which are only defined
+#' in the global environment.
 #'
-#' In order to use the comfort functions [plot.mc()], [summary.mc()], [plot.summary.mc()], and
-#' [tidy_mc_latex()] the value returned by `fun` has to be a named list of scalars.
+#' In order to use the comfort functions
+#' [plot.mc()], [summary.mc()], [plot.summary.mc()], and
+#' [tidy_mc_latex()] the value returned by `fun`
+#' has to be a named list of scalars.
 #'
 #'
 #' @return A list of type `mc` containing the following objects:
 #'
-#' * output: A tibble containing the return value of `fun` for each iteration and
+#' * output: A tibble containing the return value of `fun`
+#' for each iteration and
 #' parameter combination
 #' * parameter: A tibble which shows the different parameter combinations
-#' * simple_output: A boolean value indicating whether the return value of `fun` is a named list of
+#' * simple_output: A boolean value indicating
+#' whether the return value of `fun` is a named list of
 #' scalars or not
-#' * nice_names: A character vector containing "nice names" for the different parameter setups
-#' * calculation_time: The calculation time needed to run the whole Monte Carlo Simulation
+#' * nice_names: A character vector containing "nice names"
+#' for the different parameter setups
+#' * calculation_time: The calculation time needed
+#' to run the whole Monte Carlo Simulation
 #' * n_results: A numeric value indicating the number of results
-#' * seed: The value which is used for the parameter `seed` in [furrr::furrr_options()]
+#' * seed: The value which is used for
+#' the parameter `seed` in [furrr::furrr_options()]
 #' * fun: The user-defined function `fun`
 #' * repetitions: The number of repetitions run for each parameter setup
-#' * parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
+#' * parallel: Boolean whether the Monte Carlo Simulation
+#' was run in parallel or not
 #' * plan: A list that specified the parallelisation plan via [future::plan()]
 #'
 #' @export

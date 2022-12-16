@@ -1,0 +1,10 @@
+citHeader("To cite tidyMC in publications use:")
+
+citEntry(
+  entry    = {Manual},
+  title    = {tidyMC; MonteCarlo Simulations made easy and tidy},
+  author   = {Ignacio Moreira Lara and Konstantin Lehmann and Stefan Linner},
+  year     = {2022},
+  url      = https://github.com/stefanlinner/tidyMC,
+  notes = {version 0.1}
+)
