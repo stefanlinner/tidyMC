@@ -54,7 +54,9 @@ testthat::test_that("Errors check work", {
   testthat::expect_error(tidy_mc_latex(summary(out),
                                        repetitions_set = c(10, 20000),
                                        which_out = "mean"))
-  testthat::expect_error({ # A variable from the global environment cannot be called
+
+  # A variable from the global environment cannot be called
+  testthat::expect_error({
     rand_var <- rnorm(1)
     test_func2 <- function(param = 0.1, n = 100, x1 = 1, x2 = 1){
 

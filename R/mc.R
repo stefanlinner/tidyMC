@@ -1,7 +1,8 @@
 #' Run a Parallelized Monte Carlo Simulation
 #'
 #' @description
-#' `future_mc` runs a Monte Carlo simulation study for a user-specified function and the
+#' `future_mc` runs a Monte Carlo simulation study
+#' for a user-specified function and the
 #' desired parameter grids.
 #'
 #' @param fun The function to be evaluated. See details.

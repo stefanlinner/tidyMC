@@ -269,10 +269,14 @@ sum_mc_plot$b1 +
                                             vjust = 0.2))
 
 sum_mc_plot_subset1 <- 
-  plot(summary_default, plot = FALSE, which_setup = first_mc_ols$nice_names[4:6])
+  plot(summary_default, 
+       plot = FALSE, 
+       which_setup = first_mc_ols$nice_names[4:6])
 
 sum_mc_plot_subset2 <- 
-  plot(summary_default, plot = FALSE, parameter_comb = list(inc_x2 = 1))
+  plot(summary_default, 
+       plot = FALSE, 
+       parameter_comb = list(inc_x2 = 1))
 
 sum_mc_plot_subset2$b1
 

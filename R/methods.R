@@ -4,7 +4,8 @@
 #' Summarize the results of a Monte Carlo Simulation run by [future_mc()] with
 #' (optionally) user-defined summary functions.
 #'
-#' @param object An object of class `mc`, for which holds `simple_output = TRUE`.
+#' @param object An object of class `mc`,
+#' for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
 #' @param sum_funs A named (nested) list containing summary functions.
 #' #See details.
@@ -685,10 +686,12 @@ plot.mc <- function(x, join = NULL,
 #' returned_plot1$mean +
 #'  ggplot2::theme_minimal()
 #'
-#' returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], plot = FALSE)
+#' returned_plot2 <- plot(summary(test_mc),
+#' which_setup = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot2$mean
 #'
-#' returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
+#' returned_plot3 <- plot(summary(test_mc),
+#' join = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot3$mean
 #'
 plot.summary.mc <- function(x,
