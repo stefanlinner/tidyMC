@@ -69,21 +69,22 @@
 #'
 #' @examples
 #'
-#' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-#'
+#' test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2) {
 #'   data <- rnorm(n, mean = param) + x1 + x2
 #'   stat <- mean(data)
 #'   stat_2 <- var(data)
 #'
-#'   if (x2 == 5){
+#'   if (x2 == 5) {
 #'     stop("x2 can't be 5!")
 #'   }
 #'
 #'   return(list(mean = stat, var = stat_2))
 #' }
 #'
-#' param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
-#'                    x1 = 1:2)
+#' param_list <- list(
+#'   param = seq(from = 0, to = 1, by = 0.5),
+#'   x1 = 1:2
+#' )
 #'
 #' set.seed(101)
 #' test_mc <- future_mc(
@@ -95,22 +96,19 @@
 #' )
 #'
 future_mc <-
-  function(
-    fun,
-    repetitions,
-    param_list = NULL,
-    param_table = NULL,
-    parallelisation_plan = list(strategy = future::multisession),
-    parallelisation_options = list(),
-    check = TRUE,
-    parallel = TRUE,
-    ...
-  ){
-
+  function(fun,
+           repetitions,
+           param_list = NULL,
+           param_table = NULL,
+           parallelisation_plan = list(strategy = future::multisession),
+           parallelisation_options = list(),
+           check = TRUE,
+           parallel = TRUE,
+           ...) {
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named", null.ok = TRUE)
-    if(!is.null(param_list)){
+    if (!is.null(param_list)) {
       purrr::walk(
         param_list,
         checkmate::assert_atomic_vector,
@@ -118,32 +116,48 @@ future_mc <-
         .var.name = "Element of param_list"
       )
     }
-    checkmate::assert_data_frame(param_table, col.names = "named", null.ok = TRUE)
-    if(!is.null(param_list) & !is.null(param_table)){
-      stop("Only one of the arguments param_list and param_table can be defined at the same time!")
+    checkmate::assert_data_frame(param_table,
+      col.names = "named",
+      null.ok = TRUE
+    )
+    if (!is.null(param_list) & !is.null(param_table)) {
+      stop("Only one of the arguments param_list and param_table
+           can be defined at the same time!")
     }
-    if(is.null(param_list) & is.null(param_table)){
-      stop("At least one of the arguments param_list and param_table has to be defined!")
+    if (is.null(param_list) & is.null(param_table)) {
+      stop("At least one of the arguments param_list and param_table
+           has to be defined!")
     }
-    checkmate::assert_list(parallelisation_plan, null.ok = TRUE, names = "named")
-    checkmate::assert_list(parallelisation_options, null.ok = TRUE, names = "named")
+    checkmate::assert_list(parallelisation_plan,
+      null.ok = TRUE,
+      names = "named"
+    )
+    checkmate::assert_list(parallelisation_options,
+      null.ok = TRUE,
+      names = "named"
+    )
     checkmate::assert_logical(check, len = 1)
     checkmate::assert_logical(parallel, len = 1)
 
     fun_argnames <- methods::formalArgs(fun)
     add_args <- list(...)
 
-    checkmate::assert_subset(names(param_list), choices = fun_argnames, empty.ok = TRUE)
-    checkmate::assert_subset(names(param_table), choices = fun_argnames, empty.ok = TRUE)
+    checkmate::assert_subset(names(param_list),
+                             choices = fun_argnames,
+                             empty.ok = TRUE)
+    checkmate::assert_subset(names(param_table),
+                             choices = fun_argnames,
+                             empty.ok = TRUE)
     checkmate::assert_list(add_args, names = "named")
     checkmate::assert_subset(names(add_args), fun_argnames)
 
     parallelisation_options_default <- list(seed = TRUE)
 
     parallelisation_options <-
-      utils::modifyList(parallelisation_options_default, parallelisation_options)
+      utils::modifyList(parallelisation_options_default,
+                        parallelisation_options)
 
-    if(!parallel){
+    if (!parallel) {
       parallelisation_plan <-
         list(
           strategy = future::sequential
@@ -152,52 +166,62 @@ future_mc <-
 
     do.call(future::plan, parallelisation_plan)
 
-    if(!is.null(param_list)){
+    if (!is.null(param_list)) {
       param_table <- expand.grid(param_list)
     }
     param_names <- names(param_table)
 
     scalar_results <- NULL
 
-    if(check){
-
+    if (check) {
       deparsed_function <- deparse(fun)
       fun_2 <- eval(
-        parse(text =
-                stringr::str_c(
-                  stringr::str_c(deparsed_function[1:2], collapse = ""),
-                  "\n",
-                  "cl <-
+        parse(
+          text =
+            stringr::str_c(
+              stringr::str_c(deparsed_function[1:2], collapse = ""),
+              "\n",
+              "cl <-
                   stringr::str_c(
                     param_names,
                     eval(parse(text  =
                               stringr::str_c(\"c(\",
-                                  stringr::str_c(param_names, sep = \"\", collapse = \", \"),
+                                  stringr::str_c(param_names,
+                                  sep = \"\", collapse = \", \"),
                                   \")\",
                                sep = \"\", collapse = \"\")
                                )
                         ),
                   sep = \"=\", collapse = \", \")",
-                  "\n",
-                  stringr::str_c(
-                    "tryCatch({fun(",
-                    stringr::str_c(fun_argnames, fun_argnames, sep = "=", collapse = ", "),
-                    ")",
-                    sep = "", collapse = ""),
-                  "}, ",
-                  "\n",
-                  "error  ={ ",
-                  stringr::str_c(
-                    "function(e) stringr::str_c(\" \n Function error: \", unlist(rlang::catch_cnd(fun(",
-                    stringr::str_c(fun_argnames, fun_argnames, sep = "=", collapse = ", "),
-                    ")))[[1]], \" \n At the parameters: \",  cl, \" \n \", collapse = \"\", sep = \"\")",
-                    sep = "", collapse = ""
-                  ),
-                  "});",
-                  "\n",
-                  "}",
-                  sep = "", collapse = ""
-                )
+              "\n",
+              stringr::str_c(
+                "tryCatch({fun(",
+                stringr::str_c(fun_argnames,
+                               fun_argnames,
+                               sep = "=",
+                               collapse = ", "),
+                ")",
+                sep = "", collapse = ""
+              ),
+              "}, ",
+              "\n",
+              "error  ={ ",
+              stringr::str_c(
+                "function(e) stringr::str_c(\" \n Function error: \",
+                unlist(rlang::catch_cnd(fun(",
+                stringr::str_c(fun_argnames,
+                               fun_argnames,
+                               sep = "=",
+                               collapse = ", "),
+                ")))[[1]], \" \n At the parameters: \",
+                cl, \" \n \", collapse = \"\", sep = \"\")",
+                sep = "", collapse = ""
+              ),
+              "});",
+              "\n",
+              "}",
+              sep = "", collapse = ""
+            )
         )
       )
 
@@ -215,7 +239,7 @@ future_mc <-
       test_runs_errors <- unlist(test_runs) %>%
         stringr::str_subset(pattern = "^ \n Function error")
 
-      if(length(test_runs_errors) != 0){
+      if (length(test_runs_errors) != 0) {
         stop(test_runs_errors)
       } else {
         purrr::walk(
@@ -228,10 +252,12 @@ future_mc <-
         scalar_results <-
           purrr::map_lgl(
             test_runs,
-            function(.x){
+            function(.x) {
               purrr::map_lgl(
-                .x, function(fun_list_outputs){
-                  checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
+                .x, function(fun_list_outputs) {
+                  checkmate::test_scalar(fun_list_outputs,
+                                         na.ok = TRUE,
+                                         null.ok = TRUE)
                 }
               ) %>%
                 all()
@@ -241,7 +267,6 @@ future_mc <-
 
         message("\n Test-run successfull: No errors occurred!")
       }
-
     }
 
     message(
@@ -253,32 +278,31 @@ future_mc <-
       )
     )
 
-    output_generator <- function(x){
-
-      if(is.null(scalar_results)){
-
+    output_generator <- function(x) {
+      if (is.null(scalar_results)) {
         scalar_results <<-
           purrr::map_lgl(
-            x[1:nrow(param_table)],
-            function(.x){
+            x[1:seq_len(nrow(param_table))],
+            function(.x) {
               purrr::map_lgl(
-                .x, function(fun_list_outputs){
-                  checkmate::test_scalar(fun_list_outputs, na.ok = TRUE, null.ok = TRUE)
+                .x, function(fun_list_outputs) {
+                  checkmate::test_scalar(fun_list_outputs,
+                                         na.ok = TRUE,
+                                         null.ok = TRUE)
                 }
               ) %>%
                 all()
             }
           ) %>%
           all()
-
       }
 
-      if(scalar_results){
+      if (scalar_results) {
         return(purrr::map_dfr(.x = x, function(.x) .x) %>%
-                 dplyr::as_tibble())
+          dplyr::as_tibble())
       }
 
-      if(!scalar_results){
+      if (!scalar_results) {
         warning(
           "You cannot use the comfort functions: plot & summary,
         because for that fun has to return a list with named components.
@@ -286,13 +310,11 @@ future_mc <-
         )
         return(tibble::as_tibble_col(x))
       }
-
     }
 
     . <- NULL
 
-    if(parallel){
-
+    if (parallel) {
       start_time <- Sys.time()
 
       res_table_reps <-
@@ -304,14 +326,15 @@ future_mc <-
           params = rep(
             purrr::map_chr(
               seq_len(nrow(param_table)),
-              function(.x){
+              function(.x) {
                 stringr::str_c(
                   param_names,
-                  param_table[.x,],
+                  param_table[.x, ],
                   sep = "=",
                   collapse = ", "
                 )
-              }),
+              }
+            ),
             repetitions
           ),
           .,
@@ -328,11 +351,9 @@ future_mc <-
         dplyr::arrange(.data$params)
 
       calculation_time <- Sys.time() - start_time
-
     }
 
-    if(!parallel){
-
+    if (!parallel) {
       start_time <- Sys.time()
 
       res_table_reps <-
@@ -344,14 +365,15 @@ future_mc <-
           params = rep(
             purrr::map_chr(
               seq_len(nrow(param_table)),
-              function(.x){
+              function(.x) {
                 stringr::str_c(
                   param_names,
-                  param_table[.x,],
+                  param_table[.x, ],
                   sep = "=",
                   collapse = ", "
                 )
-              }),
+              }
+            ),
             repetitions
           ),
           .,
@@ -366,12 +388,12 @@ future_mc <-
         dplyr::arrange(.data$params)
 
       calculation_time <- Sys.time() - start_time
-
     }
 
     message(stringr::str_c("\n Simulation was successfull!",
-                           "\n Running time: ", hms::as_hms(calculation_time),
-                           collapse = "", sep = ""))
+      "\n Running time: ", hms::as_hms(calculation_time),
+      collapse = "", sep = ""
+    ))
 
     future::plan("default")
 
@@ -394,5 +416,4 @@ future_mc <-
     class(out) <- "mc"
 
     out
-
   }

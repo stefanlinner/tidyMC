@@ -122,7 +122,8 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 
   checkmate::assert_class(object, "mc")
   if(!object$simple_output){
-    stop("fun has to return a list with named components. Each component has to be scalar.")
+    stop("fun has to return a list with named components.
+         Each component has to be scalar.")
   }
   param_names <- names(object$parameter)
   stat_names <- dplyr::setdiff(names(object$output), c("params", param_names))
@@ -208,7 +209,9 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 
 
 
-  if(!is.null(sum_funs) & length(sum_funs) == length(stat_names) & is.function(sum_funs[[1]])){
+  if(!is.null(sum_funs) &
+     length(sum_funs) == length(stat_names) &
+     is.function(sum_funs[[1]])){
 
     checkmate::assert_list(sum_funs, names = "named")
     checkmate::assertNames(
@@ -263,7 +266,9 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
   }
 
 
-  if(!is.null(sum_funs) & length(sum_funs) == length(setup_names) & is.list(sum_funs[[1]])){
+  if(!is.null(sum_funs) &
+     length(sum_funs) == length(setup_names) &
+     is.list(sum_funs[[1]])){
 
     checkmate::assert_list(sum_funs, names = "named")
     checkmate::assertNames(
@@ -425,7 +430,8 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 
   checkmate::assert_class(x, "mc")
   if(!x$simple_output){
-    stop("fun has to return a list with named components. Each component has to be scalar.")
+    stop("fun has to return a list with named components.
+         Each component has to be scalar.")
   }
   param_names <- names(x$parameter)
   stat_names <- dplyr::setdiff(names(x$output), c("params", param_names))
@@ -442,15 +448,18 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
   )
 
   if(!is.null(which_setup) & !is.null(parameter_comb)){
-    stop("Please subset the setups either with which_setup or parameter_comb, not with both!")
+    stop("Please subset the setups either with which_setup or parameter_comb,
+         not with both!")
   }
 
   if(!is.null(which_setup) & !is.null(join)) {
-    stop("Arguments which_setup and join cannot be specified at the same time!")
+    stop("Arguments which_setup and
+         join cannot be specified at the same time!")
   }
 
   if(!is.null(parameter_comb) & !is.null(join)) {
-    stop("Arguments parameter_comb and join cannot be specified at the same time!")
+    stop("Arguments parameter_comb and
+         join cannot be specified at the same time!")
   }
 
   data_plot <-
@@ -535,7 +544,10 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
               ggplot2::geom_density() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = stringr::str_c(
-                "Joint density plot of", length(join), "setups for the output", stat, sep = " "
+                "Joint density plot of",
+                length(join),
+                "setups for the output",
+                stat, sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
             if(plot){
@@ -628,7 +640,11 @@ plot.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, p
 #' returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot3$mean
 #'
-plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb = NULL, plot = TRUE, ...) {
+plot.summary.mc <- function(x,
+                            join = NULL,
+                            which_setup = NULL,
+                            parameter_comb = NULL,
+                            plot = TRUE, ...) {
 
   checkmate::assert_class(x, "summary.mc")
   setup_names <- names(x)
@@ -655,18 +671,23 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
     stringr::str_extract(
       pattern = "[^=]+"
     )
-  checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
+  checkmate::assert_subset(names(parameter_comb),
+                           param_names,
+                           empty.ok = TRUE)
 
   if(!is.null(which_setup) & !is.null(parameter_comb)){
-    stop("Please subset the setups either with which_setup or parameter_comb, not with both!")
+    stop("Please subset the setups either with which_setup or
+         parameter_comb, not with both!")
   }
 
   if(!is.null(parameter_comb) & !is.null(join)) {
-    stop("Arguments parameter_comb and join cannot be specified at the same time!")
+    stop("Arguments parameter_comb and join cannot be
+         specified at the same time!")
   }
 
   if(!is.null(which_setup) & !is.null(join)) {
-    stop("Arguments which_setup and join cannot be specified at the same time!")
+    stop("Arguments which_setup and join cannot be
+         specified at the same time!")
   }
 
   if(is.null(which_setup)){
@@ -687,7 +708,9 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           purrr::map_dfc(
             which_setup,
             function(setup){
-              if(checkmate::test_list(x[[setup]][[stat]], len = 2, names = "named")){
+              if(checkmate::test_list(x[[setup]][[stat]],
+                                      len = 2,
+                                      names = "named")){
                 stat_dat <- list(x[[setup]][[stat]][[2]])
                 names(stat_dat) <- setup
                 return(stat_dat)
@@ -699,7 +722,9 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
             }
           ) %>%
           tibble::rowid_to_column(var = "repetitions") %>%
-          tidyr::pivot_longer(cols = which_setup, names_to = "setup", values_to = stat) %>%
+          tidyr::pivot_longer(cols = which_setup,
+                              names_to = "setup",
+                              values_to = stat) %>%
           dplyr::filter(!is.na(get(stat)))
 
         if(!is.null(parameter_comb) & nrow(stat_table) != 0){
@@ -755,7 +780,8 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions", y = stat)) +
+              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions",
+                                                  y = stat)) +
               ggplot2::geom_line() +
               ggplot2::facet_grid(~.data$setup) +
               ggplot2::theme_bw()
@@ -783,11 +809,17 @@ plot.summary.mc <- function(x, join = NULL, which_setup = NULL, parameter_comb =
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions", y = stat, col = "setup")) +
+              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions",
+                                                  y = stat,
+                                                  col = "setup")) +
               ggplot2::geom_line() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = stringr::str_c(
-                "Joint time series of", length(join), "setups for the output", stat, sep = " "
+                "Joint time series of",
+                length(join),
+                "setups for the output",
+                stat,
+                sep = " "
               ), color = "Setups") +
               ggplot2::theme(legend.position = "bottom")
             if(plot){
@@ -852,10 +884,12 @@ print.mc <- function(x, ...){
 
   cat("Monte Carlo simulation results for the specified function: \n \n",
       stringr::str_c(deparse(x$fun), collapse = "\n", sep = " "),
-      "\n \n", "The following", length(x$nice_names), "parameter combinations: \n")
+      "\n \n", "The following",
+      length(x$nice_names), "parameter combinations: \n")
   print(x$parameter)
   cat("are each simulated", x$repetitions, "times.",
-      "\n \n The Running time was:", stringr::str_c(hms::as_hms(x$calculation_time)),
+      "\n \n The Running time was:",
+      stringr::str_c(hms::as_hms(x$calculation_time)),
       "\n \n Parallel:", x$parallel,
       "\n \n The following parallelisation plan was used: \n")
   print(x$plan)
