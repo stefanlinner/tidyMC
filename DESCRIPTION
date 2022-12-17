@@ -45,3 +45,5 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 VignetteBuilder: knitr
+URL: https://github.com/stefanlinner/tidyMC
+BugReports: https://github.com/stefanlinner/tidyMC/issues
