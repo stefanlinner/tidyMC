@@ -1,19 +1,19 @@
 Package: tidyMC
 Title: Monte Carlo Simulations made easy and tidy
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R: c(
     person(given = "Ignacio",
            family = "Moreira Lara",
-           role = c("aut", "cre"),
-           email = "ignacio.moreira-lara@tu-dortmund.de")
+           email = "ignacio.moreira-lara@tu-dortmund.de",
+           role = c("aut", "cre")),
     person(given = "Konstantin",
            family = "Lehmann",
-           role = c("aut", "cre"),
-           email = "konstantin.lehmann@tu-dortmund.de")
+           email = "konstantin.lehmann@tu-dortmund.de",
+           role = c("aut", "cre")),
     person(given = "Stefan",
        family = "Linner",
-       role = c("aut", "cre"),
-       email = "stefan.linner@tu-dortmund.de")
+       email = "stefan.linner@tu-dortmund.de",
+       role = c("aut", "cre")))
 Description: Framework to run Monte Carlo simulations over a parameter grid. 
              Allows to parralilize the simulations. 
              Generates plots and LaTex tables
