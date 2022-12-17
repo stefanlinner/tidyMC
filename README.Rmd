@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
 # tidyMC
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/stefanlinner/tidyMC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stefanlinner/tidyMC/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Monte Carlo Simulations aim to study the properties of statistical inference techniques. At its core, a Monte Carlo Simulation works through the application of the techniques to repeatedly drawn samples from a pre-specified data generating process. The `tidyMC` package aims to cover and simplify the whole workflow of running a Monte Carlo simulation in either an academic or professional setting. Thus, `tidyMC` aims to provide functions for the following tasks:
