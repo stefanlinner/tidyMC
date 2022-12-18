@@ -7,67 +7,94 @@
 \method{summary}{mc}(object, sum_funs = NULL, which_path = "all", ...)
 }
 \arguments{
-\item{object}{An object of class \code{mc}, for which holds \code{simple_output = TRUE}.
+\item{object}{An object of class \code{mc},
+for which holds \code{simple_output = TRUE}.
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
-\item{sum_funs}{A named (nested) list containing summary functions. See details.}
+\item{sum_funs}{A named (nested) list containing summary functions.
+#See details.}
 
-\item{which_path}{A character vector containing the names of (some of) the named outputs
-(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), for which to return a "path" of the
+\item{which_path}{A character vector containing the names of (some of)
+the named outputs
+(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}),
+for which to return a "path" of the
 stepwise calculation of the result of the summary function.
-Alternatively, \code{"all"} or \code{"none"} can be used to return either the path for all or none of the
+Alternatively, \code{"all"} or \code{"none"} can be used to return either
+the path for all or none of the
 numeric outputs.
 Default: \code{"all"}.}
 
 \item{...}{Ignored}
 }
 \value{
-A list of type \code{summary.mc} containing the result of the summary functions of the simulation
+A list of type \code{summary.mc} containing the
+result of the summary functions of the simulation
 results of a respective output and parameter combination.
 
-If the provided summary functions return a single numeric value, the path of the summarized output
-(which are contained in \code{which_path}) over all simulation repetitions is also returned.
+If the provided summary functions return a single numeric value,
+the path of the summarized output
+(which are contained in \code{which_path})
+over all simulation repetitions is also returned.
 }
 \description{
 Summarize the results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}} with
 (optionally) user-defined summary functions.
 }
 \details{
-In order to use \code{summary()}, the output of \code{\link[=future_mc]{future_mc()}} has to be "simple",
-which is the case if the return value of \code{fun} is a named list of scalars. If the
-returned value of \code{fun} is a named list of more complex data structures, \code{summary()}
+In order to use \code{summary()},
+the output of \code{\link[=future_mc]{future_mc()}} has to be "simple",
+which is the case if the return value of \code{fun} is a named list of scalars.
+If the
+returned value of \code{fun} is a named list of more complex data structures,
+\code{summary()}
 cannot be used.
 
 With \code{sum_funs} the user can define (different) functions which summarize
-the simulation results for each output (return values of \code{fun} in \code{\link[=future_mc]{future_mc()}})
-and each parameter combination. Thus, the functions inside \code{sum_funs} only take one
-argument, which is the output vector (with length \code{repetitions}) of one output
+the simulation results for each output
+(return values of \code{fun} in \code{\link[=future_mc]{future_mc()}})
+and each parameter combination.
+Thus, the functions inside \code{sum_funs} only take one argument,
+which is the output vector (with length \code{repetitions}) of one output
 of one specific parameter combination.
 
 The default summary functions are \code{\link[base:mean]{base::mean()}} for numeric outputs and
 \code{\link[base:summary]{base::summary()}} for outputs with non-numeric data types.
 
-The user can define summary functions by supplying a named (nested) list to \code{sum_funs}. When
-the functions provided for each output return only one numeric value the results are twofold:
-first, a single scalar result of the function evaluating the whole output vector.
-Second, a "path" with length \code{repetitions} of the step wise calculation of the function's result
-across the output vector (assumed that the output is contained in \code{which_path}).
+The user can define summary functions by supplying a named
+(nested) list to \code{sum_funs}. When
+the functions provided for each output return only one numeric value
+the results are twofold:
+first, a single scalar result of the
+function evaluating the whole output vector.
+Second, a "path" with length \code{repetitions} of the s
+tep wise calculation of the function's result
+across the output vector
+(assumed that the output is contained in \code{which_path}).
 
-If the user wants to summarize the simulation results of a respective output in the same way
+If the user wants to summarize the simulation results of a respective output
+in the same way
 for each parameter combination, a list whose components are named after the
-outputs (the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}) is supplied and each component is
-a function which only takes the vector of results of one output as the main argument.
+outputs (the names of the returned
+list of \code{fun} in \code{\link[=future_mc]{future_mc()}}) is supplied and each component is
+a function which only takes the vector of results
+of one output as the main argument.
 
-If the user wants to summarize the simulation results of a respective output differently for
-different parameter combinations, a nested list has to be supplied. The components of the outer list
+If the user wants to summarize the simulation
+results of a respective output differently for
+different parameter combinations, a nested list has to be supplied.
+The components of the outer list
 must be equal in length and naming to the \code{nice_names} of the parameter
 combinations (see value of \code{\link[=future_mc]{future_mc()}}) and each component is another
 list (inner list). The components of the inner list are then defined the
-same way as above (components named after the outputs and each component is a function).
+same way as above
+(components named after the outputs and each component is a function).
 
-The provided summary functions are not restricted regarding the complexity of their return value.
-However, the path of the summarized output over all simulation repetitions is only returned if the
-provided summary functions return a single numeric value (and the output is contained in \code{which_path}).
+The provided summary functions are not restricted regarding the complexity
+of their return value.
+However, the path of the summarized output over all simulation repetitions
+is only returned if the
+provided summary functions return a single numeric value
+(and the output is contained in \code{which_path}).
 Thus, \code{\link[=plot.summary.mc]{plot.summary.mc()}} will only work in this specific case.
 }
 \examples{

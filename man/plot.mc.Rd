@@ -18,26 +18,33 @@
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
 \item{join}{A character vector containing the \code{nice_names} for the different
-parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted together.
+parameter combinations (returned by \code{\link[=future_mc]{future_mc()}}),
+which should be plotted together.
 Default: Each parameter combination is plotted distinctly.}
 
-\item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
+\item{which_setup}{A character vector containing the \code{nice_names}
+for the different parameter
 combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be plotted.
 Default: All parameter combinations are plotted.}
 
-\item{parameter_comb}{Alternative to \code{which_setup}. A named list whose components are named after
-(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}} and each component is a vector containing
+\item{parameter_comb}{Alternative to \code{which_setup}.
+A named list whose components are named after
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}}
+and each component is a vector containing
 the values for the parameters to filter by.
 Default: All parameter combinations are plotted.}
 
-\item{plot}{Boolean that specifies whether the plots should be printed while calling the function or not.
+\item{plot}{Boolean that specifies whether
+the plots should be printed while calling the function or not.
 Default: \code{TRUE}}
 
 \item{...}{ignored}
 }
 \value{
-A list whose components are named after the outputs of \code{fun} and each component
-contains an object of class \code{ggplot} and \code{gg} which can be plotted and modified with the
+A list whose components are named after the outputs of \code{fun}
+and each component
+contains an object of class \code{ggplot} and \code{gg}
+which can be plotted and modified with the
 \link{ggplot2} functions.
 }
 \description{
@@ -45,7 +52,8 @@ Plot density plots for numeric results and bar plots for non-numeric results
 of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}.
 }
 \details{
-Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb} can be specified
+Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb}
+can be specified
 at one time.
 }
 \examples{
@@ -81,10 +89,12 @@ returned_plot1$mean +
  ggplot2::theme_minimal() +
  ggplot2::geom_vline(xintercept = 3)
 
-returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot2 <- plot(test_mc,
+which_setup = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot2$mean
 
-returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
+returned_plot3 <- plot(test_mc,
+join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 
 }

@@ -16,64 +16,81 @@ tidy_mc_latex(
 \arguments{
 \item{x}{An object of class \code{summary.mc}. For restrictions see details.}
 
-\item{repetitions_set}{A vector of integers specifying at which repetitions the summarized
+\item{repetitions_set}{A vector of integers specifying
+at which repetitions the summarized
 results should be displayed in the table.
-Default: The argument \code{repetitions} in \code{\link[=future_mc]{future_mc()}}, which means that the summarized results after
+Default: The argument \code{repetitions} in \code{\link[=future_mc]{future_mc()}},
+which means that the summarized results after
 the last repetition are displayed in the table.}
 
-\item{which_setup}{A character vector containing the \code{nice_names} for the different parameter
-combinations (returned by \code{\link[=future_mc]{future_mc()}}), which should be presented in the table.
+\item{which_setup}{A character vector containing the \code{nice_names}
+for the different parameter
+combinations (returned by \code{\link[=future_mc]{future_mc()}}),
+which should be presented in the table.
 Default: All parameter combinations are presented.}
 
-\item{parameter_comb}{Alternative to \code{which_setup}. A named list whose components are named after
-(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}}. Each component is a vector containing
+\item{parameter_comb}{Alternative to \code{which_setup}.
+A named list whose components are named after
+(some of) the parameters in \code{param_list} in \code{\link[=future_mc]{future_mc()}}.
+Each component is a vector containing
 the values for the parameters to be filtered by.
 Default: All parameter combinations are presented.}
 
-\item{which_out}{A character vector containing the names of (some of) the named outputs
-(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}), which should be displayed in the table.
+\item{which_out}{A character vector containing
+the names of (some of) the named outputs
+(the names of the returned list of \code{fun} in \code{\link[=future_mc]{future_mc()}}),
+which should be displayed in the table.
 Default: All outputs are displayed.}
 
-\item{kable_options}{A list whose components are named after possible parameters
+\item{kable_options}{A list whose components are named
+after possible parameters
 of \code{\link[kableExtra:kbl]{kableExtra::kbl()}} customizing the generated table.}
 }
 \value{
-An object of class \code{knitr_kable} which can be modified by the functions
+An object of class \code{knitr_kable}
+which can be modified by the functions
 in the \link{kableExtra} package is returned.
 }
 \description{
-Create a LaTeX table containing the summarized results of a Monte Carlo simulation run
+Create a LaTeX table containing the
+summarized results of a Monte Carlo simulation run
 by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}.
 }
 \details{
-Only one of the arguments \code{which_setup} and \code{parameter_comb} can be specified
-at one time.
+Only one of the arguments \code{which_setup} and \code{parameter_comb}
+can be specified at one time.
 
-Only (output - parameter combination)-pairs for which the summary function specified
-in the \code{sum_funs} argument of \code{\link[=summary.mc]{summary.mc()}} returns a single scalar value appear as
-non-\code{NA} values in the latex table. If a specific output is summarized with functions
-that do not return a single numeric value over all parameter combinations, then this output
-is discarded from the table. Similarly, if for a specific parameter combination all \code{fun} outputs are
-summarized with functions which do not return a single numeric value, then this parameter combination
-is discarded as well. In summary, all outputs must be summarized with functions
+Only (output - parameter combination)-pairs
+for which the summary function specified
+in the \code{sum_funs} argument of \code{\link[=summary.mc]{summary.mc()}}
+returns a single scalar value appear as
+non-\code{NA} values in the latex table.
+If a specific output is summarized with functions
+that do not return a single numeric value over all parameter combinations,
+then this outputis discarded from the table.
+Similarly, if for a specific parameter combination all \code{fun} outputs are
+summarized with functions which do not return a single numeric value,
+then this parameter combination is discarded as well.
+In summary, all outputs must be summarized with functions
 which return just one numeric value.
 }
 \examples{
-test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2) {
   data <- rnorm(n, mean = param) + x1 + x2
   stat <- mean(data)
   stat_2 <- var(data)
 
-  if (x2 == 5){
+  if (x2 == 5) {
     stop("x2 can't be 5!")
   }
 
   return(list(mean = stat, var = stat_2))
 }
 
-param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2)
+param_list <- list(
+  param = seq(from = 0, to = 1, by = 0.5),
+  x1 = 1:2
+)
 
 test_mc <- future_mc(
   fun = test_func,
@@ -87,10 +104,10 @@ tidy_mc_latex(summary(test_mc))
 
 set.seed(101)
 tidy_mc_latex(
-   summary(test_mc),
-   repetitions_set = c(10,1000),
-   which_out = "mean",
-   kable_options = list(caption = "Mean MCS results")
+  summary(test_mc),
+  repetitions_set = c(10, 1000),
+  which_out = "mean",
+  kable_options = list(caption = "Mean MCS results")
 )
 
 }

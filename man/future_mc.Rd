@@ -19,95 +19,129 @@ future_mc(
 \arguments{
 \item{fun}{The function to be evaluated. See details.}
 
-\item{repetitions}{An integer that specifies the number of Monte Carlo iterations}
+\item{repetitions}{An integer that
+specifies the number of Monte Carlo iterations}
 
-\item{param_list}{A list whose components are named after the parameters of \code{fun} which should vary
-for the different Monte Carlo Simulations. Each component is a vector containing the desired grid
-values for that parameter. The Monte Carlo Simulation is run for all possible combinations of
+\item{param_list}{A list whose components a
+re named after the parameters of \code{fun} which should vary
+for the different Monte Carlo Simulations.
+Each component is a vector containing the desired grid
+values for that parameter.
+The Monte Carlo Simulation is run for all possible combinations of
 that parameter list.}
 
-\item{param_table}{Alternative to \code{param_list}. A \code{data.frame} or \code{data.table} containing a pre-built
-grid of values, where the columns are the parameters of \code{fun} which should vary for the different Monte Carlo
-Simulations. This is useful if you only want to run a Monte Carlo Simulation for a subset of all possible combinations.}
+\item{param_table}{Alternative to \code{param_list}.
+A \code{data.frame} or \code{data.table} containing a pre-built
+grid of values, where the columns are the parameters of \code{fun}
+which should vary for the different Monte Carlo
+Simulations.
+This is useful if you only want to run a Monte Carlo Simulation
+for a subset of all possible combinations.}
 
-\item{parallelisation_plan}{A list whose components are named after possible parameters
-of \code{\link[future:plan]{future::plan()}} specifying the parallelisation plan which should be used in the
+\item{parallelisation_plan}{A list whose components are named
+after possible parameters
+of \code{\link[future:plan]{future::plan()}} specifying the
+parallelisation plan which should be used in the
 Monte Carlo Simulation. Default is \code{strategy = multisession}.}
 
-\item{parallelisation_options}{A list whose components are named after possible parameters
-of \code{\link[furrr:furrr_options]{furrr::furrr_options()}} for fine tuning functions, such as \code{\link[furrr:future_map]{furrr::future_map()}}. Default is
-\code{seed = TRUE} as long as not specified differently in order to assure reproducibility.}
+\item{parallelisation_options}{A list whose components are named
+after possible parameters
+of \code{\link[furrr:furrr_options]{furrr::furrr_options()}} for fine tuning functions,
+such as \code{\link[furrr:future_map]{furrr::future_map()}}. Default is
+\code{seed = TRUE} as long as not specified differently
+in order to assure reproducibility.}
 
-\item{check}{Boolean that specifies whether a single test-iteration should be run for each parameter
-combination in order to check for possible occuring errors in \code{fun}. Default is \code{TRUE}.}
+\item{check}{Boolean that specifies whether a single test-iteration
+should be run for each parameter
+combination in order to check for possible
+occuring errors in \code{fun}. Default is \code{TRUE}.}
 
-\item{parallel}{Boolean that specifies whether the Monte Carlo simulation should be run in parallel.
+\item{parallel}{Boolean that specifies whether
+the Monte Carlo simulation should be run in parallel.
 Default is \code{TRUE}.}
 
-\item{...}{Additional parameters that are passed on to \code{fun} and which are not part of the parameter
+\item{...}{Additional parameters that are passed on to \code{fun}
+and which are not part of the parameter
 grid.}
 }
 \value{
 A list of type \code{mc} containing the following objects:
 \itemize{
-\item output: A tibble containing the return value of \code{fun} for each iteration and
+\item output: A tibble containing the return value of \code{fun}
+for each iteration and
 parameter combination
 \item parameter: A tibble which shows the different parameter combinations
-\item simple_output: A boolean value indicating whether the return value of \code{fun} is a named list of
+\item simple_output: A boolean value indicating
+whether the return value of \code{fun} is a named list of
 scalars or not
-\item nice_names: A character vector containing "nice names" for the different parameter setups
-\item calculation_time: The calculation time needed to run the whole Monte Carlo Simulation
+\item nice_names: A character vector containing "nice names"
+for the different parameter setups
+\item calculation_time: The calculation time needed
+to run the whole Monte Carlo Simulation
 \item n_results: A numeric value indicating the number of results
-\item seed: The value which is used for the parameter \code{seed} in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}
+\item seed: The value which is used for
+the parameter \code{seed} in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}
 \item fun: The user-defined function \code{fun}
 \item repetitions: The number of repetitions run for each parameter setup
-\item parallel: Boolean whether the Monte Carlo Simulation was run in parallel or not
+\item parallel: Boolean whether the Monte Carlo Simulation
+was run in parallel or not
 \item plan: A list that specified the parallelisation plan via \code{\link[future:plan]{future::plan()}}
 }
 }
 \description{
-\code{future_mc} runs a Monte Carlo simulation study for a user-specified function and the
+\code{future_mc} runs a Monte Carlo simulation study
+for a user-specified function and the
 desired parameter grids.
 }
 \details{
-The user defined function \code{fun} handles (if specified) the generation of data, the
+The user defined function \code{fun} handles
+(if specified) the generation of data, the
 application of the method of interest and the evaluation of the result for a
-single repetition and parameter combination. \code{future_mc} handles the generation
-of loops over the desired parameter grids and the repetition of the Monte Carlo
-experiment for each of the parameter constellations.
+single repetition and parameter combination.
+\code{future_mc} handles the generation of loops over the desired parameter grids
+and the repetition of the Monte Carlo experiment
+for each of the parameter constellations.
 
 There are four formal requirements that \code{fun} has to fulfill:
 \itemize{
-\item The arguments of \code{fun} which are present in \code{param_list} need to be scalar values.
-\item The value returned by \code{fun} has to be a named list and must have the same components for each
+\item The arguments of \code{fun} which are present in \code{param_list}
+need to be scalar values.
+\item The value returned by \code{fun} has to be a named list
+and must have the same components for each
 iteration and parameter combination.
-\item The names of the returned values and those of the arguments contained in \code{param_list} need to
-be different. Moreover, they cannot be \code{"params"}, \code{"repetitions"} or \code{"setup"}
-\item Every variable used inside \code{fun} has either to be defined inside \code{fun} or given as an argument
-through the \code{...} argument.
-In particular, \code{fun} cannot use variables which are only defined in the global environment.
+\item The names of the returned values and
+those of the arguments contained in \code{param_list} need to
+be different.
+Moreover, they cannot be \code{"params"}, \code{"repetitions"} or \code{"setup"}
+\item Every variable used inside \code{fun} has either to be defined inside \code{fun}
+or given as an argument through the \code{...} argument.
+In particular, \code{fun} cannot use variables which are only defined
+in the global environment.
 }
 
-In order to use the comfort functions \code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, \code{\link[=plot.summary.mc]{plot.summary.mc()}}, and
-\code{\link[=tidy_mc_latex]{tidy_mc_latex()}} the value returned by \code{fun} has to be a named list of scalars.
+In order to use the comfort functions
+\code{\link[=plot.mc]{plot.mc()}}, \code{\link[=summary.mc]{summary.mc()}}, \code{\link[=plot.summary.mc]{plot.summary.mc()}}, and
+\code{\link[=tidy_mc_latex]{tidy_mc_latex()}} the value returned by \code{fun}
+has to be a named list of scalars.
 }
 \examples{
 
-test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2){
-
+test_func <- function(param = 0.1, n = 100, x1 = 1, x2 = 2) {
   data <- rnorm(n, mean = param) + x1 + x2
   stat <- mean(data)
   stat_2 <- var(data)
 
-  if (x2 == 5){
+  if (x2 == 5) {
     stop("x2 can't be 5!")
   }
 
   return(list(mean = stat, var = stat_2))
 }
 
-param_list <- list(param = seq(from = 0, to = 1, by = 0.5),
-                   x1 = 1:2)
+param_list <- list(
+  param = seq(from = 0, to = 1, by = 0.5),
+  x1 = 1:2
+)
 
 set.seed(101)
 test_mc <- future_mc(

@@ -12,7 +12,8 @@
 \item{...}{ignored}
 }
 \value{
-print shows a nice representation of the summarized results of a Monte Carlo Simulation
+print shows a nice representation of the
+summarized results of a Monte Carlo Simulation
 }
 \description{
 Print the summarized results of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}
