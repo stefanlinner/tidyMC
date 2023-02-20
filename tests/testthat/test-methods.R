@@ -48,23 +48,47 @@ testthat::test_that("output format of summary is correct", {
 
   testthat::expect_identical(names(sum_mc), out$nice_names)
 
-  testthat::expect_output(str(sum_mc[[1]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[1]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[1]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[1]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
-  testthat::expect_output(str(sum_mc[[2]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[2]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[2]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[2]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
-  testthat::expect_output(str(sum_mc[[3]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[3]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[3]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[3]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
-  testthat::expect_output(str(sum_mc[[4]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[4]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[4]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[4]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
-  testthat::expect_output(str(sum_mc[[5]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[5]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[5]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[5]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
-  testthat::expect_output(str(sum_mc[[6]][[1]][[1]]), "num", fixed = TRUE)
-  testthat::expect_output(str(sum_mc[[6]][[1]][[2]]), "num [1:10]", fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[6]][[1]][[1]]),
+                          "num",
+                          fixed = TRUE)
+  testthat::expect_output(str(sum_mc[[6]][[1]][[2]]),
+                          "num [1:10]",
+                          fixed = TRUE)
 
   testthat::expect_identical(names(sum_mc[[1]]), "mean")
   testthat::expect_identical(names(sum_mc[[2]]), "mean")
@@ -73,12 +97,18 @@ testthat::test_that("output format of summary is correct", {
   testthat::expect_identical(names(sum_mc[[5]]), "mean")
   testthat::expect_identical(names(sum_mc[[6]]), "mean")
 
-  testthat::expect_identical(names(sum_mc[[1]][[1]]), c("mean", "mean_over_reps"))
-  testthat::expect_identical(names(sum_mc[[2]][[1]]), c("mean", "mean_over_reps"))
-  testthat::expect_identical(names(sum_mc[[3]][[1]]), c("mean", "mean_over_reps"))
-  testthat::expect_identical(names(sum_mc[[4]][[1]]), c("mean", "mean_over_reps"))
-  testthat::expect_identical(names(sum_mc[[5]][[1]]), c("mean", "mean_over_reps"))
-  testthat::expect_identical(names(sum_mc[[6]][[1]]), c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[1]][[1]]),
+                             c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[2]][[1]]),
+                             c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[3]][[1]]),
+                             c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[4]][[1]]),
+                             c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[5]][[1]]),
+                             c("mean", "mean_over_reps"))
+  testthat::expect_identical(names(sum_mc[[6]][[1]]),
+                             c("mean", "mean_over_reps"))
 
 })
 

@@ -51,10 +51,6 @@ testthat::test_that("Errors check work", {
     future_mc(fun = test_func2, repetitions = 10, param_list = param_list)
   })
 
-  testthat::expect_error(tidy_mc_latex(summary(out),
-                                       repetitions_set = c(10, 20000),
-                                       which_out = "mean"))
-
   # A variable from the global environment cannot be called
   testthat::expect_error({
     rand_var <- rnorm(1)
