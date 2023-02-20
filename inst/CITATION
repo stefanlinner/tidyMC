@@ -1,18 +1,12 @@
 citHeader("To cite tidyMC in publications use:")
 
 citEntry(
-  entry    = "manual",
+  entry    = "Manual",
   title    = "tidyMC: MonteCarlo Simulations made easy and tidy",
-  author   =  personList(person( given = "Ignacio",
-                                 family = "Moreira Lara",
-                                 email = "ignacio.moreira-lara@tu-dortmund.de"),
-                        person(given = "Konstantin",
-                               family = "Lehmann",
-                               email = "konstantin.lehmann@tu-dortmund.de"),
-                        person(given = "Stefan",
-                               family = "Linner",
-                               email = "stefan.linner@tu-dortmund.de")),
+  author   = personList(as.person("Ignacio Moreira Lara"),
+                             as.person("Konstantin Lehmann"),
+                             as.person("Stefan Linner")),
   year     = 2022,
   url      = "https://github.com/stefanlinner/tidyMC",
-  textVersion = 'Moreira-Lara I, Lehmann K, Linner S. (2022). "tidyMC: MonteCarlo Simulations made easy and tidy"'
+  textVersion = 'I. Moreira Lara, K. Lehmann and S. Linner (2022). "tidyMC: MonteCarlo Simulations made easy and tidy"'
 )
