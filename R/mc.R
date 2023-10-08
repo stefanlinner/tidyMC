@@ -315,7 +315,7 @@ future_mc <-
       if (is.null(scalar_results)) {
         scalar_results <<-
           purrr::map_lgl(
-            x[1:seq_len(nrow(param_table))],
+            x[seq_len(nrow(param_table))],
             function(.x) {
               purrr::map_lgl(
                 .x, function(fun_list_outputs) {
