@@ -2,6 +2,8 @@
 # tidyMC
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/stefanlinner/tidyMC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stefanlinner/tidyMC/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Monte Carlo Simulations aim to study the properties of statistical
@@ -12,14 +14,14 @@ to cover and simplify the whole workflow of running a Monte Carlo
 simulation in either an academic or professional setting. Thus, `tidyMC`
 aims to provide functions for the following tasks:
 
--   Running a Monte Carlo Simulation for a user defined function over a
-    parameter grid using `future_mc()`
--   Summarizing the results by (optionally) user defined summary
-    functions using `summary.mc()`
--   Creating plots of the Monte Carlo Simulation results, which can be
-    modified by the user using `plot.mc()` and `plot.summary.mc()`
--   Creating a `LaTeX` table summarizing the results of the Monte Carlo
-    Simulation using `tidy_mc_latex()`
+- Running a Monte Carlo Simulation for a user defined function over a
+  parameter grid using `future_mc()`
+- Summarizing the results by (optionally) user defined summary functions
+  using `summary.mc()`
+- Creating plots of the Monte Carlo Simulation results, which can be
+  modified by the user using `plot.mc()` and `plot.summary.mc()`
+- Creating a `LaTeX` table summarizing the results of the Monte Carlo
+  Simulation using `tidy_mc_latex()`
 
 ## Installing tidyMC
 
@@ -51,7 +53,7 @@ For a more elaborate example please see the vignette:
 
 ``` r
 browseVignettes(package = "tidyMC")
-#> starting httpd help server ... done
+#> Keine Vignetten gefunden durch browseVignettes(package = "tidyMC")
 ```
 
 Run your first Monte Carlo Simulation using your own parameter grid:
@@ -89,7 +91,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:00.284625
+#>  Running time: 00:00:01.95019
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -106,16 +108,18 @@ test_mc
 #> } 
 #>  
 #>  The following 6 parameter combinations: 
-#>   param x1
-#> 1   0.0  1
-#> 2   0.5  1
-#> 3   1.0  1
-#> 4   0.0  2
-#> 5   0.5  2
-#> 6   1.0  2
+#> # A tibble: 6 × 2
+#>   param    x1
+#>   <dbl> <int>
+#> 1   0       1
+#> 2   0.5     1
+#> 3   1       1
+#> 4   0       2
+#> 5   0.5     2
+#> 6   1       2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:00.284625 
+#>  The Running time was: 00:00:01.95019 
 #>  
 #>  Parallel: TRUE 
 #>  
@@ -168,6 +172,7 @@ returned_plot1$mean +
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
+
 returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot2$mean
 ```
@@ -175,6 +180,7 @@ returned_plot2$mean
 <img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
+
 returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 ```
@@ -182,6 +188,7 @@ returned_plot3$mean
 <img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
 
 ``` r
+
 returned_plot1 <- plot(summary(test_mc), plot = FALSE)
 
 returned_plot1$mean +
@@ -191,6 +198,7 @@ returned_plot1$mean +
 <img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
 
 ``` r
+
 returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], plot = FALSE)
  returned_plot2$mean
 ```
@@ -198,6 +206,7 @@ returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], 
 <img src="man/figures/README-unnamed-chunk-8-5.png" width="100%" />
 
 ``` r
+
 returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 ```

@@ -1,11 +1,11 @@
 Package: tidyMC
-Title: Monte Carlo Simulations made easy and tidy
-Version: 0.0.0.9000
+Title: Monte Carlo Simulations Made Easy and Tidy
+Version: 1.0.0
 Authors@R: c(
     person(given = "Stefan",
            family = "Linner",
            email = "stefan.linner97@gmail.com",
-           role = c("aut", "cre")),
+           role = c("aut", "cre", "cph")),
     person(given = "Ignacio",
            family = "Moreira Lara",
            email = "ignacio.moreira-lara@tu-dortmund.de",
@@ -43,7 +43,6 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 URL: https://github.com/stefanlinner/tidyMC
 BugReports: https://github.com/stefanlinner/tidyMC/issues
