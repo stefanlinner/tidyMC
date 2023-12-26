@@ -15,8 +15,8 @@ Authors@R: c(
            email = "konstantin.lehmann@tu-dortmund.de",
            role = c("aut")))
 Description: Framework to run Monte Carlo simulations over a parameter grid. 
-             Allows to parralilize the simulations. 
-             Generates plots and LaTex tables
+             Allows to parallelize the simulations. 
+             Generates plots and LaTeX tables
              summarizing the results from the simulation. 
 License: MIT + file LICENSE
 Imports:

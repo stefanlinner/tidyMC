@@ -116,7 +116,7 @@ testthat::test_that("output format of summary is correct", {
 testthat::test_that("output format of plot.mc is correct", {
 
   testthat::expect_output(str(plot_mc), "List of 1")
-  testthat::expect_output(str(plot_mc[[1]]), "List of 9")
+  testthat::expect_s3_class(plot_mc[[1]], "gg")
 
   testthat::expect_identical(names(plot_mc), "mean")
 
@@ -126,7 +126,7 @@ testthat::test_that("output format of plot.mc is correct", {
 testthat::test_that("output format of summary.plot.mc is correct", {
 
   testthat::expect_output(str(plot_mc), "List of 1")
-  testthat::expect_output(str(plot_mc[[1]]), "List of 9")
+  testthat::expect_s3_class(plot_mc[[1]], "gg")
 
   testthat::expect_identical(names(plot_mc), "mean")
 

@@ -248,7 +248,7 @@ tidy_mc_latex <- function(x,
     list(
       x = data_table %>%
         dplyr::arrange(.data$repetitions) %>%
-        dplyr::select(-.data$setup, -.data$repetitions),
+        dplyr::select(-dplyr::all_of(c("setup", "repetitions"))),
       format = "latex",
       booktabs = TRUE,
       digits = 3,

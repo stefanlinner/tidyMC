@@ -541,7 +541,7 @@ plot.mc <- function(x, join = NULL,
           if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
-              ggplot2::ggplot(ggplot2::aes_string(stat)) +
+              ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
               ggplot2::geom_density() +
               ggplot2::facet_grid(~.data$params) +
               ggplot2::theme_bw()
@@ -552,7 +552,7 @@ plot.mc <- function(x, join = NULL,
           } else if(!all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
-              ggplot2::ggplot(ggplot2::aes_string(stat)) +
+              ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
               ggplot2::geom_bar() +
               ggplot2::facet_grid(~.data$params) +
               ggplot2::theme_bw()
@@ -580,7 +580,12 @@ plot.mc <- function(x, join = NULL,
           if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
             plot_stat <-
               data_plot %>%
-              ggplot2::ggplot(ggplot2::aes_string(stat, col = "params")) +
+              ggplot2::ggplot(
+                ggplot2::aes(
+                  .data[[stat]],
+                  col = .data[["params"]]
+                )
+              ) +
               ggplot2::geom_density() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = stringr::str_c(
@@ -834,8 +839,12 @@ plot.summary.mc <- function(x,
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions",
-                                                  y = stat)) +
+              ggplot2::ggplot(
+                ggplot2::aes(
+                  x = .data[["repetitions"]],
+                  y = .data[[stat]]
+                )
+              ) +
               ggplot2::geom_line() +
               ggplot2::facet_grid(~.data$setup) +
               ggplot2::theme_bw()
@@ -863,9 +872,13 @@ plot.summary.mc <- function(x,
           if(!is.null(data_plot[[stat]])){
             plot_stat <-
               data_plot[[stat]] %>%
-              ggplot2::ggplot(ggplot2::aes_string(x = "repetitions",
-                                                  y = stat,
-                                                  col = "setup")) +
+              ggplot2::ggplot(
+                ggplot2::aes(
+                  x = .data[["repetitions"]],
+                  y = .data[[stat]],
+                  col = .data[["setup"]]
+                )
+              ) +
               ggplot2::geom_line() +
               ggplot2::theme_bw() +
               ggplot2::labs(title = stringr::str_c(
