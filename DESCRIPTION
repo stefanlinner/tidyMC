@@ -44,5 +44,6 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
-URL: https://github.com/stefanlinner/tidyMC
+URL: https://github.com/stefanlinner/tidyMC,
+    https://stefanlinner.github.io/tidyMC/
 BugReports: https://github.com/stefanlinner/tidyMC/issues
