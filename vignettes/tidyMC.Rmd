@@ -161,13 +161,13 @@ first_mc_ols
 
 ### Summarize your results with `summary.mc()`
 
-If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a step wise manner. 
+If `fun` returns a named list of scalars the user can use `summary.mc()` to summarize all Monte Carlo results. The first argument of the function is an object of class `mc` returned by `future_mc()`. The next argument `sum_funs` determines which summarizing functions will be used on the simulation results. The functions can be provided for any combination of: parameter combinations resulting from `param_list`, and the outputs of `fun`. Every specified function can only take one argument, which is the vector (with length `repetitions`) for every output. We will present all customization options of `sum_funs` in a stepwise manner. 
 
 The first option of summarizing the results is given by just providing the `mc` object to `summary.mc`. In this case, `mean()` will be applied to all numeric values and `summary()` to all non-numeric data types. When the summarizing functions return one numeric value (like `mean()`) the results are twofold:
 
 * First, a single scalar result of the function evaluated using the complete output vector is returned in the first element.
 
-* Second, a vector with length `repetitions` of numeric results from the step wise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
+* Second, a vector with length `repetitions` of numeric results from the stepwise calculation of the function's result across the output's vector. We call this resulting vector as the "path" of the summarizing function. 
 
 Additionally, to save computation time the parameter `which_path` is available to the user who wants to specify for which outputs the "path" should be calculated. The user needs to provide a character vector with the output names'. Moreover, the options `"all"` (the default) and `"none"` are also available.
 
@@ -287,7 +287,7 @@ sum_mc_plot_joint$b1
 ```
 
 
-### Create a LaTeX table of your results with `tidy_mc_latex()`
+### Create a 'LaTeX' table of your results with `tidy_mc_latex()`
 
 Using `tidy_mc_latex` the user can present the results from `future_mc` directly into a `LaTeX` document using all the benefits from the `kableExtra` package. The first and main argument `x` needed by `tidy_mc_latex` is a `summary.mc` object obtained from `summary.mc()`. To present the results in a comprehensive manner the function requires that all summarized outputs in `summary.mc` be scalar numeric results for all parameter combinations. In case, the summarizing function returns more than one argument then this will be presented in the table as an `NA` value. The second argument of the function is `repetitions_set` which allows the user to see the certain values of the "path" of the summarized results of `fun`. To illustrate this we use the MC results for the OLS example:
 

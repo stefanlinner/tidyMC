@@ -54,8 +54,7 @@ of a Monte Carlo simulation run by
 }
 \details{
 Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb}
-can be specified
-at a time.
+can be specified at a time.
 
 A plot is only created for (output - parameter combination)-pairs
 for which in \code{\link[=summary.mc]{summary.mc()}}

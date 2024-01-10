@@ -12,7 +12,7 @@ for which holds \code{simple_output = TRUE}.
 See value of \code{\link[=future_mc]{future_mc()}}.}
 
 \item{sum_funs}{A named (nested) list containing summary functions.
-#See details.}
+See details.}
 
 \item{which_path}{A character vector containing the names of (some of)
 the named outputs
@@ -66,8 +66,8 @@ the functions provided for each output return only one numeric value
 the results are twofold:
 first, a single scalar result of the
 function evaluating the whole output vector.
-Second, a "path" with length \code{repetitions} of the s
-tep wise calculation of the function's result
+Second, a "path" with length \code{repetitions} of the
+stepwise calculation of the function's result
 across the output vector
 (assumed that the output is contained in \code{which_path}).
 

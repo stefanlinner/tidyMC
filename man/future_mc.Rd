@@ -22,8 +22,8 @@ future_mc(
 \item{repetitions}{An integer that
 specifies the number of Monte Carlo iterations}
 
-\item{param_list}{A list whose components a
-re named after the parameters of \code{fun} which should vary
+\item{param_list}{A list whose components are
+named after the parameters of \code{fun} which should vary
 for the different Monte Carlo Simulations.
 Each component is a vector containing the desired grid
 values for that parameter.

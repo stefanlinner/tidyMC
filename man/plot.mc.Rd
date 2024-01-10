@@ -53,8 +53,7 @@ of a Monte Carlo Simulation run by \code{\link[=future_mc]{future_mc()}}.
 }
 \details{
 Only one of the arguments \code{join}, \code{which_setup}, and \code{paramter_comb}
-can be specified
-at one time.
+can be specified at one time.
 }
 \examples{
 

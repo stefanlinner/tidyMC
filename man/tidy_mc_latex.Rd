@@ -2,7 +2,7 @@
 % Please edit documentation in R/latex_table.R
 \name{tidy_mc_latex}
 \alias{tidy_mc_latex}
-\title{Create a LaTeX table with the summarized results of a Monte Carlo Simulation}
+\title{Create a 'LaTeX' table with the summarized results of a Monte Carlo Simulation}
 \usage{
 tidy_mc_latex(
   x,
@@ -52,7 +52,7 @@ which can be modified by the functions
 in the \link{kableExtra} package is returned.
 }
 \description{
-Create a LaTeX table containing the
+Create a 'LaTeX' table containing the
 summarized results of a Monte Carlo simulation run
 by \code{\link[=future_mc]{future_mc()}} and summarized by \code{\link[=summary.mc]{summary.mc()}}.
 }
@@ -64,10 +64,10 @@ Only (output - parameter combination)-pairs
 for which the summary function specified
 in the \code{sum_funs} argument of \code{\link[=summary.mc]{summary.mc()}}
 returns a single scalar value appear as
-non-\code{NA} values in the latex table.
+non-\code{NA} values in the 'LaTeX' table.
 If a specific output is summarized with functions
 that do not return a single numeric value over all parameter combinations,
-then this outputis discarded from the table.
+then this output is discarded from the table.
 Similarly, if for a specific parameter combination all \code{fun} outputs are
 summarized with functions which do not return a single numeric value,
 then this parameter combination is discarded as well.

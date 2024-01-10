@@ -53,7 +53,7 @@ For a more elaborate example please see the vignette:
 
 ``` r
 browseVignettes(package = "tidyMC")
-#> Keine Vignetten gefunden durch browseVignettes(package = "tidyMC")
+#> starte den http Server für die Hilfe fertig
 ```
 
 Run your first Monte Carlo Simulation using your own parameter grid:
@@ -91,7 +91,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:01.95019
+#>  Running time: 00:00:05.836134
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -119,7 +119,7 @@ test_mc
 #> 6   1       2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:01.95019 
+#>  The Running time was: 00:00:05.836134 
 #>  
 #>  Parallel: TRUE 
 #>  

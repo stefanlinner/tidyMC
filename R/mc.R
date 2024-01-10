@@ -8,8 +8,8 @@
 #' @param fun The function to be evaluated. See details.
 #' @param repetitions An integer that
 #' specifies the number of Monte Carlo iterations
-#' @param param_list A list whose components a
-#' re named after the parameters of `fun` which should vary
+#' @param param_list A list whose components are
+#' named after the parameters of `fun` which should vary
 #' for the different Monte Carlo Simulations.
 #' Each component is a vector containing the desired grid
 #' values for that parameter.
@@ -61,8 +61,8 @@
 #' iteration and parameter combination.
 #' * The names of the returned values and
 #' those of the arguments contained in `param_list` need to
-#'   be different.
-#'   Moreover, they cannot be `"params"`, `"repetitions"` or `"setup"`
+#' be different.
+#' Moreover, they cannot be `"params"`, `"repetitions"` or `"setup"`
 #' * Every variable used inside `fun` has either to be defined inside `fun`
 #' or given as an argument through the `...` argument.
 #' In particular, `fun` cannot use variables which are only defined
@@ -129,15 +129,17 @@
 #' )
 #'
 future_mc <-
-  function(fun,
-           repetitions,
-           param_list = NULL,
-           param_table = NULL,
-           parallelisation_plan = list(strategy = future::multisession),
-           parallelisation_options = list(),
-           check = TRUE,
-           parallel = TRUE,
-           ...) {
+  function(
+    fun,
+    repetitions,
+    param_list = NULL,
+    param_table = NULL,
+    parallelisation_plan = list(strategy = future::multisession),
+    parallelisation_options = list(),
+    check = TRUE,
+    parallel = TRUE,
+    ...
+  ) {
     checkmate::assert_function(fun, args = names(param_list))
     checkmate::assert_int(repetitions, lower = 1)
     checkmate::assert_list(param_list, names = "named", null.ok = TRUE)
@@ -150,8 +152,8 @@ future_mc <-
       )
     }
     checkmate::assert_data_frame(param_table,
-      col.names = "named",
-      null.ok = TRUE
+                                 col.names = "named",
+                                 null.ok = TRUE
     )
     if (!is.null(param_list) & !is.null(param_table)) {
       stop("Only one of the arguments param_list and param_table
@@ -162,12 +164,12 @@ future_mc <-
            has to be defined!")
     }
     checkmate::assert_list(parallelisation_plan,
-      null.ok = TRUE,
-      names = "named"
+                           null.ok = TRUE,
+                           names = "named"
     )
     checkmate::assert_list(parallelisation_options,
-      null.ok = TRUE,
-      names = "named"
+                           null.ok = TRUE,
+                           names = "named"
     )
     checkmate::assert_logical(check, len = 1)
     checkmate::assert_logical(parallel, len = 1)
@@ -332,7 +334,7 @@ future_mc <-
 
       if (scalar_results) {
         return(purrr::map_dfr(.x = x, function(.x) .x) %>%
-          dplyr::as_tibble())
+                 dplyr::as_tibble())
       }
 
       if (!scalar_results) {
@@ -424,8 +426,8 @@ future_mc <-
     }
 
     message(stringr::str_c("\n Simulation was successfull!",
-      "\n Running time: ", hms::as_hms(calculation_time),
-      collapse = "", sep = ""
+                           "\n Running time: ", hms::as_hms(calculation_time),
+                           collapse = "", sep = ""
     ))
 
     future::plan("default")

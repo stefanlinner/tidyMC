@@ -8,7 +8,7 @@
 #' for which holds `simple_output = TRUE`.
 #' See value of [future_mc()].
 #' @param sum_funs A named (nested) list containing summary functions.
-#' #See details.
+#' See details.
 #' @param which_path A character vector containing the names of (some of)
 #' the named outputs
 #' (the names of the returned list of `fun` in [future_mc()]),
@@ -25,7 +25,7 @@
 #' which is the case if the return value of `fun` is a named list of scalars.
 #' If the
 #' returned value of `fun` is a named list of more complex data structures,
-#'  `summary()`
+#' `summary()`
 #' cannot be used.
 #'
 #' With `sum_funs` the user can define (different) functions which summarize
@@ -42,11 +42,11 @@
 #' The user can define summary functions by supplying a named
 #' (nested) list to `sum_funs`. When
 #' the functions provided for each output return only one numeric value
-#'  the results are twofold:
+#' the results are twofold:
 #' first, a single scalar result of the
-#'  function evaluating the whole output vector.
-#' Second, a "path" with length `repetitions` of the s
-#' tep wise calculation of the function's result
+#' function evaluating the whole output vector.
+#' Second, a "path" with length `repetitions` of the
+#' stepwise calculation of the function's result
 #' across the output vector
 #' (assumed that the output is contained in `which_path`).
 #'
@@ -144,241 +144,246 @@
 #'
 #' summary(test_mc, sum_funs = sum_funcs)
 #'
-summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
+summary.mc <-
+  function(
+    object,
+    sum_funs = NULL,
+    which_path = "all",
+    ...
+  ){
 
-
-  checkmate::assert_class(object, "mc")
-  if(!object$simple_output){
-    stop("fun has to return a list with named components.
+    checkmate::assert_class(object, "mc")
+    if(!object$simple_output){
+      stop("fun has to return a list with named components.
          Each component has to be scalar.")
-  }
-  param_names <- names(object$parameter)
-  stat_names <- dplyr::setdiff(names(object$output), c("params", param_names))
-  setup_names <- unique(object$output$params)
+    }
+    param_names <- names(object$parameter)
+    stat_names <- dplyr::setdiff(names(object$output), c("params", param_names))
+    setup_names <- unique(object$output$params)
 
-  if("all" %in% which_path){
-    checkmate::assert_string(which_path, pattern = "^all$")
-  } else if("none" %in% which_path){
-    checkmate::assert_string(which_path, pattern = "^none$")
-  } else {
-    checkmate::assert_subset(which_path, stat_names, empty.ok = FALSE)
-  }
+    if("all" %in% which_path){
+      checkmate::assert_string(which_path, pattern = "^all$")
+    } else if("none" %in% which_path){
+      checkmate::assert_string(which_path, pattern = "^none$")
+    } else {
+      checkmate::assert_subset(which_path, stat_names, empty.ok = FALSE)
+    }
 
-  if("all" %in% which_path){
-    stat_names_path <- stat_names
-  } else if("none" %in% which_path){
-    stat_names_path <- NULL
-  } else {
-    stat_names_path <- which_path
-  }
+    if("all" %in% which_path){
+      stat_names_path <- stat_names
+    } else if("none" %in% which_path){
+      stat_names_path <- NULL
+    } else {
+      stat_names_path <- which_path
+    }
 
-  checkmate::assert_list(sum_funs, null.ok = TRUE)
-  if(!is.null(sum_funs)){
-    checkmate::assert_choice(
-      length(sum_funs), c(length(stat_names), length(setup_names))
-    )
-    purrr::walk(
-      sum_funs,
-      function(.x){
-        checkmate::assert(
-          {checkmate::check_list(.x ,names = "named")},
-          {checkmate::check_function(.x)},
-          combine = "or"
-        )
-      }
-    )
-  }
+    checkmate::assert_list(sum_funs, null.ok = TRUE)
+    if(!is.null(sum_funs)){
+      checkmate::assert_choice(
+        length(sum_funs), c(length(stat_names), length(setup_names))
+      )
+      purrr::walk(
+        sum_funs,
+        function(.x){
+          checkmate::assert(
+            {checkmate::check_list(.x ,names = "named")},
+            {checkmate::check_function(.x)},
+            combine = "or"
+          )
+        }
+      )
+    }
 
-  if(is.null(sum_funs)){
+    if(is.null(sum_funs)){
 
-    sum_out <-
-      object$output %>%
-      dplyr::group_by(.data$params) %>%
-      dplyr::group_map(~{
-        purrr::map(
-          stat_names,
-          function(stat){
+      sum_out <-
+        object$output %>%
+        dplyr::group_by(.data$params) %>%
+        dplyr::group_map(~{
+          purrr::map(
+            stat_names,
+            function(stat){
 
-            if(is.numeric(.x[[stat]])){
+              if(is.numeric(.x[[stat]])){
 
-              mean_out <- mean(.x[[stat]])
+                mean_out <- mean(.x[[stat]])
 
-              if(stat %in% stat_names_path & !all(is.na(.x[[stat]]))){
-                mean_over_reps <-
-                  {cumsum(.x[[stat]]) / seq_along(.x[[stat]])} %>%
+                if(stat %in% stat_names_path & !all(is.na(.x[[stat]]))){
+                  mean_over_reps <-
+                    {cumsum(.x[[stat]]) / seq_along(.x[[stat]])} %>%
+                    unname()
+                }
+
+                if(exists("mean_over_reps")){
+                  out <- list(
+                    mean = mean_out,
+                    mean_over_reps = mean_over_reps
+                  )
+                } else {
+                  out <- list(
+                    mean = mean_out
+                  )
+                }
+
+                return(out)
+              }
+
+              if(!is.numeric(.x[[stat]])){
+                return(list(summary = summary(.x[[stat]])))
+              }
+            }
+          )%>%
+            purrr::set_names(stat_names)
+        }) %>%
+        purrr::set_names(setup_names)
+
+    }
+
+
+
+    if(!is.null(sum_funs) &
+       length(sum_funs) == length(stat_names) &
+       is.function(sum_funs[[1]])){
+
+      checkmate::assert_list(sum_funs, names = "named")
+      checkmate::assertNames(
+        names(sum_funs),
+        permutation.of = stat_names
+      )
+      purrr::walk(
+        sum_funs,
+        checkmate::assert_function,
+        .var.name = "sum_funs"
+      )
+
+      sum_out <-
+        object$output %>%
+        dplyr::group_by(.data$params) %>%
+        dplyr::group_map(~{
+
+          purrr::map(
+            stat_names,
+            function(.y){
+
+              sum_func_out <- sum_funs[[.y]](.[[.y]])
+              if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
+
+                sum_func_over_reps <-
+                  purrr::map_dbl(
+                    seq_along(.[[.y]]),
+                    function(.z) {
+                      sum_funs[[.y]](.[[.y]][1:.z])
+                    }
+                  ) %>%
                   unname()
-              }
 
-              if(exists("mean_over_reps")){
-                out <- list(
-                  mean = mean_out,
-                  mean_over_reps = mean_over_reps
+                return(
+                  list(
+                    sum_func = sum_func_out,
+                    sum_func_over_reps = sum_func_over_reps
+                  )
                 )
+
               } else {
-                out <- list(
-                  mean = mean_out
-                )
+                return(list(sum_func = sum_func_out))
               }
 
-              return(out)
             }
+          ) %>%
+            purrr::set_names(stat_names)
 
-            if(!is.numeric(.x[[stat]])){
-              return(list(summary = summary(.x[[stat]])))
+        }) %>%
+        purrr::set_names(setup_names)
+
+    }
+
+
+    if(!is.null(sum_funs) &
+       length(sum_funs) == length(setup_names) &
+       is.list(sum_funs[[1]])){
+
+      checkmate::assert_list(sum_funs, names = "named")
+      checkmate::assertNames(
+        names(sum_funs),
+        permutation.of = setup_names
+      )
+
+      purrr::walk(
+        sum_funs,
+        function(.x){
+          checkmate::assert_list(
+            .x,
+            names = "named",
+            len = length(stat_names),
+            .var.name = "sum_funs"
+          )
+          checkmate::assertNames(
+            names(.x),
+            permutation.of = stat_names,
+            .var.name = "sum_funs"
+          )
+          purrr::walk(
+            .x,
+            function(.y){
+              checkmate::assert_function(.y,
+                                         .var.name = "sum_funs")
             }
-          }
-        )%>%
-          purrr::set_names(stat_names)
-      }) %>%
-      purrr::set_names(setup_names)
+          )
+        }
+      )
 
-  }
+      sum_out <-
+        object$output %>%
+        dplyr::group_by(.data$params) %>%
+        dplyr::group_map(~{
+
+          setup <- unique(.$params)
+
+          purrr::map(
+            stat_names,
+            function(.y){
 
 
+              sum_func_out <- sum_funs[[setup]][[.y]](.[[.y]])
 
-  if(!is.null(sum_funs) &
-     length(sum_funs) == length(stat_names) &
-     is.function(sum_funs[[1]])){
+              if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
 
-    checkmate::assert_list(sum_funs, names = "named")
-    checkmate::assertNames(
-      names(sum_funs),
-      permutation.of = stat_names
-    )
-    purrr::walk(
-      sum_funs,
-      checkmate::assert_function,
-      .var.name = "sum_funs"
-    )
+                sum_func_over_reps <-
+                  purrr::map_dbl(
+                    seq_along(.[[.y]]),
+                    function(.z) {
+                      sum_funs[[setup]][[.y]](.[[.y]][1:.z])
+                    }
+                  ) %>%
+                  unname()
 
-    sum_out <-
-      object$output %>%
-      dplyr::group_by(.data$params) %>%
-      dplyr::group_map(~{
-
-        purrr::map(
-          stat_names,
-          function(.y){
-
-            sum_func_out <- sum_funs[[.y]](.[[.y]])
-            if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
-
-              sum_func_over_reps <-
-                purrr::map_dbl(
-                  seq_along(.[[.y]]),
-                  function(.z) {
-                    sum_funs[[.y]](.[[.y]][1:.z])
-                  }
-                ) %>%
-                unname()
-
-              return(
-                list(
-                  sum_func = sum_func_out,
-                  sum_func_over_reps = sum_func_over_reps
+                return(
+                  list(
+                    sum_func = sum_func_out,
+                    sum_func_over_reps = sum_func_over_reps
+                  )
                 )
-              )
 
-            } else {
-              return(list(sum_func = sum_func_out))
+              } else {
+                return(list(sum_func = sum_func_out))
+              }
             }
+          ) %>%
+            purrr::set_names(stat_names)
 
-          }
-        ) %>%
-          purrr::set_names(stat_names)
+        }, .keep = TRUE) %>%
+        purrr::set_names(setup_names)
 
-      }) %>%
-      purrr::set_names(setup_names)
+
+    }
+
+    class(sum_out) <- "summary.mc"
+
+    attributes(sum_out)$n_reps <- object$repetitions
+
+    sum_out
 
   }
-
-
-  if(!is.null(sum_funs) &
-     length(sum_funs) == length(setup_names) &
-     is.list(sum_funs[[1]])){
-
-    checkmate::assert_list(sum_funs, names = "named")
-    checkmate::assertNames(
-      names(sum_funs),
-      permutation.of = setup_names
-    )
-
-    purrr::walk(
-      sum_funs,
-      function(.x){
-        checkmate::assert_list(
-          .x,
-          names = "named",
-          len = length(stat_names),
-          .var.name = "sum_funs"
-        )
-        checkmate::assertNames(
-          names(.x),
-          permutation.of = stat_names,
-          .var.name = "sum_funs"
-        )
-        purrr::walk(
-          .x,
-          function(.y){
-            checkmate::assert_function(.y,
-                                       .var.name = "sum_funs")
-          }
-        )
-      }
-    )
-
-    sum_out <-
-      object$output %>%
-      dplyr::group_by(.data$params) %>%
-      dplyr::group_map(~{
-
-        setup <- unique(.$params)
-
-        purrr::map(
-          stat_names,
-          function(.y){
-
-
-            sum_func_out <- sum_funs[[setup]][[.y]](.[[.y]])
-
-            if(checkmate::test_number(sum_func_out) & .y %in% stat_names_path){
-
-              sum_func_over_reps <-
-                purrr::map_dbl(
-                  seq_along(.[[.y]]),
-                  function(.z) {
-                    sum_funs[[setup]][[.y]](.[[.y]][1:.z])
-                  }
-                ) %>%
-                unname()
-
-              return(
-                list(
-                  sum_func = sum_func_out,
-                  sum_func_over_reps = sum_func_over_reps
-                )
-              )
-
-            } else {
-              return(list(sum_func = sum_func_out))
-            }
-          }
-        ) %>%
-          purrr::set_names(stat_names)
-
-      }, .keep = TRUE) %>%
-      purrr::set_names(setup_names)
-
-
-  }
-
-  class(sum_out) <- "summary.mc"
-
-  attributes(sum_out)$n_reps <- object$repetitions
-
-  sum_out
-
-}
 
 
 #' Plot the results of a Monte Carlo Simulation
@@ -410,8 +415,7 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #'
 #'
 #' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb`
-#'  can be specified
-#' at one time.
+#' can be specified at one time.
 #'
 #' @return A list whose components are named after the outputs of `fun`
 #' and each component
@@ -462,156 +466,159 @@ summary.mc <- function(object, sum_funs = NULL, which_path = "all", ...){
 #' join = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot3$mean
 #'
-plot.mc <- function(x, join = NULL,
-                    which_setup = NULL,
-                    parameter_comb = NULL,
-                    plot = TRUE, ...){
+plot.mc <-
+  function(
+    x, join = NULL,
+    which_setup = NULL,
+    parameter_comb = NULL,
+    plot = TRUE,
+    ...
+  ){
 
-
-  checkmate::assert_class(x, "mc")
-  if(!x$simple_output){
-    stop("fun has to return a list with named components.
+    checkmate::assert_class(x, "mc")
+    if(!x$simple_output){
+      stop("fun has to return a list with named components.
          Each component has to be scalar.")
-  }
-  param_names <- names(x$parameter)
-  stat_names <- dplyr::setdiff(names(x$output), c("params", param_names))
-  setup_names <- unique(x$output$params)
-  checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
-  checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
-  checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
-  checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
-  purrr::walk(
-    parameter_comb,
-    checkmate::assert_atomic_vector,
-    unique = TRUE,
-    .var.name = "Element of parameter_comb"
-  )
+    }
+    param_names <- names(x$parameter)
+    stat_names <- dplyr::setdiff(names(x$output), c("params", param_names))
+    setup_names <- unique(x$output$params)
+    checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
+    checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
+    checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+    checkmate::assert_subset(names(parameter_comb), param_names, empty.ok = TRUE)
+    purrr::walk(
+      parameter_comb,
+      checkmate::assert_atomic_vector,
+      unique = TRUE,
+      .var.name = "Element of parameter_comb"
+    )
 
-  if(!is.null(which_setup) & !is.null(parameter_comb)){
-    stop("Please subset the setups either with which_setup or parameter_comb,
+    if(!is.null(which_setup) & !is.null(parameter_comb)){
+      stop("Please subset the setups either with which_setup or parameter_comb,
          not with both!")
-  }
+    }
 
-  if(!is.null(which_setup) & !is.null(join)) {
-    stop("Arguments which_setup and
+    if(!is.null(which_setup) & !is.null(join)) {
+      stop("Arguments which_setup and
          join cannot be specified at the same time!")
-  }
+    }
 
-  if(!is.null(parameter_comb) & !is.null(join)) {
-    stop("Arguments parameter_comb and
+    if(!is.null(parameter_comb) & !is.null(join)) {
+      stop("Arguments parameter_comb and
          join cannot be specified at the same time!")
-  }
+    }
 
-  data_plot <-
-    x$output
-
-  if(!is.null(which_setup)) {
     data_plot <-
-      data_plot %>%
-      dplyr::filter(.data$params %in% which_setup)
-  }
+      x$output
 
-  if(!is.null(parameter_comb)){
-    count <- 0
-    data_plot <-
-      data_plot %>%
-      dplyr::filter(
-        dplyr::if_all(
-          names(parameter_comb),
-          ~{
-            count <<- count + 1
-            .x %in% parameter_comb[[count]]
-          }
+    if(!is.null(which_setup)) {
+      data_plot <-
+        data_plot %>%
+        dplyr::filter(.data$params %in% which_setup)
+    }
+
+    if(!is.null(parameter_comb)){
+      count <- 0
+      data_plot <-
+        data_plot %>%
+        dplyr::filter(
+          dplyr::if_all(
+            names(parameter_comb),
+            ~{
+              count <<- count + 1
+              .x %in% parameter_comb[[count]]
+            }
+          )
         )
-      )
-  }
+    }
 
-  if(!is.null(join)){
-    data_plot <-
-      data_plot %>%
-      dplyr::filter(.data$params %in% join)
-  }
+    if(!is.null(join)){
+      data_plot <-
+        data_plot %>%
+        dplyr::filter(.data$params %in% join)
+    }
 
-  if(is.null(join)){
+    if(is.null(join)){
 
-    plots_which <-
-      purrr::map(
-        stat_names,
-        function(stat){
-          if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
-            plot_stat <-
-              data_plot %>%
-              ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
-              ggplot2::geom_density() +
-              ggplot2::facet_grid(~.data$params) +
-              ggplot2::theme_bw()
-            if(plot){
-              print(plot_stat)
+      plots_which <-
+        purrr::map(
+          stat_names,
+          function(stat){
+            if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
+              plot_stat <-
+                data_plot %>%
+                ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
+                ggplot2::geom_density() +
+                ggplot2::facet_grid(~.data$params) +
+                ggplot2::theme_bw()
+              if(plot){
+                print(plot_stat)
+              }
+              plot_stat
+            } else if(!all(is.na(data_plot[[stat]]))){
+              plot_stat <-
+                data_plot %>%
+                ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
+                ggplot2::geom_bar() +
+                ggplot2::facet_grid(~.data$params) +
+                ggplot2::theme_bw()
+              if(plot){
+                print(plot_stat)
+              }
+              plot_stat
             }
-            plot_stat
-          } else if(!all(is.na(data_plot[[stat]]))){
-            plot_stat <-
-              data_plot %>%
-              ggplot2::ggplot(ggplot2::aes(.data[[stat]])) +
-              ggplot2::geom_bar() +
-              ggplot2::facet_grid(~.data$params) +
-              ggplot2::theme_bw()
-            if(plot){
-              print(plot_stat)
-            }
-            plot_stat
           }
-        }
-      ) %>%
-      purrr::set_names(stat_names)
+        ) %>%
+        purrr::set_names(stat_names)
 
-    plots_which <- plots_which[!purrr::map_lgl(plots_which, is.null)]
+      plots_which <- plots_which[!purrr::map_lgl(plots_which, is.null)]
 
-    return(invisible(plots_which))
+      return(invisible(plots_which))
 
-  }
+    }
 
-  if(!is.null(join)) {
+    if(!is.null(join)) {
 
-    plots_joint <-
-      purrr::map(
-        stat_names,
-        function(stat){
-          if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
-            plot_stat <-
-              data_plot %>%
-              ggplot2::ggplot(
-                ggplot2::aes(
-                  .data[[stat]],
-                  col = .data[["params"]]
-                )
-              ) +
-              ggplot2::geom_density() +
-              ggplot2::theme_bw() +
-              ggplot2::labs(title = stringr::str_c(
-                "Joint density plot of",
-                length(join),
-                "setups for the output",
-                stat, sep = " "
-              ), color = "Setups") +
-              ggplot2::theme(legend.position = "bottom")
-            if(plot){
-              print(plot_stat)
+      plots_joint <-
+        purrr::map(
+          stat_names,
+          function(stat){
+            if(is.numeric(data_plot[[stat]]) & !all(is.na(data_plot[[stat]]))){
+              plot_stat <-
+                data_plot %>%
+                ggplot2::ggplot(
+                  ggplot2::aes(
+                    .data[[stat]],
+                    col = .data[["params"]]
+                  )
+                ) +
+                ggplot2::geom_density() +
+                ggplot2::theme_bw() +
+                ggplot2::labs(title = stringr::str_c(
+                  "Joint density plot of",
+                  length(join),
+                  "setups for the output",
+                  stat, sep = " "
+                ), color = "Setups") +
+                ggplot2::theme(legend.position = "bottom")
+              if(plot){
+                print(plot_stat)
+              }
+              plot_stat
+
             }
-            plot_stat
-
           }
-        }
-      ) %>%
-      purrr::set_names(stat_names)
+        ) %>%
+        purrr::set_names(stat_names)
 
-    plots_joint <- plots_joint[!purrr::map_lgl(plots_joint, is.null)]
+      plots_joint <- plots_joint[!purrr::map_lgl(plots_joint, is.null)]
 
-    return(invisible(plots_joint))
+      return(invisible(plots_joint))
+
+    }
 
   }
-
-}
 
 
 #' Plot the summarized results of a Monte Carlo Simulation
@@ -632,7 +639,7 @@ plot.mc <- function(x, join = NULL,
 #' combinations (returned by [future_mc()]), which should be plotted.
 #' Default: All parameter combinations are plotted.
 #' @param parameter_comb Alternative to `which_setup`.
-#'  A named list whose components are named after
+#' A named list whose components are named after
 #' (some of) the parameters in `param_list` in [future_mc()]
 #' and each component is a vector containing
 #' the values for the parameters to filter by.
@@ -643,8 +650,7 @@ plot.mc <- function(x, join = NULL,
 #' @param ... additional arguments passed to callies.
 #'
 #' @details Only one of the arguments `join`, `which_setup`, and `paramter_comb`
-#'  can be specified
-#' at a time.
+#' can be specified at a time.
 #'
 #' A plot is only created for (output - parameter combination)-pairs
 #' for which in [summary.mc()]
@@ -699,212 +705,216 @@ plot.mc <- function(x, join = NULL,
 #' join = test_mc$nice_names[1:2], plot = FALSE)
 #' returned_plot3$mean
 #'
-plot.summary.mc <- function(x,
-                            join = NULL,
-                            which_setup = NULL,
-                            parameter_comb = NULL,
-                            plot = TRUE, ...) {
+plot.summary.mc <-
+  function(
+    x,
+    join = NULL,
+    which_setup = NULL,
+    parameter_comb = NULL,
+    plot = TRUE,
+    ...
+  ) {
 
-  checkmate::assert_class(x, "summary.mc")
-  setup_names <- names(x)
-  stat_names <- names(x[[1]])
-  checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
-  checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
-  checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
-  purrr::walk(
-    parameter_comb,
-    checkmate::assert_atomic_vector,
-    unique = TRUE,
-    .var.name = "Element of parameter_comb"
-  )
-  param_names <-
-    names(x)[1] %>%
-    stringr::str_replace_all(
-      pattern = " ",
-      replacement = ""
-    ) %>%
-    stringr::str_split(
-      pattern = ","
-    ) %>%
-    unlist() %>%
-    stringr::str_extract(
-      pattern = "[^=]+"
+    checkmate::assert_class(x, "summary.mc")
+    setup_names <- names(x)
+    stat_names <- names(x[[1]])
+    checkmate::assert_subset(join, setup_names, empty.ok = TRUE)
+    checkmate::assert_subset(which_setup, setup_names, empty.ok = TRUE)
+    checkmate::assert_list(parameter_comb, names = "named", null.ok = TRUE)
+    purrr::walk(
+      parameter_comb,
+      checkmate::assert_atomic_vector,
+      unique = TRUE,
+      .var.name = "Element of parameter_comb"
     )
-  checkmate::assert_subset(names(parameter_comb),
-                           param_names,
-                           empty.ok = TRUE)
+    param_names <-
+      names(x)[1] %>%
+      stringr::str_replace_all(
+        pattern = " ",
+        replacement = ""
+      ) %>%
+      stringr::str_split(
+        pattern = ","
+      ) %>%
+      unlist() %>%
+      stringr::str_extract(
+        pattern = "[^=]+"
+      )
+    checkmate::assert_subset(names(parameter_comb),
+                             param_names,
+                             empty.ok = TRUE)
 
-  if(!is.null(which_setup) & !is.null(parameter_comb)){
-    stop("Please subset the setups either with which_setup or
+    if(!is.null(which_setup) & !is.null(parameter_comb)){
+      stop("Please subset the setups either with which_setup or
          parameter_comb, not with both!")
-  }
+    }
 
-  if(!is.null(parameter_comb) & !is.null(join)) {
-    stop("Arguments parameter_comb and join cannot be
+    if(!is.null(parameter_comb) & !is.null(join)) {
+      stop("Arguments parameter_comb and join cannot be
          specified at the same time!")
-  }
+    }
 
-  if(!is.null(which_setup) & !is.null(join)) {
-    stop("Arguments which_setup and join cannot be
+    if(!is.null(which_setup) & !is.null(join)) {
+      stop("Arguments which_setup and join cannot be
          specified at the same time!")
-  }
+    }
 
-  if(is.null(which_setup)){
-    which_setup <- setup_names
-  }
+    if(is.null(which_setup)){
+      which_setup <- setup_names
+    }
 
-  if(!is.null(join)){
-    which_setup <- join
-  }
+    if(!is.null(join)){
+      which_setup <- join
+    }
 
-  . <- NULL
+    . <- NULL
 
-  data_plot <-
-    purrr::map(
-      stat_names,
-      function(stat){
-        stat_table <-
-          purrr::map_dfc(
-            which_setup,
-            function(setup){
-              if(checkmate::test_list(x[[setup]][[stat]],
-                                      len = 2,
-                                      names = "named")){
-                stat_dat <- list(x[[setup]][[stat]][[2]])
-                names(stat_dat) <- setup
-                return(stat_dat)
-              } else {
-                stat_dat <- list(NA)
-                names(stat_dat) <- setup
-                return(stat_dat)
-              }
-            }
-          ) %>%
-          tibble::rowid_to_column(var = "repetitions") %>%
-          tidyr::pivot_longer(cols = which_setup,
-                              names_to = "setup",
-                              values_to = stat) %>%
-          dplyr::filter(!is.na(get(stat)))
-
-        if(!is.null(parameter_comb) & nrow(stat_table) != 0){
-          count <- 0
+    data_plot <-
+      purrr::map(
+        stat_names,
+        function(stat){
           stat_table <-
-            stat_table %>%
-            data.frame(
-              .,
-              purrr::map_dfr(
-                .$setup,
-                function(params){
-                  eval(
-                    parse(
-                      text = stringr::str_c(
-                        "list(", params, ")",
-                        sep = ""
+            purrr::map_dfc(
+              which_setup,
+              function(setup){
+                if(checkmate::test_list(x[[setup]][[stat]],
+                                        len = 2,
+                                        names = "named")){
+                  stat_dat <- list(x[[setup]][[stat]][[2]])
+                  names(stat_dat) <- setup
+                  return(stat_dat)
+                } else {
+                  stat_dat <- list(NA)
+                  names(stat_dat) <- setup
+                  return(stat_dat)
+                }
+              }
+            ) %>%
+            tibble::rowid_to_column(var = "repetitions") %>%
+            tidyr::pivot_longer(cols = which_setup,
+                                names_to = "setup",
+                                values_to = stat) %>%
+            dplyr::filter(!is.na(get(stat)))
+
+          if(!is.null(parameter_comb) & nrow(stat_table) != 0){
+            count <- 0
+            stat_table <-
+              stat_table %>%
+              data.frame(
+                .,
+                purrr::map_dfr(
+                  .$setup,
+                  function(params){
+                    eval(
+                      parse(
+                        text = stringr::str_c(
+                          "list(", params, ")",
+                          sep = ""
+                        )
                       )
                     )
-                  )
-                }
-              )
-            ) %>%
-            dplyr::filter(
-              dplyr::if_all(
-                names(parameter_comb),
-                ~{
-                  count <<- count + 1
-                  .x %in% parameter_comb[[count]]
-                }
-              )
-            ) %>%
-            dplyr::select(-param_names)
-        }
+                  }
+                )
+              ) %>%
+              dplyr::filter(
+                dplyr::if_all(
+                  names(parameter_comb),
+                  ~{
+                    count <<- count + 1
+                    .x %in% parameter_comb[[count]]
+                  }
+                )
+              ) %>%
+              dplyr::select(-param_names)
+          }
 
-        stat_table
+          stat_table
+        }
+      ) %>%
+      purrr::set_names(stat_names)
+
+    data_plot <- data_plot[purrr::map_lgl(
+      data_plot,
+      function(data){
+        !all(is.na(data[[3]]))
       }
-    ) %>%
-    purrr::set_names(stat_names)
+    )]
 
-  data_plot <- data_plot[purrr::map_lgl(
-    data_plot,
-    function(data){
-      !all(is.na(data[[3]]))
+    if(is.null(join)){
+
+      plots_over_reps_which <-
+        purrr::map(
+          stat_names,
+          function(stat){
+            if(!is.null(data_plot[[stat]])){
+              plot_stat <-
+                data_plot[[stat]] %>%
+                ggplot2::ggplot(
+                  ggplot2::aes(
+                    x = .data[["repetitions"]],
+                    y = .data[[stat]]
+                  )
+                ) +
+                ggplot2::geom_line() +
+                ggplot2::facet_grid(~.data$setup) +
+                ggplot2::theme_bw()
+              if(plot){
+                print(plot_stat)
+              }
+              plot_stat
+            }
+          }
+        ) %>%
+        purrr::set_names(stat_names)
+
+      plots_over_reps_which <-
+        plots_over_reps_which[!purrr::map_lgl(plots_over_reps_which, is.null)]
+
+      return(invisible(plots_over_reps_which))
+
     }
-  )]
 
-  if(is.null(join)){
-
-    plots_over_reps_which <-
-      purrr::map(
-        stat_names,
-        function(stat){
-          if(!is.null(data_plot[[stat]])){
-            plot_stat <-
-              data_plot[[stat]] %>%
-              ggplot2::ggplot(
-                ggplot2::aes(
-                  x = .data[["repetitions"]],
-                  y = .data[[stat]]
-                )
-              ) +
-              ggplot2::geom_line() +
-              ggplot2::facet_grid(~.data$setup) +
-              ggplot2::theme_bw()
-            if(plot){
-              print(plot_stat)
+    if(!is.null(join)){
+      plots_over_reps_joint <-
+        purrr::map(
+          stat_names,
+          function(stat){
+            if(!is.null(data_plot[[stat]])){
+              plot_stat <-
+                data_plot[[stat]] %>%
+                ggplot2::ggplot(
+                  ggplot2::aes(
+                    x = .data[["repetitions"]],
+                    y = .data[[stat]],
+                    col = .data[["setup"]]
+                  )
+                ) +
+                ggplot2::geom_line() +
+                ggplot2::theme_bw() +
+                ggplot2::labs(title = stringr::str_c(
+                  "Joint time series of",
+                  length(join),
+                  "setups for the output",
+                  stat,
+                  sep = " "
+                ), color = "Setups") +
+                ggplot2::theme(legend.position = "bottom")
+              if(plot){
+                print(plot_stat)
+              }
+              plot_stat
             }
-            plot_stat
           }
-        }
-      ) %>%
-      purrr::set_names(stat_names)
+        ) %>%
+        purrr::set_names(stat_names)
 
-    plots_over_reps_which <-
-      plots_over_reps_which[!purrr::map_lgl(plots_over_reps_which, is.null)]
+      plots_over_reps_joint <-
+        plots_over_reps_joint[!purrr::map_lgl(plots_over_reps_joint, is.null)]
 
-    return(invisible(plots_over_reps_which))
+      return(invisible(plots_over_reps_joint))
+    }
 
   }
-
-  if(!is.null(join)){
-    plots_over_reps_joint <-
-      purrr::map(
-        stat_names,
-        function(stat){
-          if(!is.null(data_plot[[stat]])){
-            plot_stat <-
-              data_plot[[stat]] %>%
-              ggplot2::ggplot(
-                ggplot2::aes(
-                  x = .data[["repetitions"]],
-                  y = .data[[stat]],
-                  col = .data[["setup"]]
-                )
-              ) +
-              ggplot2::geom_line() +
-              ggplot2::theme_bw() +
-              ggplot2::labs(title = stringr::str_c(
-                "Joint time series of",
-                length(join),
-                "setups for the output",
-                stat,
-                sep = " "
-              ), color = "Setups") +
-              ggplot2::theme(legend.position = "bottom")
-            if(plot){
-              print(plot_stat)
-            }
-            plot_stat
-          }
-        }
-      ) %>%
-      purrr::set_names(stat_names)
-
-    plots_over_reps_joint <-
-      plots_over_reps_joint[!purrr::map_lgl(plots_over_reps_joint, is.null)]
-
-    return(invisible(plots_over_reps_joint))
-  }
-
-}
 
 #' Print the results of a Monte Carlo Simulation
 #'
@@ -916,6 +926,7 @@ plot.summary.mc <- function(x,
 #'
 #' @return print shows a complete representation
 #' of the run Monte Carlo Simulation
+#'
 #' @export
 #'
 #' @examples
@@ -946,24 +957,28 @@ plot.summary.mc <- function(x,
 #'
 #' test_mc
 
-print.mc <- function(x, ...){
+print.mc <-
+  function(
+    x,
+    ...
+  ){
 
-  checkmate::assert_class(x, "mc")
+    checkmate::assert_class(x, "mc")
 
-  cat("Monte Carlo simulation results for the specified function: \n \n",
-      stringr::str_c(deparse(x$fun), collapse = "\n", sep = " "),
-      "\n \n", "The following",
-      length(x$nice_names), "parameter combinations: \n")
-  print(x$parameter)
-  cat("are each simulated", x$repetitions, "times.",
-      "\n \n The Running time was:",
-      stringr::str_c(hms::as_hms(x$calculation_time)),
-      "\n \n Parallel:", x$parallel,
-      "\n \n The following parallelisation plan was used: \n")
-  print(x$plan)
-  cat("\n", "Seed:", x$seed)
+    cat("Monte Carlo simulation results for the specified function: \n \n",
+        stringr::str_c(deparse(x$fun), collapse = "\n", sep = " "),
+        "\n \n", "The following",
+        length(x$nice_names), "parameter combinations: \n")
+    print(x$parameter)
+    cat("are each simulated", x$repetitions, "times.",
+        "\n \n The Running time was:",
+        stringr::str_c(hms::as_hms(x$calculation_time)),
+        "\n \n Parallel:", x$parallel,
+        "\n \n The following parallelisation plan was used: \n")
+    print(x$plan)
+    cat("\n", "Seed:", x$seed)
 
-}
+  }
 
 
 
@@ -978,6 +993,7 @@ print.mc <- function(x, ...){
 #'
 #' @return print shows a nice representation of the
 #' summarized results of a Monte Carlo Simulation
+#'
 #' @export
 #'
 #' @examples
@@ -1008,30 +1024,34 @@ print.mc <- function(x, ...){
 #' )
 #'
 #' summary(test_mc)
-print.summary.mc <- function(x, ...){
+print.summary.mc <-
+  function(
+    x,
+    ...
+  ){
 
-  checkmate::assert_class(x, "summary.mc")
-  setup_names <- names(x)
-  stat_names <- names(x[[1]])
+    checkmate::assert_class(x, "summary.mc")
+    setup_names <- names(x)
+    stat_names <- names(x[[1]])
 
-  purrr::walk(
-    stat_names,
-    function(stat){
-      cat("Results for the output ", stat, ": \n ", sep = "")
-      purrr::walk(
-        setup_names,
-        function(setup){
-          if(checkmate::test_number(x[[setup]][[stat]][[1]])){
-            cat("  ", setup, ": ", x[[setup]][[stat]][[1]], " \n ", sep = "")
-          } else {
-            cat("  ", setup, ": \n", sep = "")
-            print(x[[setup]][[stat]][[1]])
-            cat("\n ")
+    purrr::walk(
+      stat_names,
+      function(stat){
+        cat("Results for the output ", stat, ": \n ", sep = "")
+        purrr::walk(
+          setup_names,
+          function(setup){
+            if(checkmate::test_number(x[[setup]][[stat]][[1]])){
+              cat("  ", setup, ": ", x[[setup]][[stat]][[1]], " \n ", sep = "")
+            } else {
+              cat("  ", setup, ": \n", sep = "")
+              print(x[[setup]][[stat]][[1]])
+              cat("\n ")
+            }
           }
-        }
-      )
-      cat("\n \n")
-    }
-  )
-}
+        )
+        cat("\n \n")
+      }
+    )
+  }
 
