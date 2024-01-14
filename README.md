@@ -25,8 +25,13 @@ aims to provide functions for the following tasks:
 
 ## Installing tidyMC
 
-Until now, the `tidyMC` package is not on CRAN, thus you need to
-download the development version from
+Install from `CRAN`
+
+``` r
+install.packages("tidyMC")
+```
+
+or download the development version from
 [GitHub](https://github.com/stefanlinner/tidyMC) as follows:
 
 ``` r
@@ -91,7 +96,7 @@ test_mc <- future_mc(
 #> Running whole simulation: Overall 6 parameter combinations are simulated ...
 #> 
 #>  Simulation was successfull!
-#>  Running time: 00:00:05.836134
+#>  Running time: 00:00:06.505337
 
 test_mc
 #> Monte Carlo simulation results for the specified function: 
@@ -119,7 +124,7 @@ test_mc
 #> 6   1       2
 #> are each simulated 1000 times. 
 #>  
-#>  The Running time was: 00:00:05.836134 
+#>  The Running time was: 00:00:06.505337 
 #>  
 #>  Parallel: TRUE 
 #>  
@@ -169,7 +174,7 @@ returned_plot1$mean +
  ggplot2::geom_vline(xintercept = 3)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 ``` r
 
@@ -177,7 +182,7 @@ returned_plot2 <- plot(test_mc, which_setup = test_mc$nice_names[1:2], plot = FA
 returned_plot2$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-2.png" width="100%" />
 
 ``` r
 
@@ -185,7 +190,7 @@ returned_plot3 <- plot(test_mc, join = test_mc$nice_names[1:2], plot = FALSE)
 returned_plot3$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-3.png" width="100%" />
 
 ``` r
 
@@ -195,7 +200,7 @@ returned_plot1$mean +
   ggplot2::theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-4.png" width="100%" />
 
 ``` r
 
@@ -203,7 +208,7 @@ returned_plot2 <- plot(summary(test_mc), which_setup = test_mc$nice_names[1:2], 
  returned_plot2$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-5.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-5.png" width="100%" />
 
 ``` r
 
@@ -211,7 +216,7 @@ returned_plot3 <- plot(summary(test_mc), join = test_mc$nice_names[1:2], plot = 
 returned_plot3$mean
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-6.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-6.png" width="100%" />
 
 Show your results in a `LaTeX` table:
 
@@ -220,7 +225,7 @@ tidy_mc_latex(summary(test_mc)) %>%
   print()
 #> \begin{table}
 #> 
-#> \caption{\label{tab:unnamed-chunk-9}Monte Carlo simulations results}
+#> \caption{\label{tab:unnamed-chunk-10}Monte Carlo simulations results}
 #> \centering
 #> \begin{tabular}[t]{cccc}
 #> \toprule
@@ -249,7 +254,7 @@ tidy_mc_latex(
   print()
 #> \begin{table}
 #> 
-#> \caption{\label{tab:unnamed-chunk-9}Mean MCS results}
+#> \caption{\label{tab:unnamed-chunk-10}Mean MCS results}
 #> \centering
 #> \begin{tabular}[t]{ccc}
 #> \toprule
