@@ -36,7 +36,7 @@
 #' @param check Boolean that specifies whether a single test-iteration
 #' should be run for each parameter
 #' combination in order to check for possible
-#' occuring errors in `fun`. Default is `TRUE`.
+#' occurring errors in `fun`. Default is `TRUE`.
 #' @param parallel Boolean that specifies whether
 #'  the Monte Carlo simulation should be run in parallel.
 #' Default is `TRUE`.
