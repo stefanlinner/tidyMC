@@ -1,48 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/404.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/articles/tidyMC.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/index.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/future_mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/plot.mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/plot.summary.mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/print.mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/print.summary.mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/summary.mc.html</loc>
-  </url>
-  <url>
-    <loc>https://stefanlinner.github.io/tidyMC/reference/tidy_mc_latex.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://stefanlinner.github.io/tidyMC/404.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/LICENSE-text.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/LICENSE.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/articles/index.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/articles/tidyMC.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/authors.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/index.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/future_mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/index.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/plot.mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/plot.summary.mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/print.mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/print.summary.mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/summary.mc.html</loc></url>
+<url><loc>https://stefanlinner.github.io/tidyMC/reference/tidy_mc_latex.html</loc></url>
 </urlset>
+
