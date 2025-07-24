@@ -44,7 +44,7 @@ A list whose components are named after the outputs of \code{fun}
 and each component
 contains an object of class \code{ggplot} and \code{gg} which can be plotted
 and modified with the
-\link{ggplot2} functions.
+\link[ggplot2:ggplot2-package]{ggplot2::ggplot2} functions.
 }
 \description{
 Plot line plots of the path of the summarized output

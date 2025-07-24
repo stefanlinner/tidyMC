@@ -47,4 +47,4 @@ VignetteBuilder: knitr
 URL: https://github.com/stefanlinner/tidyMC,
     https://stefanlinner.github.io/tidyMC/
 BugReports: https://github.com/stefanlinner/tidyMC/issues
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2.9000

@@ -49,7 +49,7 @@ of \code{\link[kableExtra:kbl]{kableExtra::kbl()}} customizing the generated tab
 \value{
 An object of class \code{knitr_kable}
 which can be modified by the functions
-in the \link{kableExtra} package is returned.
+in the \link[kableExtra:kableExtra-package]{kableExtra::kableExtra} package is returned.
 }
 \description{
 Create a 'LaTeX' table containing the

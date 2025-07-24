@@ -49,7 +49,7 @@
 #'
 #' @return An object of class `knitr_kable`
 #' which can be modified by the functions
-#' in the [kableExtra] package is returned.
+#' in the [kableExtra::kableExtra] package is returned.
 #' @export
 #'
 #' @examples

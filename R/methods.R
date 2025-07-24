@@ -421,7 +421,7 @@ summary.mc <-
 #' and each component
 #' contains an object of class `ggplot` and `gg`
 #' which can be plotted and modified with the
-#' [ggplot2] functions.
+#' [ggplot2::ggplot2] functions.
 #'
 #' @export
 #'
@@ -662,7 +662,7 @@ plot.mc <-
 #' and each component
 #' contains an object of class `ggplot` and `gg` which can be plotted
 #' and modified with the
-#' [ggplot2] functions.
+#' [ggplot2::ggplot2] functions.
 #'
 #' @export
 #'
